@@ -1,0 +1,3 @@
+[submodule "deps/neat"]
+	path = deps/neat
+	url = https://github.com/GeeLaw/neat.git
