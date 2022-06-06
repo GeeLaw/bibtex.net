@@ -39,7 +39,7 @@ namespace Neat.BibTeX.Data
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    protected internal sealed override void CtorCheckImpl(string name)
+    internal sealed override void CtorCheckImpl(string name)
     {
       if (!BibBstComparer.Equals(Type, EntryType))
       {

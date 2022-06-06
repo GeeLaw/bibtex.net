@@ -38,7 +38,7 @@ namespace Neat.BibTeX.Data
     /// <summary>
     /// Checks the validity of this instance.
     /// </summary>
-    protected internal abstract void CtorCheckImpl(string name);
+    internal abstract void CtorCheckImpl(string name);
 
 #endif
 
