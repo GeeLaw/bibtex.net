@@ -8,4 +8,8 @@
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\deps\neat\src\Neat.Collections\Neat.Collections.csproj" />
+  </ItemGroup>
+
 </Project>
