@@ -8,8 +8,12 @@
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DefineConstants>$(DefineConstants);BIB_CTOR_CHECKS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\deps\neat\src\Neat.Collections\Neat.Collections.csproj" />
+    <ProjectReference Include="..\..\deps\neat\src\Neat.Unicode\Neat.Unicode.csproj" />
   </ItemGroup>
 
 </Project>
