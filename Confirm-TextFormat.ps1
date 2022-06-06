@@ -5,6 +5,8 @@ End
 {
 
 $txt = @(
+  '.git',
+  '.gitmodules',
   '.gitattributes',
   '.gitignore',
   '.md',
