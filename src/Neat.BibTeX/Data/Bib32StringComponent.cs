@@ -43,16 +43,16 @@ namespace Neat.BibTeX.Data
       name = (name is null ? "keyOrValue" : name);
       if (IsValue)
       {
-        if (!BibBstChars.IsIdentifier(KeyOrValue))
+        if (!BibBstChars.IsValidAndBraceBalanced(KeyOrValue))
         {
-          throw new ArgumentException("Bib32StringComponent:KeyOrValue (key) is a not valid identifier.", name);
+          throw new ArgumentException("Bib32StringComponent: KeyOrValue (value) is not both valid and brace-balanced.", name);
         }
       }
       else
       {
-        if (!BibBstChars.IsValidAndBraceBalanced(KeyOrValue))
+        if (!BibBstChars.IsIdentifier(KeyOrValue))
         {
-          throw new ArgumentException("Bib32StringComponent: KeyOrValue (value) is not both valid and brace-balanced.", name);
+          throw new ArgumentException("Bib32StringComponent:KeyOrValue (key) is a not valid identifier.", name);
         }
       }
 #endif

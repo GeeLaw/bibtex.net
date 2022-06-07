@@ -17,7 +17,9 @@ namespace Neat.BibTeX.Data
 
     /// <summary>
     /// The citation key of this entry.
-    /// This string should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
+    /// This string should be a valid citation key and should be compared by <see cref="BibBstComparer"/>.
+    /// A valid citation key must not contain "," or space characters
+    /// (there is no other requirement for validity, and it can be empty).
     /// </summary>
     public readonly String32 Key;
 
@@ -48,9 +50,9 @@ namespace Neat.BibTeX.Data
       {
         throw new ArgumentException("Bib32GeneralEntry: Type is not a valid general entry type.", name is null ? "type" : name);
       }
-      if (!BibBstChars.IsIdentifier(Key))
+      if (!BibBstChars.IsCitationKey(Key))
       {
-        throw new ArgumentException("Bib32GeneralString: Key is not a valid identifier.", name is null ? "key" : name);
+        throw new ArgumentException("Bib32GeneralString: Key is not a valid citation key.", name is null ? "key" : name);
       }
       name = (name is null ? "fields" : name);
       Bib32Field[] fields = Fields;

@@ -18,6 +18,7 @@ namespace Neat.BibTeX.Utils
     public const int Assignment = '=';
     public const int DoubleQuote = '"';
     public const int Concatenation = '#';
+    public const int Comma = ',';
 
     /* BST special character */
     public const int Escape = '\\';
@@ -43,6 +44,12 @@ namespace Neat.BibTeX.Utils
     public static bool IsIdentifier(Char32 ch)
     {
       return IsIdentifierImpl(ch.Value);
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsCitationKey(String32 str)
+    {
+      return IsCitationKeyImpl(Unsafe.As<String32, Char32[]>(ref str));
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -143,7 +150,6 @@ namespace Neat.BibTeX.Utils
       public readonly bool Item61 = false;
       public readonly bool Item62 = true;
       public readonly bool Item63 = true;
-      /* @ is a valid identifier character, which sounds terrible to me. */
       public readonly bool Item64 = true;
       public readonly bool Item65 = true;
       public readonly bool Item66 = true;
@@ -207,11 +213,7 @@ namespace Neat.BibTeX.Utils
       public readonly bool Item124 = true;
       public readonly bool Item125 = false;
       public readonly bool Item126 = true;
-      /* This is different from the original BibTeX implementation,
-      /* which did set DEL to be a valid identifier character.
-      /* However, DEL has always been set to be an invalid input character,
-      /* so this actually does not matter. */
-      public readonly bool Item127 = false;
+      public readonly bool Item127 = true;
     }
 
     private static IsIdentifierCharacterData theIsIdentifierCharacter = new IsIdentifierCharacterData(0);
@@ -239,6 +241,24 @@ namespace Neat.BibTeX.Utils
       /* Aside from 0-9, A-Z, a-z, these characters are valid identifier characters: !$&*+-./:;<>?@[\]^_`|~ */
       return (uint)value < 128u
         && Unsafe.Add(ref Unsafe.As<IsIdentifierCharacterData, bool>(ref theIsIdentifierCharacter), value);
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool IsCitationKeyImpl(Char32[] data)
+    {
+      if (data is null)
+      {
+        return false;
+      }
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        value = data[i].Value;
+        if (value == Comma || IsSpaceImpl(value))
+        {
+          return false;
+        }
+      }
+      return true;
     }
 
     [MethodImpl(Helper.OptimizeInline)]
