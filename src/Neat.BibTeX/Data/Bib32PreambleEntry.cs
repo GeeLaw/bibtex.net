@@ -1,4 +1,4 @@
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
 using System;
 #endif
 using System.Runtime.CompilerServices;
@@ -8,7 +8,7 @@ using Neat.Unicode;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a <c>@preamble { "value" # reference }</c> entry.
+  /// Represents a <c>@preamble{ "literal" # {literal} # 123 # reference }</c> entry.
   /// </summary>
   public sealed class Bib32PreambleEntry : Bib32Entry
   {
@@ -28,7 +28,7 @@ namespace Neat.BibTeX.Data
       : base(type, isBrace)
     {
       Value = value;
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
       CtorCheckImpl(null);
     }
 

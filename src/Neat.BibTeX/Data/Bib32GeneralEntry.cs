@@ -1,4 +1,4 @@
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
 using System;
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -9,7 +9,7 @@ using Neat.Unicode;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a general <c>@entrytype { ... }</c> entry.
+  /// Represents a general <c>@entry_type{ key, key1 = {literal} # "literal" # 123 # reference, ... }</c> entry.
   /// </summary>
   public sealed class Bib32GeneralEntry : Bib32Entry
   {
@@ -36,7 +36,7 @@ namespace Neat.BibTeX.Data
     {
       Key = key;
       Fields = fields;
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
       CtorCheckImpl(null);
     }
 

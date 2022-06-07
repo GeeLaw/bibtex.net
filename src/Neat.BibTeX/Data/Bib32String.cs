@@ -1,4 +1,4 @@
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
 using System;
 #endif
 using System.Runtime.CompilerServices;
@@ -7,7 +7,7 @@ using Neat.BibTeX.Utils;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a string that is a concatenation of referenced strings and literal string values.
+  /// Represents a string that is a concatenation of referenced strings and literal string values (e.g., <c>"literal" # {literal} # 123 # reference</c>).
   /// This type avoids allocation for the most common case of single-component strings.
   /// </summary>
   public readonly struct Bib32String
@@ -33,7 +33,7 @@ namespace Neat.BibTeX.Data
     {
       OnlyComponent = onlyComponent;
       Components = null;
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
       CtorCheckImpl("onlyComponent");
 #endif
     }
@@ -46,12 +46,12 @@ namespace Neat.BibTeX.Data
     {
       OnlyComponent = default(Bib32StringComponent);
       Components = components;
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
       CtorCheckImpl("components");
 #endif
     }
 
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
 
     [MethodImpl(Helper.OptimizeNoInline)]
     internal void CtorCheckImpl(string name)

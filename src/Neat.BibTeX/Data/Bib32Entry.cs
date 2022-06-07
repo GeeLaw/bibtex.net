@@ -8,7 +8,8 @@ namespace Neat.BibTeX.Data
   /// Represents an entry in <c>.bib</c> files.
   /// An instance could be <see cref="Bib32StringEntry"/>,
   /// <see cref="Bib32PreambleEntry"/>, or
-  /// <see cref="Bib32GeneralEntry"/>.
+  /// <see cref="Bib32GeneralEntry"/>
+  /// (e.g., <c>@entry_type{ ... }</c>).
   /// </summary>
   public abstract class Bib32Entry
   {
@@ -33,7 +34,7 @@ namespace Neat.BibTeX.Data
       IsBrace = isBrace;
     }
 
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
 
     /// <summary>
     /// Checks the validity of this instance.

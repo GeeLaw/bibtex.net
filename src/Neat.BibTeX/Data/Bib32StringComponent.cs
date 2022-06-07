@@ -1,4 +1,4 @@
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
 using System;
 #endif
 using System.Runtime.CompilerServices;
@@ -10,8 +10,8 @@ namespace Neat.BibTeX.Data
   /// <summary>
   /// Represents a string component, which is either a reference to
   /// a macro defined in <c>.bst</c> files (<c>MACRO { ... } { ... }</c>) or
-  /// a string defined by <see cref="Bib32StringEntry"/> (<c>@string { ... }</c>),
-  /// or a literal string value.
+  /// a string defined by <see cref="Bib32StringEntry"/> (<c>@string{ ... }</c>),
+  /// or a literal string value (e.g., <c>reference</c>, <c>{literal}</c>, <c>"literal"</c>, <c>123</c>).
   /// </summary>
   public readonly struct Bib32StringComponent
   {
@@ -33,7 +33,7 @@ namespace Neat.BibTeX.Data
     {
       IsValue = isValue;
       KeyOrValue = keyOrValue;
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
       CtorCheckImpl(null);
     }
 

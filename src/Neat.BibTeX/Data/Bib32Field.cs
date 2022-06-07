@@ -1,4 +1,4 @@
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
 using System;
 #endif
 using System.Runtime.CompilerServices;
@@ -8,7 +8,7 @@ using Neat.Unicode;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a field in a <see cref="Bib32GeneralEntry"/>.
+  /// Represents a field in a <see cref="Bib32GeneralEntry"/> (e.g., <c>key1 = {literal} # "literal" # 123 # reference</c>).
   /// </summary>
   public readonly struct Bib32Field
   {
@@ -28,7 +28,7 @@ namespace Neat.BibTeX.Data
     {
       Key = key;
       Value = value;
-#if BIB_CTOR_CHECKS
+#if BIB_DATA_CHECKS
       CtorCheckImpl(null);
     }
 
