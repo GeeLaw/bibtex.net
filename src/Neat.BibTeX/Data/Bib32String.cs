@@ -2,6 +2,7 @@
 using System;
 #endif
 using System.Runtime.CompilerServices;
+using System.Text;
 using Neat.BibTeX.Utils;
 
 namespace Neat.BibTeX.Data
@@ -24,6 +25,46 @@ namespace Neat.BibTeX.Data
     /// This array cannot be non-<see langword="null"/> empty.
     /// </summary>
     public readonly Bib32StringComponent[] Components;
+
+    [MethodImpl(Helper.JustOptimize)]
+    public override string ToString()
+    {
+      Bib32StringComponent[] components = Components;
+      if (components is null)
+      {
+        return OnlyComponent.ToString();
+      }
+      /* component1 # component2 # ... */
+      StringBuilder sb = new StringBuilder();
+      for (int i = 0; i < components.Length; ++i)
+      {
+        if (i != 0)
+        {
+          sb.Append(" # ");
+        }
+        components[i].ToString(sb);
+      }
+      return sb.ToString();
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal StringBuilder ToString(StringBuilder sb)
+    {
+      Bib32StringComponent[] components = Components;
+      if (components is null)
+      {
+        return OnlyComponent.ToString(sb);
+      }
+      for (int i = 0; i < components.Length; ++i)
+      {
+        if (i != 0)
+        {
+          sb.Append(" # ");
+        }
+        components[i].ToString(sb);
+      }
+      return sb;
+    }
 
     /// <summary>
     /// Initializes a single-component string.

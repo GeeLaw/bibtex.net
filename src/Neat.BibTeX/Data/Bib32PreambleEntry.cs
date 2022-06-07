@@ -2,6 +2,7 @@
 using System;
 #endif
 using System.Runtime.CompilerServices;
+using System.Text;
 using Neat.BibTeX.Utils;
 using Neat.Unicode;
 
@@ -19,6 +20,17 @@ namespace Neat.BibTeX.Data
     /// This string should be valid and brace-balanced.
     /// </summary>
     public readonly Bib32String Value;
+
+    [MethodImpl(Helper.JustOptimize)]
+    public sealed override string ToString()
+    {
+      /* @preamble{ value } */
+      return Value.ToString(new StringBuilder()
+        .Append('@')
+        .Append(Type.ToString())
+        .Append("{ ")
+      ).Append(" }").ToString();
+    }
 
     /// <summary>
     /// <paramref name="type"/> must be <c>preamble</c> (in any casing).

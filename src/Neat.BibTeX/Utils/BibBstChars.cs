@@ -53,6 +53,12 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.OptimizeInline)]
+    public static bool MustUseParenthesis(String32 key)
+    {
+      return MustUseParenthesisImpl(Unsafe.As<String32, Char32[]>(ref key));
+    }
+
+    [MethodImpl(Helper.OptimizeInline)]
     public static bool IsAlpha(Char32 ch)
     {
       return IsAlphaImpl(ch.Value);
@@ -259,6 +265,20 @@ namespace Neat.BibTeX.Utils
         }
       }
       return true;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool MustUseParenthesisImpl(Char32[] data)
+    {
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        value = data[i].Value;
+        if (value == RightBrace)
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
     [MethodImpl(Helper.OptimizeInline)]

@@ -29,6 +29,14 @@ namespace Neat.BibTeX.Data
     /// </summary>
     public readonly Bib32Field[] Fields;
 
+    [MethodImpl(Helper.JustOptimize)]
+    public sealed override string ToString()
+    {
+      /* @entry_type{ key, ... } or @entry_type( key, ... ) */
+      return string.Format(BibBstChars.MustUseParenthesis(Key) ? "@{0}{{ {1}, ... }}" : "@{0}( {1}, ... )",
+        Type.ToString(), Key.ToString());
+    }
+
     /// <summary>
     /// <paramref name="type"/> must not be any of <c>string</c>, <c>preamble</c>, or <c>comment</c> (in any casing).
     /// </summary>

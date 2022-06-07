@@ -2,6 +2,7 @@
 using System;
 #endif
 using System.Runtime.CompilerServices;
+using System.Text;
 using Neat.BibTeX.Utils;
 using Neat.Unicode;
 
@@ -24,6 +25,19 @@ namespace Neat.BibTeX.Data
     /// The value of this referenceable string.
     /// </summary>
     public readonly Bib32String Value;
+
+    [MethodImpl(Helper.JustOptimize)]
+    public override string ToString()
+    {
+      /* @string{ key = value } */
+      return Value.ToString(new StringBuilder()
+        .Append('@')
+        .Append(Type.ToString())
+        .Append("{ ")
+        .Append(Key.ToString())
+        .Append(" = ")
+      ).Append(" }").ToString();
+    }
 
     /// <summary>
     /// <paramref name="type"/> must be <c>string</c> (in any casing).

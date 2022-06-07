@@ -2,6 +2,7 @@
 using System;
 #endif
 using System.Runtime.CompilerServices;
+using System.Text;
 using Neat.BibTeX.Utils;
 using Neat.Unicode;
 
@@ -22,6 +23,16 @@ namespace Neat.BibTeX.Data
     /// The value of this field.
     /// </summary>
     public readonly Bib32String Value;
+
+    [MethodImpl(Helper.JustOptimize)]
+    public override string ToString()
+    {
+      /* key = value */
+      return Value.ToString(new StringBuilder()
+        .Append(Key.ToString())
+        .Append(" = ")
+      ).ToString();
+    }
 
     [MethodImpl(Helper.OptimizeInline)]
     public Bib32Field(String32 key, Bib32String value)

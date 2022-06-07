@@ -2,6 +2,7 @@
 using System;
 #endif
 using System.Runtime.CompilerServices;
+using System.Text;
 using Neat.BibTeX.Utils;
 using Neat.Unicode;
 
@@ -27,6 +28,23 @@ namespace Neat.BibTeX.Data
     /// If this is the value, it should be valid and brace-balanced.
     /// </summary>
     public readonly String32 KeyOrValue;
+
+    [MethodImpl(Helper.JustOptimize)]
+    public override string ToString()
+    {
+      /* {value} or reference */
+      return IsValue
+        ? "{" + KeyOrValue.ToString() + "}"
+        : KeyOrValue.ToString();
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal StringBuilder ToString(StringBuilder sb)
+    {
+      return IsValue
+        ? sb.Append('{').Append(KeyOrValue.ToString()).Append('}')
+        : sb.Append(KeyOrValue.ToString());
+    }
 
     [MethodImpl(Helper.OptimizeInline)]
     public Bib32StringComponent(bool isValue, String32 keyOrValue)
