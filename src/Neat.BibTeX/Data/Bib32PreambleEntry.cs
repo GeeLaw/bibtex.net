@@ -24,8 +24,8 @@ namespace Neat.BibTeX.Data
     /// <paramref name="type"/> must be <c>preamble</c> (in any casing).
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32PreambleEntry(String32 type, bool isBrace, Bib32String value)
-      : base(type, isBrace)
+    public Bib32PreambleEntry(String32 type, Bib32String value)
+      : base(type)
     {
       Value = value;
 #if BIB_DATA_CHECKS

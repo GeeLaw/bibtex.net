@@ -33,8 +33,8 @@ namespace Neat.BibTeX.Data
     /// <paramref name="type"/> must not be any of <c>string</c>, <c>preamble</c>, or <c>comment</c> (in any casing).
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32GeneralEntry(String32 type, bool isBrace, String32 key, Bib32Field[] fields)
-      : base(type, isBrace)
+    public Bib32GeneralEntry(String32 type, String32 key, Bib32Field[] fields)
+      : base(type)
     {
       Key = key;
       Fields = fields;

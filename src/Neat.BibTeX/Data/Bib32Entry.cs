@@ -21,17 +21,10 @@ namespace Neat.BibTeX.Data
     /// </summary>
     public readonly String32 Type;
 
-    /// <summary>
-    /// Indicates whether the entry is opened by a brace.
-    /// If this field is <see langword="false"/>, then the entry is opened by a parenthesis.
-    /// </summary>
-    public readonly bool IsBrace;
-
     [MethodImpl(Helper.OptimizeInline)]
-    private protected Bib32Entry(String32 type, bool isBrace)
+    private protected Bib32Entry(String32 type)
     {
       Type = type;
-      IsBrace = isBrace;
     }
 
 #if BIB_DATA_CHECKS

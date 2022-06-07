@@ -29,8 +29,8 @@ namespace Neat.BibTeX.Data
     /// <paramref name="type"/> must be <c>string</c> (in any casing).
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32StringEntry(String32 type, bool isBrace, String32 key, Bib32String value)
-      : base(type, isBrace)
+    public Bib32StringEntry(String32 type, String32 key, Bib32String value)
+      : base(type)
     {
       Key = key;
       Value = value;
