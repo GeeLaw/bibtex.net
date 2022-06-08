@@ -45,7 +45,7 @@ namespace Neat.BibTeX.Data
     }
 
     [MethodImpl(Helper.OptimizeNoInline)]
-    internal sealed override void CtorCheckImpl(string name)
+    internal void CtorCheckImpl(string name)
     {
       if (!BibBstComparer.Equals(Type, EntryType))
       {

@@ -32,15 +32,6 @@ namespace Neat.BibTeX.Data
       Type = type;
     }
 
-#if BIB_DATA_CHECKS
-
-    /// <summary>
-    /// Checks the validity of this instance.
-    /// </summary>
-    internal abstract void CtorCheckImpl(string name);
-
-#endif
-
     /// <summary>
     /// Dispatches the correct method for the value-type visitor.
     /// </summary>

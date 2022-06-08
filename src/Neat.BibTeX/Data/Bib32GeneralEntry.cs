@@ -52,7 +52,7 @@ namespace Neat.BibTeX.Data
 
     [SuppressMessage("Usage", "CA2208", Justification = "The usage is correct.")]
     [MethodImpl(Helper.OptimizeNoInline)]
-    internal sealed override void CtorCheckImpl(string name)
+    internal void CtorCheckImpl(string name)
     {
       if (!IsValidGeneralEntryType(Type))
       {
