@@ -1,0 +1,179 @@
+%% ttb_en.sec5.tex
+%% Copyright 2003-2005  Nicolas Markey
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt 
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+% 
+% This work has the LPPL maintenance status "maintained".
+% The Current Maintainer of this work is Nicolas Markey  
+% 
+% This work consists of the files
+%       ttb_en.tex
+%       ttb_en.sec1.tex  ttb_en.sec2.tex  ttb_en.sec3.tex
+%       ttb_en.sec4.tex  ttb_en.sec5.tex  ttb_style.sty
+%       local.bib        idxstyle.ist     Makefile
+% and the derived ttb_en.dvi, ttb_en.ps and ttb_en.pdf
+
+
+\mypart{Other use of \bt}\label{autres}
+\parttoc
+\mtcskip
+
+Here are some general extensions, showing how to use \bt for other purposes.
+I'm developing some of those extensions, and you can get the latest news on my web
+page: 
+\begin{center}
+\url{http://www.lsv.ens-cachan.fr/~markey/bibla.php}.
+\end{center}
+Don't hesitate to give me your comments and ideas.
+
+\mysection{A publication list}
+
+This is not really a wide extension of the use of \bt, since it still deals
+with bibliography. In this example, we use classical \ext{bib} files in order
+to extract only publications by one single person, indicating the names of the
+possible other authors. This gives, for instance:
+\begin{myex}
+\def\refname{Books by Michel \textsc{Goossens}}
+\begin{thebibliography}{9}
+\bibitem{companion} 
+{\em the \LaTeX{} Companion}.
+Addison-Wesley, 1993.
+Joint work with Frank Mittelbach  and  Alexander Samarin. 
+
+\bibitem{graphics}
+{\em the \LaTeX{} Graphics Companion}.
+Addison-Wesley, 1999.
+Joint work with  Sebastian Rahtz and Frank Mittelbach.
+
+\bibitem{webc}
+{\em the \LaTeX{} Web Companion}.
+Addison-Wesley, 1999.
+Joint work with Sebastian Rahtz.
+
+\end{thebibliography}
+\end{myex}
+
+There are three important points here:
+\begin{itemize}
+\item In this case, the entries to be cited are extracted by the style file;
+\item Typesetting of names is a little bit different.
+\end{itemize}
+
+The third difference consists in the way the style is configured: Instead of
+asking the user to modify the \ext{bst} file, which is rarely desirable, we
+add a new entry-type, named \nient{config}. A \nient{config} entry will define
+the name of the author whose publications are to be extracted, as well as some
+other configuration variables. 
+
+\mysection{An addressbook}
+
+A list of addresses is a database, that has to be sorted, grouped and typeset.
+\bt should be able to do that...
+
+To that aim, we have to completely redefine the fields, entry-types, and
+functions. Fields include names, addresses, phone numbers, e-mail
+addresses,~... Here is an example of the output:
+
+\bigskip
+\makeatletter
+\font\lettre=cmssdc10 at 20pt
+\def\at{@}
+\ifx\sautepage\@undefined%
+\def\sautepage{\null\cleardoublepage}\fi
+\ifx\ecritlettre\@undefined%
+\def\ecritlettre#1#2#3#4#5{
+\vbox to 0pt{
+\vspace{#3mm}\hspace{#1mm}
+\smash{\colorbox[rgb]{.8,.8,.8}{\lettre \ \
+\vrule height #2mm depth #2mm width 0pt%
+\vrule height 8mm depth 0mm width 0pt%
+\hbox to #4mm{#5\hfil\null}%
+}}
+\vspace{-#3mm}\hspace{-#1mm}}}\fi
+\small
+\makeatother
+\ecritlettre{157}{5}{10}{20}{mn}
+\noindent
+\begin{center}
+\begin{tabular}{|p{.30\textwidth}|p{.4\textwidth}p{.18\textwidth}|}
+\hline
+{\vrule height 5mm width 0mm
+{\normalsize \textsc{Markey} Nicolas
+}} \vrule height 0mm depth 5mm width 0mm &
+\vrule height 5mm width 0mm
+LSV -- ENS Cachan\endgraf
+61, avenue du Pr\'esident Wilson\endgraf
+94235 \textsc{Cachan} C\'edex\vrule depth 3mm width 0mm
+& \vrule height 5mm width 0mm
+\Telefon \hfill01.47.40.75.32\endgraf
+\Faxmachine \hfill01.47.40.24.64\endgraf
+\\ &
+\multicolumn{2}{l|}{\texttt{markey\at lsv.ens-cachan.fr}} \vrule depth 2mm
+  width 0mm
+\\ \hline
+\end{tabular}
+\end{center}
+
+As in the previous example, I defined a \nient{config} entry-type in order to
+define how letters should be grouped together,~...
+
+\mysection{Exporting, extracting and cleaning bibliographic entries}
+\label{bibexport}
+
+It sometimes occurs that you have to extract a part of your bibliographic
+database, for instance for sending it together with a \LaTeX~document. Several
+tools already exist for doing this, but they generally can't handle crossrefs,
+macros, string abbreviations,~... If fact, \bt can do this on its own: You
+simply have to ask the bibliography style to format its output as a 
+\ext{bib} database (The result will be named \ext{bbl}, since there is no way
+to tell \bt to write somewhere else). This technique has many advantages: It
+ensures that the fields are treated exactly as \bt would treat them with
+another style file; abbreviations are automatically expanded; It is easy to
+extract all the references by one author (remember that names could be encoded
+in many different manners inside a \ext{bib} database),~...
+The package \verb+bibexport+ implements these techniques:
+\url{http://www.ctan.org/tex-archive/biblio/bibtex/utils/bibexport/}
+
+\mysection{Using several languages in one bibliography}
+
+Classical bibliography style only handle one language, generally English.
+Handling several languages is quite tricky: First, when filling the \ext{bib}
+file, you must ensure not to write language-dependant data. Namely, for
+instance, months should be entered numerically. Moreover, \bt adds some words
+while processing the entries, such as the ``and'' before the last author name. 
+
+There are several solution for handling several languages:
+\begin{itemize}
+\item Designing one style file per language. This is somewhat tiring to do,
+  but not really complicated, and many such translations already exist.
+
+  French styles are available on  
+  \url{http://www.ctan.org/tex-archive/biblio/bibtex/contrib/bib-fr/}. In
+  those styles, I put every translated word at the beginning of the file, so
+  that it is easy to adapt the translation.
+
+\item Another solution is to replace language-dependant words with a \LaTeX
+  command. This is done in \textsf{babelbib}
+  (\url{http://www.ctan.org/tex-archive/biblio/bibtex/contrib/babelbib/}),
+  developed by Harald Harders.
+  Those style files require that you use the package \sty{babel}, and allows
+  you to define one language for each entry (and thus to use the right
+  hyphenation patterns).
+\end{itemize}
+
+
+\mysection{A glossary}
+
+A glossary is a dictionary defining technical terms that appear in a
+document. Glossaries are generally made using the index mechanisms of \LaTeX. 
+But \bt can also do that (and even better than with \nicmd{index}, since it
+could extract definitions from a general dictionary). Moreover, it is
+possible to add reference to pages where the term is used by using the
+\sty{backref} package. See for instance the package \sty{gloss}, developed by
+Jose Luis Diaz de Arriba and Javier Bezos.

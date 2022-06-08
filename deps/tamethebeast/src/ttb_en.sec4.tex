@@ -1,0 +1,841 @@
+%% ttb_en.sec4.tex
+%% Copyright 2003-2005  Nicolas Markey
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt 
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+% 
+% This work has the LPPL maintenance status "maintained".
+% The Current Maintainer of this work is Nicolas Markey  
+% 
+% This work consists of the files
+%       ttb_en.tex
+%       ttb_en.sec1.tex  ttb_en.sec2.tex  ttb_en.sec3.tex
+%       ttb_en.sec4.tex  ttb_en.sec5.tex  ttb_style.sty
+%       local.bib        idxstyle.ist     Makefile
+% and the derived ttb_en.dvi, ttb_en.ps and ttb_en.pdf
+
+
+\mypart{Bibliography style (\protect\niext{bst}) files}\label{bst}
+\parttoc
+\mtcskip
+
+\mysection{What's that?}
+
+The \ext{bst} file is responsible for building the reference list. It is
+crucial to distinguish between the role of \bt and the role of \LaTeX, and,
+inside the role of \bt,
+between what is done by the style file and what should be done in the
+\ext{bib} file. 
+
+Roughly speaking, \bt reads three files, in the following order: The \ext{aux}
+file first, where it finds the name of the style file to be used, the name of
+the database(s), and the list of cited entries. The \ext{bst} file is read
+next,  and the \ext{bib} file last. 
+
+The \ext{bst} file tell \bt what to do with each cited entry. Namely:
+\begin{itemize}
+\item Which entry-type are defined;
+\item Which fields are mandatory, or just allowed, depending on the entry;
+\item And, mainly, how to handle all that stuff in order to produce a clean,
+  \LaTeX-able bibliography.
+\end{itemize}
+
+In view of this, \bt uses a language with two types of instructions: The
+so-called \emph{commands}\index{bibtex}{command}, first, and the
+\emph{internal functions}\index{bibtex}{internal function}. The following section
+deals with commands, and the other ones with internal functions.
+
+
+\mysection{The structure of a \protect\niext{bst} file}
+
+Here is, roughly speaking, the structure of a \ext{bst} file:
+
+\begin{myexv}
+\begin{verbatimtab}
+ENTRY 
+  {  ...  }
+  {  ...  }
+  {  ...  }
+
+INTEGERS {  ...  }
+STRINGS {  ...  }
+
+MACRO {  ...  }{  ...  }
+FUNCTION {  ...  }{  ...  }
+
+READ
+EXECUTE {  ...  }
+ITERATE {  ...  }
+SORT
+ITERATE {  ...  }
+REVERSE {  ...  }
+EXECUTE {  ...  }
+\end{verbatimtab}
+\end{myexv}
+
+This example shows all the 
+commands\index{bibtex}{command} understood by \bt. 
+Here is their meaning:
+\begin{description}
+\item[\texttt{ENTRY}]\index{bibtex}{entry@\texttt{ENTRY}}: This command defines
+  the list of all possible fields. More precisely, it takes three arguments
+  (between braces), defining the list of possible ``external'' (string)
+  entries\footnote{Except the \chp{crossref} field, which is added
+  automatically by \bt.}, the  list of ``internal'' integer variables, and a
+  list of ``internal'' string variables. Those variables are used for internal
+  computations of \bt, for instance when building the label with the
+  \bst{alpha} style. 
+
+  Inside braces, variable names are
+  separated with spaces. I shall also mention that \bt does not distinguish
+  between upper- and lowercase in the names of functions and variables. I will
+  generally write command names in uppercase, and everything else in lowercase.
+
+  For instance, \bst{plain} starts with:
+\begin{myexv}
+\begin{verbatimtab}
+ENTRY
+  { address
+    author
+    booktitle
+    ...
+    volume
+    year
+  }
+  {}
+  { label }
+\end{verbatimtab}
+\end{myexv}
+\noindent This defines the classical fields, plus an internal 
+string variable for the label. In fact, \bst{plain} uses numbers as labels,
+but remember that the length of the longest label has to be evaluated and
+given as argument to the \env{thebibliography} environment. This is the only
+reason why this \verb+label+ variable is defined.
+
+Note that \texttt{ENTRY} must appear once and only once in each style file. 
+
+\item[\texttt{INTEGERS}]\index{bibtex}{integers@\texttt{INTEGERS}}: This command
+  declares integer variables\footnote{Those variables are not linked with any
+  entry, contrary to variables defined in the second argument of
+  \texttt{ENTRY}.}. The argument of this command is a space-separated
+  list of names. 
+
+\item[\texttt{STRINGS}]\index{bibtex}{strings@\texttt{STRINGS}}: This commands
+  defines string variables in the same way as \texttt{INTEGERS} defines
+  integer variables. Contrary to integer variables, string variables are very
+  ``expensive'', and \bt limits the number of such variables to twenty. You
+  should really spare string variables if you plan to develop a large style
+  file. 
+
+\item[\texttt{MACRO}]\index{bibtex}{macro@\texttt{MACRO}}: This command defines
+  abbreviations, in the same way as \ent{string} does\footnote{Note that
+  \ent{string} has nothing to do with
+  \texttt{STRINGS}\index{bibtex}{strings@\texttt{STRINGS}}...}. 
+  If an abbreviation is defined in both the \ext{bst} and in the
+  \ext{bib} file, the definition in the \ext{bib} file is used. Also note that
+  you can define \ent{string} definitions involving \texttt{MACRO}
+  definitions. But this is probably not a good advice...
+
+  As regards the syntax, \texttt{MACRO} requires two arguments, the first one
+  being the name of the abbreviation to be defined, the second one being the
+  definition itself. It must be a string surrounded with double-quotes.
+  As an example, standard style files define the following:
+\begin{myexv}
+\begin{verbatimtab}
+MACRO {jan} {"January"}
+MACRO {feb} {"February"}
+MACRO {mar} {"March"}
+...
+\end{verbatimtab}
+\end{myexv}
+\item[\texttt{FUNCTION}]\index{bibtex}{function@\texttt{FUNCTION}}: The most useful
+  command: It allows to define macro functions that will be executed later on.
+  The first argument is the name of the function, the second one is its
+  definition. No example for the moment since there will be numerous ones in
+  the following.
+\item[\texttt{READ}]\index{bibtex}{read@\texttt{READ}}: As for \texttt{ENTRY},
+  this command must occur exactly once in any \ext{bst} style file. This is
+  not surprising since it tells \bt to read the \ext{bib} file: Reading it
+  several time would not change anything, and not reading it would seriously limit the
+  interest of the bibliography style. So, that command extracts from the
+  \ext{bib}-file the entries that are cited in the \ext{aux} file. Commands
+  \texttt{ENTRY} and \texttt{MACRO} should appear before \texttt{READ}, while
+  \texttt{ITERATE} and \texttt{REVERSE} may only  appear after.
+\item[\texttt{EXECUTE}]\index{bibtex}{execute@\texttt{EXECUTE}}: This executes
+  the function whose name is given as argument. Note that the function must 
+  have been defined earlier. The argument could also be a sequence of \bt
+  internal functions. For some more comments, see the
+  description of \texttt{ITERATE} below.
+\item[\texttt{ITERATE}]\index{bibtex}{iterate@\texttt{ITERATE}}: 
+This commands also execute the function given in the argument, but contrary to
+\texttt{EXECUTE}, the function is executed as many times as the number of
+entries imported by \texttt{READ}. The function may use the fields of
+each entry. \texttt{EXECUTE} only executes its argument once, and it can not
+use any field of any entry.
+\item[\texttt{SORT}]\index{bibtex}{sort@\texttt{SORT}}: 
+This command sorts the entries according to the variable \fn{sort.key}. That
+special variable is a string variable, implicitly declared for each entry,
+and that can be set by \texttt{ITERATE}{}ing a function. The entries are then
+sorted alphabetically according to that string. Of course, some styles won't
+sort the entries, in which case they will appear in the same order as in the
+document. 
+\item[\texttt{REVERSE}]\index{bibtex}{reverse@\texttt{REVERSE}}: 
+Like \texttt{ITERATE}, but from the last entry to the first one.
+\end{description}
+
+That's all for the list of commands. You probably can imagine how this will be
+set up. It remains to define the relevant \texttt{FUNCTION}{}s... This is the
+subject of the next two sections: We will first see the notation used by \bt,
+and then how to define functions. 
+
+\mysection{Reverse Polish Notation}
+
+\bt uses the so-called Reverse Polish Notation. This is the main reason why
+people say that \bt language is hard to understand. It is a stack-based
+language: You put arguments on a stack (think of a stack of plates), and each
+function takes as many arguments as necessary on the top of the stack, and
+replace them with its result. Addition, for instance, will take the first two
+elements on the stack, add them, and put the result on the top of the stack.
+Another example\footnote{This part is crucial, that's why I insist on it. 
+  But if you really understood how it works,
+  you can skip the explanation.}: \verb/ 1 3 5 + 2 3 * - / is executed as
+follows: 
+\begin{itemize}
+\item \verb+1+ is put on the stack. Assuming the stack was initially empty, it
+  now contains \verb+1+;
+\item \verb+3+ is then put on the stack, which now contains 
+\verb+1+ and \verb+3+ (\verb+3+ being on the top of the stack);
+\item \verb+5+ is added on the stack, which now contains \verb+1+, \verb+3+
+  and \verb+5+;
+\item \verb/+/ is a binary operator: it reads (and removes) the topmost two
+  elements on the 
+  stack, which are \verb+5+ and \verb+3+, adds them, and put the resulting
+  value, \verb+8+, on the top of the stack. The stack is now \verb+1+,
+  \verb+8+, with \verb+8+ being on the top;
+\item \verb+2+ is put on the top of the stack;
+\item \verb+3+ is put on the stack. It now contains \verb+1+, \verb+8+,
+  \verb+2+ and \verb+3+. 
+\item \verb+*+ is applied to the topmost two elements, which are removed. 
+The resulting value\footnote{We assume that $\mathtt *$ is the
+  multiplication in that example, but it is not the case in \bt. In fact,
+  there is no multiplication operator in \bt, as we will see later, and
+  $\mathtt{*}$ is the concatenation on strings.}~$3\times 2=6$
+is put on top of the stack, which is now made of \verb+1+, \verb+8+ and
+\verb+6+. 
+\item \verb+-+ is now applied to \verb+6+ and \verb+8+. As defined in
+  \bt\footnote{This operator is not commutative, and it could have been
+  defined in the other way.}, the
+  first value, \verb+6+, is subtracted to the second one, \verb+8+.
+  Finally, the stack contains \verb+1+ and \verb+2+.
+\end{itemize}
+
+If you did not understand this example, you'd better re-read it, or try to
+find more informations somewhere. This is really the core of \bt language, and
+you'll probably won't understand anything below if you did not understand
+this example. 
+
+But for most of you, it should be ok, and we can tackle the most exciting part.
+
+
+\mysection{Internal functions}
+
+The table below describes all internal functions\index{bibtex}{internal function}.
+For each of them, I give
+\begin{itemize}
+\item on the left, the items it requires to be present on the top of the
+stack, the rightmost item being the uppermost on the stack;
+\item on the right, what the function puts on the top of the stack.
+\end{itemize}
+I will use the following conventions: \el I represents an integer, \el S is a
+string, \el F is a function, \el N is a variable name\footnote{A variable name
+  is a name that has been declared with \texttt{STRINGS} or \texttt{INTEGERS},
+  or with \texttt{ENTRY}.
+  Moreover, it must be preceded with a single quote, so that \bt understands
+  that you mean the name of the variable and not its value. For instance,
+  \texttt{'label}.}, \el C is the name of a field declared with
+\texttt{ENTRY}\footnote{It could also be \chp{crossref}, which is implicitly
+  declared by \bt.}, and \el E is an item that can be either a string or an integer.. 
+
+\begin{longtable}{|>{\vrule height9pt depth5pt width0pt}rlr|p{.58\textwidth}<{\vrule height5pt depth7pt width0pt}|}
+\hline\endhead
+\hline\endfirsthead
+\hline\endfoot
+\hline\endlastfoot
+\eli I1 \eli I2 & \texttt+ & (\eli I1$+$\el I2) & 
+integer addition\footnotemark; \\
+\noalign{\footnotetext{Integers must be preceded with a 
+\texttt\#. For instance, if you want to compute $2+5$, you'll enter
+\texttt{\#2 \#5 +}. Negative numbers are entered with \texttt{\#-3}, for
+instance. }}
+\eli I1 \eli I2 & \texttt- & (\eli I1$-$\eli I2) &
+integer subtraction; \\
+\eli I1 \eli I2 & \texttt> & \el I & 
+returns $1$ if \eli I1 is strictly greater than \eli I2, and~$0$
+otherwise\footnotemark;\\ 
+\noalign{\footnotetext{There is no boolean type in \bt, because integers are
+    sufficient. Negative numbers (including $0$) mean \texttt{false}, and
+    strictly positive mean \texttt{true}.}}
+\eli I1 \eli I2 & \texttt< & \el I & returns $1$ if \eli I2 is strictly
+greater than \eli I1, and $0$ otherwise; \\
+\eli I1 \eli I2 & \texttt= & \el I & returns $1$ if both integers are equal,
+and $0$ otherwise;\\
+\eli S1 \eli S2 & \texttt = & \el I & returns $1$ if both strings are equal,
+and $0$ otherwise;\\
+\eli S1 \eli S2 & \texttt* & (\eli S1\eli S2) & concatenates both strings\footnotemark; \\
+\noalign{\footnotetext{As mentioned earlier, there is not multiplication in
+    \bt{}\footnotemark.}}%
+\noalign{\footnotetext{We will define one later, since it may be useful.}}
+\el E \el N & \texttt{:=} & & assignment operation. Provided that variable \el
+N has the same type as item \el E, it is set to that value; \\
+\el S & \fn{add.period} & \el S & adds a period at the end of string \el S,
+except if \el S already ends with a period, or an exclamation or question
+mark (after removing right braces); \\
+& \fn{call.type} && executes the function whose name is the type of the
+current entry. For instance, for an entry \nient{book}, it runs the function
+\texttt{book}. Of course, this command cannot be executed through an
+\texttt{EXECUTE} command, it can only be called with \texttt{ITERATE} or
+\texttt{REVERSE}. 
+This explains how to add new entry-types: you simply have to define a function
+whose name is the entry-type. If an entry-type is used and the
+corresponding function has not been defined before the \texttt{READ} command,
+ \bt will complain; \\
+\el S \texttt{"t"} & \fn{change.case} & \el S & 
+turns \el S to lower case, except for the first letter and for letters that
+appear at brace-depth strictly positive. Remember that special characters are
+at depth~0; \\
+\el S \texttt{"l"} & \fn{change.case} & \el S & 
+turns \el S to lower case, except parts that are at strictly positive
+brace-depth; \\
+\el S \texttt{"u"} & \fn{change.case} & \el S & 
+turns \el S to upper case, except... \\
+\el S & \fn{chr.to.int} & \el I & 
+if \el S contains only one character (in the classical sense, \emph{i.e.} not
+considering special characters), returns its ASCII code; \\
+& \fn{cite} & \el S & puts on the stack the internal key of the current entry.
+Only meant to be used with \texttt{ITERATE} or \texttt{REVERSE}, of course;\\
+\el E & \fn{duplicate} & \el E \el E & 
+adds a copy of the first item on the top of the stack;\\
+\el E & \fn{empty} & \el I & adds $1$ on the top of the stack if \el E is an
+empty string or an empty (but defined) field, and $0$ otherwise; \\
+\eli S1 \el I \eli S2 & \fn{format.name} & \el S & 
+extract the \el I-th name of string \eli S1 (in which names are separated by
+\texttt{and}), and formats it according to specification given by string \eli
+S2. I can't explain all that here, see the next section for more details; \\
+& \fn{global.max} & \el I & 
+put on the stack the maximal length allowed for strings. This is useful to
+ensure that a string obtained by concatenation is not too long, but the value
+is generally quite high (5000~characters); \\
+\el I \eli F1 \eli F2 & \fn{if} && execute \eli F1 if \el I is strictly
+positive, and \eli F2 otherwise; \\
+\el I & \fn{int.to.chr} & \el S & turns \el I to its corresponding character
+in the ASCII table. \el I must be between $0$ and $127$; \\
+\el I & \fn{int.to.str} & \el S & turns an integer to the equivalent
+string\footnotemark; \\
+\noalign{\footnotetext{Scientists would remark that I did not define the
+    equivalence relation I deal with. I think an example will be sufficient: 
+    if \el I is 147, the equivalent string is \texttt{"147"}.}}
+\el C & \fn{missing} & \el I & returns $1$ if field \el C has been defined in
+the current entry, and $0$ otherwise;\\
+& \fn{newline} & & flushes the output buffer to the \ext{bbl} file, and 
+   starts a new line; \\
+\el S & \fn{num.names} & \el I & returns the number of names in string \el S.
+This is done by counting the number of occurrences of \texttt{and}, surrounded
+with spaces and at level~$0$, and adding~$1$; \\
+\el E & \fn{pop} & & removes the topmost item on the stack; \\
+& \fn{preamble} & \el S & puts on the stack a string made of the concatenation
+of all \chp{preamble} declarations found in the \ext{bib} file; \\
+\el S & \fn{purify} & \el S & 
+removes all non-alphanumeric characters of string~\el S. More precisely, this
+functions preserves letters and numbers and spaces, replaces each tabulation,
+hyphen and tilde with a space, and removes other standard characters, namely
+characters not listed above and appearing in the table given in appendix~C of
+the \TeX{}book. Special characters are an exception: \LaTeX commands are
+removed, as well as spaces, tabulations, hyphens and tildes. Only numbers and
+letters appearing outside \LaTeX command names are preserved.%
+\label{purify}
+
+Practically, this commands is used for cleaning strings before comparing them,
+when sorting entries. This is why it is important to keep only ``known''
+characters. I insists on the fact that ``\texttt{\bs'e}'' and ``\texttt{\'e}''
+are different, from this point of view, since the first one will be
+transformed into an \texttt e, while the second one will be unchanged, but,
+when sorting, will be put after the standard 26~letters. \\
+& \fn{quote} & \el S & adds the 1-character string 
+  \verb+"+ on the stack;\\ 
+& \fn{skip} && does nothing; \\
+& \fn{sort.key} & \el S & this function is in fact a string variable,
+implicitly declared for each entry, and that is used by \texttt{SORT}. It
+must therefore be defined accordingly before sorting; \\
+... \el E \el E& \fn{stack} && clears the stack, and prints its contents on
+standard output (not in the output file); \\
+\el S \eli I1 \eli I2 & \fn{substring} & \el S & extracts from \el S the
+string of length \eli I2 starting at position~\eli I1. By convention, the
+first character is at position~$1$. Note that special characters and braces
+are not considered here, so that the substring of \verb+{\LaTeX}+ of length~3
+starting at position~2 is \verb+\LaT+; \\
+\eli E1 \eli E2 & \fn{swap} & \eli E2 \eli E1 & 
+swaps both topmost items on the stack; \\
+\el S & \fn{text.length} & \el I & returns the number of characters of \el S,
+special characters being considered as only one character, and braces being
+omitted; \label{textlength} \\
+\el S \el I & \fn{text.prefix} & \el S & 
+returns the first \el I characters of \el S, still considering special
+characters as only one character, and omitting braces. Braces are output,
+however. For instance, the prefix of length~3 of \verb+{{\LaTeX}}1234+ is
+\verb+{{\LaT}}+, while it is \verb+{\LaTeX}12+ for \verb+{\LaTeX}1234+; \\
+\el E & \fn{top} && echoes the first item of the stack on standard output (not
+in the output file) and removes it from the stack; \\
+& \fn{type} & \el S & adds on the stack the type of the current entry; \\
+\el S & \fn{warning} && writes \el S in a warning message on the standard
+output; \\
+\eli F1 \eli F2 & \fn{while} & & 
+successively executes \eli F1 and \eli F2 while \eli F1 returns a strictly
+positive value. \eli F1 has to return an integer; \\
+\el S & \fn{width} &\el I& returns the length of string \el S, in hundredths
+of a point, when written using font \emph{cmr}10 of June 1987. You probably
+don't mind the details... This function is used for comparing widths of
+labels, the longest label being passed as the argument of the
+\env{thebibliography} environment; \\
+\el S & \fn{write} && write \el S in the output \ext{bbl} file.
+\end{longtable}
+
+We're done. This should be sufficient for defining plenty of functions for
+managing entries, sorting them, label them and typeset them. Before using
+them, I promised to explain how \fn{format.name} works.
+
+
+\mysection{The \protect\nifn{format.name} function}\label{noms-start}
+
+This function is quite complicated. The syntax is as follows:
+\begin{center}
+\begin{minipage}{.8\textwidth}
+\eli S1 \el I \eli S2 \ \fn{format.name}\ \el S
+\end{minipage}
+\end{center}
+
+The first argument \eli S1 is generally the content of fields \chp{author} or
+\chp{editor}. It is a list of names separated
+with \verb+and+. If names are in one of the three formats recognized by \bt
+(see section~\ref{author}), \bt will be able to detect the last name, first
+name, ``von'' and ``complement''. String \eli S2 defines the output format.
+Here is an example:
+\begin{center}
+\begin{minipage}{.8\textwidth}
+\begin{verbatimtab}
+"{ff }{vv }{ll}{, jj}"
+\end{verbatimtab}
+\end{minipage}
+\end{center}
+The format of such a specification is defined as follows:
+\begin{itemize}
+\item globally, it is a list of strings, each one being surrounded with
+  braces;
+\item \verb+ff+ represents the \verb+First+ part, \emph{i.e.} the first name;
+  \verb+ll+ is the \verb+Last+ part, \emph{i.e.} the last name, and \verb+vv+ and
+  \verb+jj+ are the \verb+von+ and \verb+jr+ part of the name; 
+\item \fn{format.name} replaces, in each string of list \el S2, strings
+  \verb+ff+, \verb+ll+, \verb+vv+ and \verb+jj+, with their respective values.
+  If a value is empty, the complete string is removed. Otherwise, the other
+  characters in the string are output. In the example above, for instance, if
+  the \verb+jr+ part is empty, the comma won't be output, and if the
+  \verb+First+ part is not empty, it will be followed with a space. 
+\end{itemize}
+
+This should be almost clear, now. I just mention, but you've probably already
+understood, that the integer \el I indicates that we are working on the \el
+I-th name of \eli S1. 
+
+Last, there exists abbreviated forms for name formats. They are used to
+extract the first letter of first names, for instance. It suffices to replace
+\verb+{ff }+ with \verb+{f }+. For multiple names in one part
+(several first names, for instance), the first 
+letter of each name is written, followed with a period. Different names must
+be separated with a space, a tabulation, a tilde or an hyphen. Tabulations
+are turned to spaces, tildes and hyphens are preserved. Note that there is no
+period at the end, and it must be specified by hand by writing \verb+{f. }+.
+For instance
+\begin{myexv}
+\begin{verbatimtab}
+"Goossens, Michel and Mittelbach, Franck and Samarin, Alexander"
+#2 "{f. }{vv }{ll}{, jj}" format.name$
+\end{verbatimtab}
+\end{myexv} %$
+\noindent returns \textit{F. Mittelbach}. 
+Let's have a look at several other interesting examples:
+\begin{myexv}
+\begin{verbatimtab}
+"Charles Jean Gustave Nicolas de La Vall{\'e}e Poussin"
+#1 "{vv }{ll}{, f}" format.name$
+\end{verbatimtab}
+\end{myexv} %$
+\noindent 
+yields \emph{de La Vall\'ee Poussin, C.J.G.N} 
+without the final period, since we did not ask for it.
+\begin{myexv}
+\begin{verbatimtab}
+"Doppler, {\relax Ch}ristian Andreas"
+#1 "{f. }{vv }{ll}" format.name$
+\end{verbatimtab}
+\end{myexv} %$
+\noindent gives \emph{Ch.~A. Doppler}. 
+Last, 
+\begin{myexv}
+\begin{verbatimtab}
+"Jean-Baptiste Poquelin" #1 "{f. }{vv }{ll}" format.name$
+\end{verbatimtab}
+\end{myexv} %$
+\noindent outputs \emph{J.-B. Poquelin}.
+
+You probably remarked that one problem is still unsolved: For creating
+labels from author names, we will of course use \fn{format.name}, and we'd
+like to get \verb+LVP+, say, for a book by 
+La Vall\'ee Poussin. The first idea, of course, is:
+\begin{myexv}
+\begin{verbatimtab}
+"Charles Jean Gustave Nicolas de La Vall{\'e}e Poussin"
+#1 "{l}" format.name$
+\end{verbatimtab}
+\end{myexv} %$
+\noindent 
+which unfortunately gives \emph{L. V. P}, which would look awful as a label.
+But in fact, the period added between names is a default value, but can be
+explicitly given. In our case, we would like to replace the period with empty strings:
+\begin{myexv}
+\begin{verbatimtab}
+"Charles Jean Gustave Nicolas de La Vall{\'e}e Poussin"
+#1 "{l{}}" format.name$
+\end{verbatimtab}
+\end{myexv} %$
+\noindent 
+which gives the expected \emph{LVP}. 
+Braces following \verb+l+ mean that nothing should be put between names or
+letters. It is also possible to add some text only once, before or after
+the names. Spaces can be entered directly, while text and commands should be
+put between braces, so that \bt distinguished them with \verb+ff+,
+\verb+ll+,~... specifications. An example should make this clear:
+\begin{myexv}
+\begin{verbatimtab}
+"Charles Jean Gustave Nicolas de La Vall{\'e}e Poussin"
+#1 "{{\scshape\bgroup}ff{ }{\egroup}" format.name$
+\end{verbatimtab}
+\end{myexv} %$
+\noindent gives
+\verb+{\scshape\bgroup}Charles Jean Gustave Nicolas{\egroup}+, and thus
+<<~{\scshape\bgroup}Charles Jean Gustave Nicolas{\egroup}~>>. 
+Note that we had to trick \bt and \LaTeX regarding the \cmd{bgroup}: braces,
+which are necessary in \bt name specifications, are copied verbatim in the
+output...
+\label{noms-end}
+
+\medskip
+Well... Once again, I could stop here, since you know everything, at least
+from the theoretical point of view. But this would not be a good 
+idea. So the next sections are devoted to some examples and tricks that could
+be useful.
+
+\clearpage
+\mysection{Some practical tricks}
+
+In fact, the main trick to know is how to build a minimal file, in order to
+test \bt{}'s behavior, for instance for testing the encoding of a name. This
+basic style file will simply output its result on the standard output. 
+Assume you want to see how \bt cuts the following name:
+%\begin{myexv}
+\begin{center}
+\begin{minipage}{.8\textwidth}
+\begin{verbatimtab}
+de la Cierva y Codorn{\'\i}u, Juan
+\end{verbatimtab}
+\end{minipage}
+\end{center}
+%\end{myexv} %$
+
+The minimal \ext{bst} file must contain 
+\texttt{ENTRY}\index{bibtex}{entry@\texttt{ENTRY}} and
+\texttt{READ}\index{bibtex}{read@\texttt{READ}}
+commands, even if we won't use any entry. It must also compute the desired
+result. Our style file, \verb+min.bst+, will be:
+\begin{myexv}
+\begin{verbatimtab}
+ENTRY {}{}{}
+
+FUNCTION {test}
+{"de la Cierva y Codorn{\'\i}u, Juan"
+#1 "{ff - }{vv - }{ll}" format.name$ top$}
+
+READ
+
+EXECUTE{test}
+\end{verbatimtab}
+\end{myexv} 
+\noindent This will split the name and write the different parts, separated
+with hyphens.
+
+The \ext{aux} file now: it will simply define the style file to be used:
+\begin{myexv}
+\begin{verbatimtab}
+\bibstyle{min}
+\end{verbatimtab}
+\end{myexv} 
+
+This file, called \verb+min.aux+, contains neither the \cmd{bibdata} 
+precising the \ext{bib} file to use, nor the \cmd{citation}{}s declaring the
+entries to be extracted. \bt will, of course, complain about that, but will
+continue the execution anyway. 
+
+The result is as follows:
+\begin{myexv}
+\begin{verbatimtab}
+% bibtex min
+This is BibTeX, Version 0.99c (Web2C 7.4.5)
+The top-level auxiliary file: min.aux
+The style file: min.bst
+I found no \citation commands---while reading file min.aux
+I found no \bibdata command---while reading file min.aux
+Warning--I didn't find any fields--line 1 of file min.bst
+Juan - de~la Cierva~y - Codorn{\'\i}u
+(There were 2 error messages)
+\end{verbatimtab}
+\end{myexv}
+
+We get the error messages, but also the result, showing that our encoding is
+not correct (since the \verb+von+ part should only contain \verb+de la+). 
+As regards unbreakable spaces: \bt automatically adds unbreakable spaces
+instead of the first and last spaces.
+
+This provides you with a way to test all your future \bt functions, which can
+be quite useful since \bt error messages are generally difficult to understand. 
+You can also try to test if \fn{purify} behaves as I said previously.
+
+
+\mysection{Some small simple functions}
+
+\mysubsection{Boolean functions}
+
+As you know, \bt does not know about booleans. In particular, there is no
+negation, conjunction or disjunction, while it would be quite useful.
+Those operations are defined  on figure~\ref{fig1}.
+
+\begin{figure}[!htbp]
+\begin{myexv}
+\begin{verbatimtab}
+FUNCTION {not}
+{   { #0 }
+    { #1 }
+  if$
+}
+
+FUNCTION {and}
+{   'skip$
+    { pop$ #0 }
+  if$
+}
+
+FUNCTION {or}
+{   { pop$ #1 }
+    'skip$
+  if$
+}
+\end{verbatimtab}
+\end{myexv} %$
+\caption{Basic boolean functions}\label{fig1}
+\end{figure}
+Let me just explain the first two: For negation, you assume there is a boolean
+(\emph{i.e.} an integer) on the top of the stack. Function \fn{if} will test that
+boolean. If it evaluates to \verb+true+, the function returns \verb+#0+ (\emph{i.e.}
+\verb+false+), and otherwise it returns \verb+#1+ (\emph{i.e.} \verb+true+).
+This is precisely what we wanted.
+
+For the conjunction: we have two booleans on the stack. Function \fn{if} tests
+the first one. If it is \verb+true+, then we do nothing (thus leaving the
+second boolean on the top of the stack, it's value being the result of the
+conjunction). If it is \verb+false+, the conjunction is false: We remove the
+second argument and put \verb+#0+ on the top of the stack.  
+
+\mysubsection{Multiplication}
+
+Figure~\ref{fig2} shows how to compute the multiplication of two integers.
+I won't enter into the details, comments should be sufficient. In the same
+way, you can try to define integer division, gcd, primality testing,~...
+But I'm not sure if it is useful. Multiplication can be, as you'll see below.
+
+\begin{figure}[!htbp]
+\begin{myexv}
+\begin{verbatimtab}
+INTEGERS { a b }
+
+FUNCTION {mult}
+{
+ 'a := 			    %% we store the first value
+ 'b :=			    %% we store the second value
+
+ b #0 <			    %% We remember the sign of b, and
+    {#-1 #0 b - 'b :=}	    %% then consider its absolute value. 
+    {#1}		    %% 
+ if$			    %%
+
+ #0			    %% Put 0 on the stack.
+ {b #0 >}		    %% While b is strictly positive, 
+ {			    %% we add a to the value on the stack 
+   a +			    %% and decrement b. 
+   b #1 - 'b :=		    %% 
+ }			    %% 
+ while$			    %%
+
+ swap$ 	  		    %% Last, we take the opposite
+   'skip$  		    %% if b was negative.
+   {#0 swap$ -}		    %% 
+ if$			    %% 
+}
+\end{verbatimtab}
+\end{myexv}
+\caption{The ``multiplication'' function}\label{fig2}
+\end{figure}
+
+
+\mysubsection{Converting a string to an integer}
+
+There is no direct way for converting a string (made of digits) to the
+corresponding integer. We will define a function achieving this, and returning
+an error message whenever the string is not a number.
+This is done recursively, as shown on figure~\ref{fig3}.
+
+\begin{figure}[!htbp]
+\begin{myexv}
+\begin{verbatimtab}
+FUNCTION {chr.to.value}	      %% The ASCII code of a character
+{
+  chr.to.int$ #48 -	      %% ASCII value of "0" -> 48
+  duplicate$ duplicate$	      %%	        "1" -> 49
+  #0 < swap$ #9 > or	      %%		   ...
+  {			      %%                "9" -> 57
+      #48 + int.to.chr$ 
+      " is not a number..." * 
+      warning$		      %% Return 0 if it is not a number
+      pop$ #0		      %% 
+    }
+  {}
+  if$
+}
+
+FUNCTION {str.to.int.aux}     %% The auxiliary function
+{
+  {duplicate$ empty$ not}     %% While the string is not empty
+    {			      %% consider its first char
+      swap$ #10 mult 'a :=    %% and ``add'' it at the end of
+      duplicate$ #1 #1 substring$   %% the result.
+      chr.to.value a +
+      swap$
+      #2 global.max$ substring$
+    }
+  while$
+  pop$
+}
+
+FUNCTION {str.to.int}
+{			      %% Handling negative values
+  duplicate$ #1 #1 substring$ "-" = 
+    {#1 swap$ #2 global.max$ substring$}
+    {#0 swap$}
+  if$
+			      %% Initialization, and then 
+  #0 swap$ str.to.int.aux     %% call to the aux. funtion
+  swap$ 
+    {#0 swap$ -}	      %% And handle the sign.
+    {}
+  if$
+}
+\end{verbatimtab}
+\end{myexv}  %$
+\caption{Converting a string to an integer}\label{fig3}
+\end{figure}
+
+There are several interesting points: first, it requires boolean functions,
+and multiplications. Those functions must thus be added before the above
+definitions. Moreover, function \verb+chr.to.value+ emphasizes an important
+rule of thumb: A function must always behave in the same way as regards the
+stack: Same type and numbers of inputs, same type and number of outputs. For
+instance, here, if the character is not an integer, we complain, but we return
+an integer, as if everything was ok. This rule is very important unless you
+want to spend some time in debugging.
+
+
+\mysubsection{Counting the number of characters in a string}
+
+As we saw on page~\pageref{textlength}, \fn{text.length} counts the number of
+characters in a string, but assuming \bt's meaning of ``character''. 
+In fact, the only function that assumes the standard definition of a character
+is \fn{substring}. We will use it repeatedly for counting the number of
+characters of a string, by computing the successive prefixes until they equal
+the original string.
+
+\begin{figure}[!htbp]
+\begin{myexv}
+\begin{verbatimtab}
+INTEGERS{ l }
+FUNCTION{ string.length }
+{
+  #1 'l :=
+  {duplicate$ duplicate$ #1 l substring$ = not}
+    {l #1 + 'l :=}
+  while$
+  pop$ l
+}
+\end{verbatimtab}
+\end{myexv} %$
+\caption{A function for counting the \emph{real} number of characters}\label{fig4}
+\end{figure}
+
+As an exercise, the reader can try to implement another algorithm: removing
+one after the other the first characters of the string until the resulting
+string is empty.
+
+\mysubsection{A ``search-and-replace'' function}
+
+With the function above, we can now design an algorithm for searching and
+replacing the occurrences of a string in a given text. Once again, we cannot
+use \fn{text.length} and \fn{text.prefix} since they assume a special
+definition of a character. We only use the function \verb+string.length+ and
+\fn{substring}. The idea is to successively extract the first $n$ characters
+of the text, compare them with the pattern, and replace it or drop the first
+character, depending on the result of the comparison.
+
+\begin{figure}[!htbp]
+\begin{myexv}
+\begin{verbatimtab}
+STRINGS{replace find text}
+INTEGERS{find_length}
+FUNCTION{find.replace}
+{ 'replace :=
+  'find :=
+  'text :=
+  find string.length 'find_length :=
+  ""
+    { text empty$ not }
+    { text #1 find_length substring$ find =
+        {
+          replace *
+          text #1 find_length + global.max$ substring$ 'text :=
+        }
+        { text #1 #1 substring$ *
+          text #2 global.max$ substring$ 'text :=
+        }
+      if$
+    }
+  while$
+}
+\end{verbatimtab}
+\end{myexv} %$
+\caption{Search-and-replacing with \bt}\label{fig5}
+\end{figure}
+
+This function replaces all the occurrences of the pattern, but it can easily be
+adapted for replacing only the first occurrence. As an exercise, the reader can
+try to implement the same algorithm using only two string
+variables\footnote{Hint: try to leave \texttt{find} on the stack.} (it may be
+important to spare string variables since their number is very limited).

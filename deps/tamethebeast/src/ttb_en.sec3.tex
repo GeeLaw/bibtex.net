@@ -1,0 +1,747 @@
+%% ttb_en.sec3.tex
+%% Copyright 2003-2005  Nicolas Markey
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt 
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+% 
+% This work has the LPPL maintenance status "maintained".
+% The Current Maintainer of this work is Nicolas Markey  
+% 
+% This work consists of the files
+%       ttb_en.tex
+%       ttb_en.sec1.tex  ttb_en.sec2.tex  ttb_en.sec3.tex
+%       ttb_en.sec4.tex  ttb_en.sec5.tex  ttb_style.sty
+%       local.bib        idxstyle.ist     Makefile
+% and the derived ttb_en.dvi, ttb_en.ps and ttb_en.pdf
+
+
+\mypart{The \protect\niext{bib} file}\label{part3}
+\parttoc
+\mtcskip
+
+The \ext{bib} file is the database. Its contents heavily
+depends on the style being applied to it, even though 
+bibliography styles are generally ``compatible'' with each w.r.t.\ the
+database. I will only describe here
+the case of standard styles\footnote{Thus using entry types
+and fields as described at pages~\pageref{champ} 
+to~\pageref{fin-champ}.}. 
+But remember that
+\bt can do many other things, we'll see some examples in
+section~\ref{autres}. 
+
+\mysection{Structure of the \protect\niext{bib} file}
+
+We start with  an example:
+
+\begin{verbatimtab}
+@book{companion,
+  author 	= "Goossens, Michel and Mittelbach, Franck and Samarin, Alexander",
+  title 	= "The {{\LaTeX}} {C}ompanion",
+  publisher 	= "Addison-Wesley",
+  year 		= 1993,
+}
+\end{verbatimtab}
+We just consider the structure of this entry for the moment, not its
+contents. The general form is the following\footnote{The 
+outermost braces can be replaced by parentheses: 
+ \texttt{\at{\itshape entry\_type}({\itshape internal\_key}, ...)}.}:
+\bigskip
+
+\noindent\begin{minipage}{\textwidth}
+\obeylines
+\ttfamily \at{\itshape entry\_type}\{internal\_key, 
+\ \ {\bfseries field\_1}\ \ \ \ \ \ \ = "value\_1",
+\ \ {\bfseries field\_2}\ \ \ \ \ \ \ = "value\_2",
+\ \ ...
+\ \ {\bfseries field\_n}\ \ \ \ \ \ \ = "value\_n"
+\}
+\end{minipage}
+
+\bigskip
+
+\noindent Some basic remarks:
+\begin{itemize}
+\item New entries always start with \texttt\at. Anything outside
+  the ``argument'' of a ``command'' starting with an \texttt\at{} is
+  considered as a comment. This gives an easy way to comment a given
+  entry: just remove the initial \texttt\at.
+  As usual when a language allows comments, don't hesitate to use
+  them so that you have a clean, ordered, and easy-to-maintain
+  database. Conversely, anything starting with an \texttt\at{} is
+  considered as being a new entry\footnote{There is a special entry
+  type named \ent{comment}. The main use of such an
+  entry type is to comment a large part of the bibliography easily,
+since anything outside an entry is already a comment, and commenting 
+out one entry may be achieved by just removing its 
+initial~\texttt{\at}.}.
+
+\item \bt does not distinguish between normal and capital
+  letters in entry and field names. \bt will complain if two entries
+  have the same internal key, even if they aren't capitalized in the
+  same way. For instance, you cannot have two entries named
+  \texttt{Example} and  \texttt{example}. 
+
+  In the same way, if you cite both \texttt{example} and
+  \texttt{Example}, \bt will complain. Indeed, it~would have to
+  include the same entry twice, which probably is not what you want;
+
+
+\item Spaces and line breaks are not important, except for 
+  readability. On the contrary, commas are compulsory between any two
+  fields;
+
+
+\item Values (\emph{i.e.} right hand sides of each assignment) can be either
+  between curly braces or between double quotes. The main difference
+  is that you can write double quotes in the first case, and not in
+  the second case. For citing 
+  \emph{Comments on ``Filenames and Fonts''} by Franck
+\textsc{Mittelbach}, you can use one of the following solutions:
+\begin{verbatimtab}
+  title 	= "Comments on {"}Filenames and Fonts{"}",
+  title 	= {Comments on "Filenames and Fonts"},
+\end{verbatimtab}
+
+Curly braces have to match, since they will appear in the output to be
+compiled by \LaTeX. 
+A problem occurs if you need to write a (left-, say) brace in an entry. You
+could of course write \verb+\{+, but the entry will have to also include the
+corresponding right brace. To include a left brace without its
+corresponding right brace, you'll have use a \LaTeX~function having no
+brace in its name. \cmd{leftbrace} is the right choice here. Another solution
+is to add an extra \cmd{bgroup} in the entry, so that both \LaTeX and \bt will
+find the correct number of ``braces''.
+
+\item For numerical values, curly braces and double quotes can be
+  omitted.
+\end{itemize}
+
+
+As I already mentioned, you can define fields even if they aren't
+used by the style being applied. For instance, the following can be
+used for the \LaTeX Companion:
+\begin{verbatimtab}
+@book{companion,
+  author 	= "Goossens, Michel and Mittelbach, Franck and Samarin, Alexander",
+  title 	= "The {{\LaTeX}} {C}ompanion",
+  booktitle 	= "The {{\LaTeX}} {C}ompanion",
+  publisher 	= "Addison-Wesley",
+  year 		= 1993,
+  month		= "December",
+  ISBN 		= "0-201-54199-8",
+  library 	= "Yes",
+}
+\end{verbatimtab}
+It gives complementary information about the book\footnote{Filling
+both \nichp{title} and \nichp{booktitle} for a book may be of real
+interest, as we will see in the section dedicated to cross references
+(see section~\ref{crossref} for some more details).}, for instance the
+fact that it is available in your local library.  You really should
+not hesitate to use auxiliary, personal fields, giving them explicit
+names in order to be sure that no bibliography style will use them
+incidentally\footnote{You'll ask ``Is it really useful?''. First of
+all, it doesn't take long to add those informations each time you add a
+new entry; it~takes much longer to add a field to several
+entries. Moreover, we'll see later how to design bibliography styles,
+and you'll be able to write styles that take those new fields into
+account.}.
+
+
+\mysection{The  \protect\nient{string} and \protect\nient{preamble}
+  entries}\label{strpre}
+
+These are not really entry types: \ent{string}
+entries can be used in order to define abbreviations. For instance,
+we've cited two books published by Addison-Wesley. It might be useful
+to define a shortcut for this publisher. Thus we write:
+\begin{verbatimtab}
+@string{AW	= "Addison-Wesley"}
+
+@book{companion,
+  author 	= "Goossens, Michel and Mittelbach, Franck and Samarin, Alexander",
+  title 	= "The {{\LaTeX}} {C}ompanion",
+  booktitle 	= "The {{\LaTeX}} {C}ompanion",
+  publisher 	= AW,
+  year 		= 1993,
+  month		= "December",
+  ISBN 		= "0-201-54199-8",
+  library 	= "Yes",
+}
+\end{verbatimtab}
+
+This does not only spare some time, but most importantly, it ensures that
+you won't misspell it, and helps you maintain a homogeneous database.
+I find this really interesting for author names, so that you're sure
+to always write them correctly (or always incorrectly, but it would 
+be easy to detect and correct a global mistake anyway).
+
+
+As regards \ent{preamble}, it may be used for inserting commands or
+text in the file created by \bt. Anything declared in a \ent{preamble}
+command will be concatenated and put in a variable named
+\fn{preamble}, for being used in the bibliography style and,
+generally, inserted at the beginning of the \ext{bbl} file, just
+before the \env{thebibliography} environment. This is useful for
+defining new commands used in the bibliography. Here is a small
+example:
+\begin{verbatimtab}
+@preamble{ "\makeatletter" }
+@preamble{ "\@ifundefined{url}{\def\url#1{\texttt{#1}}}{}" }
+@preamble{ "\makeatother" }
+\end{verbatimtab}
+This way, you may safely use the \nicmd{url} command in your
+entries. If it is not defined at the beginning of the bibliography, the
+default command defined in the \ent{preamble} will be used.  
+
+Please note that you should never define style settings
+in the \ent{preamble} of a bibliography database, 
+since it would be applied to
+any bibliography built from this database.
+
+
+
+
+
+
+\mysection{The \nichp{title} field}\label{title}
+
+Let's see how to fill the ``title'' field. We start by studying how I entered
+the title field for the  
+\emph{\LaTeX Companion} : 
+\begin{verbatimtab}
+  title 	= "The {{\LaTeX}} {C}ompanion"
+\end{verbatimtab}
+
+We'll need several definitions before going further.
+The \emph{brace depth} of an item is the number of braces surrounding
+it. This is not a very formal definition, but for instance, in
+the title above, \verb+\LaTeX+ has brace depth $2$, the \verb+C+ has
+brace depth $1$, and everything else has depth $0$\footnote{Of course,
+surrounding the field with braces instead of quotes does not modify
+the brace depth.}.
+A~\emph{special character} is a part of a field starting with a left 
+brace
+being at brace depth $0$ immediately 
+followed with a backslash, and ending 
+with the corresponding right brace. 
+For instance, in the above example, there is
+no special character, since \verb+\LaTeX+ is at depth~$2$. It should
+be noticed that anything in a special character is considered as being at
+brace depth~$0$, even if it is placed between another pair of braces.
+
+That's it for the definitions.
+Generally speaking, several modifications can be applied to the
+title by the bibliography style:
+\begin{itemize}
+\item first of all, the title might be used for sorting. When sorting,
+  \bt computes a string, named \fn{sort.key}, for each
+  entry. The \fn{sort.key} string is an (often long) 
+  string defining the order in which
+  entries will be sorted. To avoid any ambiguity, \fn{sort.key} should
+  only contain alphanumeric characters. Classical non-alphanumeric 
+  characters\footnote{Except hyphens and tildes 
+  that are replaced
+  by spaces. Spaces are preserved. The precise behavior of 
+  \fn{purify} is explain on page~\pageref{purify}.}, 
+  except special characters, will be removed by 
+  a \bt function named \fn{purify}. For special characters, \fn{purify}
+  removes spaces and 
+  \LaTeX commands (strings beginning with a backslash), even those
+  placed between brace pairs. Everything else is left unmodified. For
+  instance, 
+  \verb+t\^ete+, \verb+t{\^e}te+ and \verb+t{\^{e}}te+
+are transformed into \verb+tete+, 
+while \texttt{t\^ete} gives \texttt{t\^ete};
+\verb+Bib{\TeX}+ gives \verb+Bib+ and
+\verb+Bib\TeX+ becomes \verb+BibTeX+.
+There are thirteen \LaTeX commands that won't follow the above rules:
+\verb+\OE+, \verb+\ae+, \verb+\AE+, \verb+\aa+, \verb+\AA+, 
+\verb+\o+, \verb+\O+, \verb+\l+, \verb+\L+, \verb+\ss+.
+Those commands correspond to \i, \j, \oe,
+\OE, \ae, \AE, \aa, \AA, \o, \O,
+\l, \L, \ss, and \fn{purify} transforms them (if they are in a special
+character, 
+in \verb+i+, \verb+j+,
+  \verb+oe+, 
+\verb+OE+, \verb+ae+, \verb+AE+, \verb+aa+, \verb+AA+, \verb+o+,
+  \verb+O+, 
+\verb+l+, \verb+L+, \verb+ss+, respectively. 
+
+
+\item the second transformation applied to a title is to be turned to
+  lower case (except the first character). 
+  The function named
+  \fn{change.case} does this job. But it only applies to letters that
+  are a brace depth~$0$, except within a special character. In a
+  special character, brace depth is always $0$, and letters are
+  switched to lower case, except \LaTeX commands, that
+  are left unmodified.
+\end{itemize}
+Both transformations might be applied to the \chp{title} field by 
+standard styles, and you must ensure that your title will be treated correctly
+in all cases. 
+
+Let's try to apply it now, 
+for instance to \emph{the \LaTeX Companion}. 
+Several solutions might be tried:
+\begin{itemize}
+\item \verb+ title = "The \LaTeX Companion"+: This won't work, since
+  turning it to lower case will produce \verb+The \latex companion+,
+  and 
+  \LaTeX won't accept this...
+\item \verb+ title = "The {\LaTeX} {C}ompanion"+ : This ensures that
+  switching to lower case will be correct. However, applying
+  \fn{purify} gives  \verb+The  Companion+. Thus sorting could be
+  wrong; 
+\item \verb+ title = "The {\csname LaTeX\endcsname} {C}ompanion"+:
+  This won't work since \texttt{LaTeX} will be turned to \texttt{latex};
+\item \verb+ title = "The { \LaTeX} {C}ompanion"+ : In this case,
+  \verb+{ \LaTeX}+ is \emph{not} a special character, but a set of
+  letters at depth~$1$. It won't be modified by
+  \fn{change.case}. However, \fn{purify} will leave both spaces, and
+  produce \verb+The  LaTeX Companion+, which could result in wrong
+  sorting;
+\item \verb+ title = "The{ \LaTeX} {C}ompanion"+: This solution also
+  works, but is not as elegant as the next one;
+\item \verb+ title = "The {{\LaTeX}} {C}ompanion"+ : This is the
+  solution I used. It solves the problems mentioned above.
+\end{itemize}
+
+For encoding an accent in a title, say \emph{\'E} (in upper case) as
+in the French word \emph{\'Ecole}, we'll write 
+\verb+{\'{E}}cole+, \verb+{\'E}cole+ or \verb+{{\'E}}cole+,
+depending on whether we want it to be turned to lower case (the first
+two solutions) or not (the last one). \fn{purify} will give the same
+result in the three cases.
+However, it should be noticed that the third one is not a special
+character. If you ask \bt to extract the first character of each
+string using \fn{text.prefix}, you'll get \verb+{\'{E}}+ in the first case,
+\verb+{\'E}+ in the second case  and 
+\verb+{{\}}+ in the third case. 
+
+
+That's all for subtleties of titles. Let's have a look at author
+names, which is even more tricky.
+
+
+\mysection{The \nichp{author} field}\label{author}
+
+
+We still begin with the entry for the \emph{\LaTeX Companion}: 
+\begin{verbatim}
+  author 	= "Goossens, Michel and Mittelbach, Franck and Samarin, Alexander"
+\end{verbatim}
+The first point to notice is that two authors are separated with the
+keyword  \texttt{and}\index{bibtex}{and}. The format of the names is
+the second important point: The last name first, then the first name, 
+with a separating comma. In fact, \bt understands other formats.
+
+Before going further, we remark an important point: \bt will have to
+\emph{guess} which part is the first name and which part is the last
+name. It also has to distinguish a possible ``von'' part (as in John
+von Neumann) and a possible ``Jr'' part.
+
+The following explanation is somewhat technical. The first name will
+be called \verb+First+, the last name is denoted by \verb+Last+, the
+``von'' with \verb+von+ and the ``Jr'' part, \verb+Jr+.
+
+
+So, \bt must be able to distinguish between the different parts of the
+\chp{author} field. To that aim, \bt recognizes three
+possible formats:
+\begin{itemize}
+\item \verb+First von Last+; 
+\item \verb+von Last, First+;
+\item \verb+von Last, Jr, First+.
+\end{itemize}
+
+The format to be considered is obtained by counting the number of
+commas in the name.
+ Here are the characteristics of these formats:
+
+\begin{itemize}
+\item \verb+First von Last+: Suppose you entered
+\verb+Jean de La Fontaine+. There is no comma, hence the format is 
+\verb+First von Last+. The \verb+Last+ name cannot be empty, unless
+the whole field is. It should then contain at least \verb+Fontaine+. 
+\bt then looks at the first character\footnote{In the sequel, the
+  first character means ``the first non-brace character that at brace depth
+  $0$, if 
+  any, characters of a special character being
+  at depth $0$, even if there are $15$ braces around.'' If there is 
+  no 
+  character at depth $0$, then the item will go with its neighbour,
+  first and foremost with the \texttt{First}, then with the \texttt{Last}. It 
+  will be in the \texttt{von} if, and only if, it is surrounded with
+  two \texttt{von} items. Moreover, two words in the same group
+  (in \LaTeX sense) will go to the same place. Last, for a
+  \LaTeX command outside a special character, the backslash is removed
+  and \bt considers the remaining word. If you did not understand,
+  please take a while for reading this note anew, since it will be
+  used 
+  in the sequel.} of each remaining word. If some 
+of them are lower cases alphabetic letters, 
+anything between the first and the last ones
+(beginning with lower cases) is considered as being in the
+\verb+von+. Anything before the 
+\verb+von+ is in the \verb+First+, anything after is in the
+\verb+Last+. If no first letter is in lower case, then everything
+(except the part already put in the \verb+Last+) is put in the
+\verb+First+. 
+
+\verb+Jean de La Fontaine+ will then give \verb+La Fontaine+ as the
+\verb+Last+, \verb+Jean+ for the \verb+First+ and \verb+de+ for the
+\verb+von+. 
+
+Here is what it gives for several other combinations. This is for you
+to check if you understood:
+\begin{center}
+\begin{longtable}{|>{\vrule height 4mm depth 2mm width 0pt}p{.3\textwidth}|p{.15\textwidth}|p{.15\textwidth}|p{.18\textwidth}|}
+\hline
+Name & \verb+First+ & \verb+von+ & \verb+Last+ \endfirsthead
+\hline
+Name & \verb+First+ & \verb+von+ & \verb+Last+ \endhead
+\hline
+\verb+jean de la fontaine+ & \verb++ & \verb+jean de la+ & \verb+fontaine+ \\
+\hline
+\verb+Jean de la fontaine+ & \verb+Jean+ & \verb+de la+ & \verb+fontaine+ \\
+\hline
+\verb+Jean {de} la fontaine+ & \verb+Jean de+ & \verb+la+ & \verb+fontaine+ \\
+\hline
+\verb+jean {de} {la} fontaine+ & \verb++ & \verb+jean+ & \verb+de la fontaine+ \\
+\hline
+\verb+Jean {de} {la} fontaine+ & \verb+Jean de la+ & \verb++ & \verb+fontaine+ \\
+\hline
+\verb+Jean De La Fontaine+ & \verb+Jean De La+ & \verb++ & \verb+Fontaine+ \\
+\hline
+\verb+jean De la Fontaine+ & \verb++ & \verb+jean De la+ & \verb+Fontaine+ \\
+\hline
+\verb+Jean de La Fontaine+ & \verb+Jean+ & \verb+de+ & \verb+La Fontaine+ \\
+\hline
+\end{longtable}
+\end{center}
+The last line is the only one (in this table) that is correct.
+Of course, some of you will have a counter example where the
+\verb+von+ has to begin with an upper case letter. We'll see this at section~\ref{trucsbib}.
+
+\item \verb+von Last, First+: The idea is similar, but identifying
+  the \verb+First+ is easier: It's everything after the comma. Before
+  the comma, the last word is put in the \verb+Last+ (even if it
+  starts with a lower case). If any other word begins with a lower
+  case, anything from the first word to the last one starting with a
+  lower case is in the \verb+von+, and what remains is in the
+  \verb+Last+. 
+Once again, an example should make everything clear:
+
+\begin{center}
+\begin{longtable}{|>{\vrule height 4mm depth 2mm width 0pt}p{.3\textwidth}|p{.15\textwidth}|p{.15\textwidth}|p{.18\textwidth}|}
+\hline
+Name & \verb+First+ & \verb+von+ & \verb+Last+ \endfirsthead
+\hline
+Name & \verb+First+ & \verb+von+ & \verb+Last+ \endhead
+\hline
+\verb+jean de la fontaine,+\footnotemark & \verb++ & \verb+jean de la+ & \verb+fontaine+ \\
+\noalign{\footnotetext{This case raises an error message from \bt, complaining
+  that a name ends with a comma. 
+It is a common error to separate names with commas instead of ``\texttt{and}''.}}%
+\hline
+\verb+de la fontaine, Jean + & \verb+Jean+ & \verb+de la+ & \verb+fontaine+ \\
+\hline
+\verb+De La Fontaine, Jean+ & \verb+Jean+ & \verb++ & \verb+De La Fontaine+ \\
+\hline
+\verb+De la Fontaine, Jean+ & \verb+Jean+ & \verb+De la+ & \verb+Fontaine+ \\
+\hline
+\verb+de La Fontaine, Jean+ & \verb+Jean+ & \verb+de+ & \verb+La Fontaine+ \\
+\hline
+\end{longtable}
+\end{center}
+%\medskip
+
+\item \verb+von Last, Jr, First+: Well... It's still the same, except
+  that anything between the commas is put in the \verb+Jr+.
+\end{itemize}
+
+Names are separated by spaces above, but it may occur that two
+first names are separated by a hyphen, as in ``Jean-Fran\c cois'' 
+for instance. \bt splits that string, and if both parts are in the
+\verb+First+, the abbreviated surnames is ``J.-F.'' as (generally)
+wanted. A tilde is also seen as a string separator. This all boils 
+down to the fact that, if you enter \verb+Jean-baptiste Poquelin+,
+the string \verb+baptiste+ will be in the \verb+von+ part of the 
+name, since it erroneously begins with a lower case letter.
+\medskip
+
+I think it's a good place for coming back to abbreviations: You probably agree 
+that names are something not that easy to enter, and are
+error-prone. I personally advise defining an abbreviation for each
+author. You'll then concatenate them with \verb+``and''+ using
+\verb+#+\index{bibtex}{\#@\texttt{\#}(concatenation)}\index{bibtex}{concatenation@concatenation (\texttt{\#})} (actually, even \verb+``and''+ will be defined as an abbreviation). 
+
+For instance, I always include a \ext{bib} file containing the
+following lines:
+\begin{verbatimtab}
+@string{and = "and"}
+...
+@string{goossens    	= "Goossens, Michel"}
+@string{mittelbach  	= "Mittelbach, Franck"}
+@string{samarin		= "Samarin, Alexander"}
+\end{verbatimtab}
+another one containing:
+\begin{verbatimtab}
+@string{AW		= "Addison-Wesley"}
+\end{verbatimtab}
+and my main bibliographic file contains\footnote{This is not quite
+  true, since \texttt{December} still depends on the language, and I
+  prefer using \texttt{12} and letting the style file translate that
+  into the corresponding month in the correct language.}:
+\begin{verbatimtab}
+@book{companion,
+  author	= goossens # and # mittelbach # and # samarin,
+  title		= "The {{\LaTeX}} {C}ompanion",
+  booktitle	= "The {{\LaTeX}} {C}ompanion",
+  year 		= 1993,
+  publisher	= AW,
+  month		= "December",
+  ISBN 		= "0-201-54199-8",
+  library 	= "Yes",
+}
+\end{verbatimtab}
+This makes adding an entry much easier when you're used to such an
+encoding. Moreover, you can easily recover self-contained entries by using
+\texttt{bibexport.sh}~tool (see section~\ref{bibexport}).
+
+
+
+\mysection{Cross-references (\protect\nichp{crossref})}\label{crossref} 
+As mentioned earlier (can't remember where... Oh, yes, on
+page~\pageref{cetaitla}), \bt allows for cross-referencing. This is
+very useful, for instance, when citing a part of a book, or an article
+in conference proceedings. For instance, for citing chapter~$13$ of
+the \LaTeX~Companion:
+\begin{verbatimtab}
+@incollection{companion-bib,
+  crossref 	= "companion",
+  title		= "Bibliography Generation",
+  chapter	= 13,
+  pages		= "371-420",
+}
+\end{verbatimtab}
+This shows why having defined the \chp{booktitle} field
+of the \verb+companion+~entry is useful: It is not used in the \ent{book} entry,
+but 
+it is inherited in the above \ent{incollection} entry. We could of
+course have added it by hand, but we should have added it in each
+chapter we cite.
+
+The other possible interesting feature is that, when cross-referencing
+several times an entry that is not cited by itself, \bt can
+``factor'' it, \emph{i.e.} add it in the list of references and
+explicitly \cmd{cite} it in each entry. On the other hand, if the cross
+reference appears only once, it inherits from the fields of the
+reference, which is not included in the bibliography. 
+Here is an example of both behaviours:
+
+\medskip
+\begin{myex}
+\begin{thebibliography}{1}
+
+\bibitem{bib}
+Michel Goossens, Franck Mittelbach, and Alexander Samarin.
+\newblock Bibliography generation.
+\newblock In {\em The {{\LaTeX}} {C}ompanion\/} \cite{companion4}, chapter~13,
+  pages 371--420.
+
+\bibitem{math}
+Michel Goossens, Franck Mittelbach, and Alexander Samarin.
+\newblock Higher mathematics.
+\newblock In {\em The {{\LaTeX}} {C}ompanion\/} \cite{companion4}, chapter~8,
+  pages 215--258.
+
+\bibitem{ind}
+Michel Goossens, Franck Mittelbach, and Alexander Samarin.
+\newblock Index generation.
+\newblock In {\em The {{\LaTeX}} {C}ompanion\/} \cite{companion4}, chapter~12,
+  pages 345--370.
+
+\bibitem{companion4}
+Michel Goossens, Franck Mittelbach, and Alexander Samarin.
+\newblock {\em The {{\LaTeX}} {C}ompanion}.
+\newblock Addison-Wesley, December 1993.
+
+\end{thebibliography}
+\end{myex}
+
+\medskip \noindent or\medskip
+
+\begin{myex}
+\begin{thebibliography}{1}
+
+\bibitem{bib2}
+Michel Goossens, Franck Mittelbach, and Alexander Samarin.
+\newblock Bibliography generation.
+\newblock In {\em The {{\LaTeX}} {C}ompanion}, chapter~13, pages 371--420.
+  Addison-Wesley, December 1993.
+
+\bibitem{math2}
+Michel Goossens, Franck Mittelbach, and Alexander Samarin.
+\newblock Higher mathematics.
+\newblock In {\em The {{\LaTeX}} {C}ompanion}, chapter~8, pages 215--258.
+  Addison-Wesley, December 1993.
+
+\bibitem{ind2}
+Michel Goossens, Franck Mittelbach, and Alexander Samarin.
+\newblock Index generation.
+\newblock In {\em The {{\LaTeX}} {C}ompanion}, chapter~12, pages 345--370.
+  Addison-Wesley, December 1993.
+
+\end{thebibliography}
+\end{myex}
+
+In order to have one presentation or the other, we can tell \bt the
+number of cross-references needed for an entry to be explicitly
+\cmd{cite}{}'d. We use the \verb+-min-crossrefs+ command line argument
+of \bt for that. 
+For the first example above, I used
+\verb+bibtex biblio+, 
+while the second example was obtained with
+\verb+bibtex -min-crossrefs=5 biblio+.
+
+
+One other important remark is that cross-referenced entries must be
+defined \emph{after} entries containing the corresponding
+\chp{crossref} field. And you can't embed
+cross-references, that is, you cannot \chp{crossref} an entry that
+already contains a \chp{crossref}.
+
+
+Last, the \chp{crossref} field has a particular behaviour: it always
+exists, whatever the bibliography style. If a \chp{crossref}{}'ed entry
+is included (either by a \cmd{cite} command or by \bt if there are
+sufficiently many \chp{crossref}{}s), then the entries cross-referencing
+it have their original \chp{crossref} field. Otherwise, that field is
+empty. 
+
+
+
+\mysection{Quick tricks}\label{trucsbib}
+
+\mysubsection{How to get \emph{Christopher} abbreviated as \emph{Ch.}?}
+
+First names abbreviation is done when extracting names from the \chp{author}
+field. If the function is asked to abbreviate the first name (or any other part
+of it), it will return the first character of each ``word'' in that part. 
+Thus \emph{Christopher} gets abbreviated into \emph{C.} Special characters
+  provide a solution against this problem: If you enter
+  \verb+{\relax Ch}ristopher+, the abbreviated version would be
+  \verb+{\relax Ch}.+, which gives \emph{Ch.}, while the long version is
+  \verb+{\relax Ch}ristopher+, \emph{i.e.} \emph{{Ch}ristopher}. 
+
+\mysubsection{How to get caps in \texttt{von}?}
+
+Note: This part is somewhat technical. You should probably read and understand
+how \bt extracts names, which is explained at pages~\pageref{noms-start}
+and~\pageref{noms-end}. 
+
+It may occur that the \verb+von+ part of a name begins with a capital letter.
+For some reason, the standard example is \emph{Maria De La Cruz}. 
+
+The basic solution is to write
+\verb+"{\uppercase{d}e La} Cruz, Maria"+. When analyzing this name, \bt will
+place \verb+Cruz+ in the
+\verb+Last+ part, then \verb+Maria+ as the \verb+First+ name. Then
+\verb+{\uppercase{d}e La}+ is a special character,  
+whose first letter is \verb+d+, and is thus placed in the \verb+von+ part.
+
+In that case, however, if you use an ``alphanumeric'' style such as
+\bst{alpha}, \bt will use the first character of the
+\verb+von+ part in the label\footnote{It could be argued \texttt{von} parts
+should not be used when computing the label, but classical style file do use
+it.}. But the first character here is
+\verb+{\uppercase{d}e La}+, and the label would be
+\verb+{\uppercase{d}e La}C+, and you'll get \texttt{[{\uppercase{d}e La}C]}.
+You'd probably prefer \texttt{[DLC]} or \texttt{[Cru]}. The second solution
+would then be 
+\begin{verbatimtab}
+  author = "{\uppercase{d}}e {\uppercase{l}}a Cruz, Maria"
+\end{verbatimtab}
+The label would be \verb+{\uppercase{d}}{\uppercase{l}}C+, which is correct.  
+Another (easier) proposal would be
+\begin{verbatimtab}
+  author = "{D}e {L}a Cruz, Maria"
+\end{verbatimtab}
+This also solves the problem, because \bt only considers characters at level~0 when
+determining which part a word belongs to, but takes all letters into account
+when extracting the first letter.
+
+
+\mysubsection{How to get lowercase letters in the \texttt{Last}?}
+
+This is precisely the reverse problem, but the solution will be different. 
+Assume you cite a paper by the famous Spanish scientist
+\emph{Juan de la Cierva y Codorn\'\i u}. The basic ideas are
+\begin{verbatimtab}
+  author = "de la Cierva {\lowercase{Y}} Codorn{\'\i}u, Juan"
+\end{verbatimtab}
+or 
+\begin{verbatimtab}
+  author = "de la Cierva {y} Codorn{\'\i}u, Juan"
+\end{verbatimtab}
+However, these solutions yields labels such as \verb+CYC+ or \verb+CyC+, where
+we would prefer \verb+CC+.
+
+Several solutions are possible:
+\begin{verbatimtab}
+  author = "de la Cierva{ }y Cordon{\'\i}u, Juan"
+\end{verbatimtab}
+or
+\begin{verbatimtab}
+  author = "de la {Cierva y} Cordon{\'\i}u, Juan"
+\end{verbatimtab}
+Both solutions work: In the first case, \bt won't see the space, and
+considers that the \verb+y+ belongs to the previous word. In the second case, 
+\verb+Cierva y+ is at brace-level~$1$, and thus goes into the \verb+Last+ part,
+which has priority over the \verb+von+ part.
+
+\mysubsection{How to remove space between \texttt{von} and \texttt{Last}?}
+
+Here the example will be \emph{Jean d'Ormesson}. 
+The best way to encode this appears to be
+\begin{verbatimtab}
+  author = "d'\relax Ormesson, Jean"
+\end{verbatimtab}
+Indeed, the \nicmd{relax} commands will gobble spaces until the next
+non-space character. 
+
+\mysubsection{How to get \emph{et al.} in the author list?}
+
+Some special bibliography styles will automatically replace long lists of 
+authors with the name of the first author, followed by \emph{et al.} 
+However, standard \bt styles won't. You can however get the same result by 
+using the special name \verb+others+. For instance, if you enter
+\begin{verbatimtab}
+  author = "Dupont, Jean and others"
+\end{verbatimtab}
+you get "Jean Dupont \emph{et al.}" in the resulting bibliography.
+
+\mysubsection{The \protect\nichp{key} field}
+
+It may happen that no author is given for a document. In that case, 
+bibliography styles such as \bst{alpha}, when computing the ``label'' of such
+an entry, will use the \chp{key} field (the first three letters for
+\bst{alpha}, but the entire field for \bst{apalike}, for instance). 
+When no \texttt{key} is given, the first three letters of the internal
+citation key are used.
+
+\bigskip
+
+Is it ok with everyone? Yes ?!
+Right, we can go to the next, most exciting part of
+this doc: How to create or modify a bibliography style...
+
+

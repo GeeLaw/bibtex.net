@@ -1,0 +1,9 @@
+v1.00 2004/07/21	First release on CTAN.
+v1.01 2004/08/15	Corrected two related errors in sec3
+			(about left brace and @preamble)
+v1.1  2005/03/06	Some corrections.
+			Added hyperref.
+v1.2  2005/06/10	Added LPPL licence notes
+			Minor corrections and additions
+v1.3  2005/10/16	Corrected many typos 
+v1.4  2009/10/11	Corrected some more typos

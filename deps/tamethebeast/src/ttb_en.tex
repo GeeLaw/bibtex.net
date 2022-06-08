@@ -1,0 +1,171 @@
+%% ttb_en.tex
+%% Copyright 2003-2005  Nicolas Markey
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+%
+% This work has the LPPL maintenance status "maintained".
+% The Current Maintainer of this work is Nicolas Markey
+%
+% This work consists of the files
+%       ttb_en.tex
+%       ttb_en.sec1.tex  ttb_en.sec2.tex  ttb_en.sec3.tex
+%       ttb_en.sec4.tex  ttb_en.sec5.tex  ttb_style.sty
+%       local.bib        idxstyle.ist     Makefile
+% and the derived ttb_en.dvi, ttb_en.ps and ttb_en.pdf
+
+\def\ttbversion{1.4}
+\def\ttbdate{11/10/2009}
+
+\documentclass[twoside,openright]{article}
+\usepackage[T1]{fontenc}
+\usepackage{ifpdf}
+\ifpdf
+  \usepackage{lmodern}
+\fi
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+\usepackage{moreverb}
+\usepackage{url}
+\usepackage[margin=3cm,bottom=2.5cm,top=3cm]{geometry}
+\usepackage{multind}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{marvosym}
+\usepackage{color}
+\usepackage{ttb_style}
+\usepackage{xcolor}
+\usepackage[colorlinks,breaklinks]{hyperref}
+\makeatletter
+\def\@citecolor{green!50!black}
+\def\@linkcolor{red!80!black}
+\makeatother
+\usepackage{advdate}
+\makeatletter
+\let\save@ssect\@ssect
+\usepackage{minitoc}
+\expandafter\ifx\csname mtcskip\endcsname\relax
+  \def\mtcskip{}
+  \message{WARNING -- Please update your minitoc package.}
+\fi
+
+\makeindex{latex}
+\makeindex{bibtex}
+
+
+
+\begin{document}
+\SetDate[\ttbdate]
+\setcounter{parttocdepth}{3}
+\doparttoc
+
+%% Title page
+\begin{center}
+{\Huge\bfseries Tame the BeaST} 
+\par\bigskip
+{\large The B to X of \bt} 
+\par\bigskip
+Nicolas \textsc{Markey} 
+\par
+\href{mailto:markey@lsv.ens-cachan.fr}{markey@lsv.ens-cachan.fr}
+\end{center}
+\widowpenalty10000
+\vfil\vfil
+\begin{center}
+\fbox{Version \ttbversion{} -- \today}
+\vfil
+\begin{minipage}{.8\textwidth}
+This \pageref{lastpage}-page tutorial presents and explains, as clearly and
+exhaustively as possible, what \bt can do. 
+Indeed, \bt manuals, essentially two documents by its 
+author~\cite{btxdoc,btxhak} and chapters in some \LaTeX
+books~\cite[...]{latex:dps,latex:lc,latex:lc2}, are often 
+short and incomplete.
+
+The capital letters ``BST'' in the title represent the standard extension of
+\bt style files. ``B~to~X'' means that I tried to be as complete as
+possible. Don't hesitate to e-mail me your \TeX{}nical as well as
+(mis)spelling remarks.
+\end{minipage}
+\end{center}
+\vfil\vfil
+\begin{center}
+\begin{minipage}{.8\textwidth}
+\tableofcontents
+\end{minipage}
+\end{center}
+\vfil
+
+\clearpage
+
+\vbox{}
+\vfill
+
+\noindent
+\begin{center}
+\begin{minipage}{.7\linewidth}
+\centerline{\Large\textsf{Acknowledgements:}}
+
+\bigskip
+Several readers of this document have helped me improve it. I~would
+like to thank them: 
+Bj\"orn~Bringert,
+Maarten~Grachten,
+Roger~Jeurissen,
+John~Kewley,
+W.~Trevor~King,
+Carsten~Lemmen,
+Tristan~Miller,
+Jochen~Vo\ss.
+\end{minipage}
+\end{center}
+\vfill
+\vfill
+
+\include{ttb_en.sec1}
+\include{ttb_en.sec2}
+\include{ttb_en.sec3}
+\include{ttb_en.sec4}
+\include{ttb_en.sec5}
+
+
+%\nocite{merlin}
+\def\addcontentsline#1#2#3{}
+\cleardoublepage
+\bibliographystyle{alpha}
+\bibliography{local}
+\printindex{latex}{\LaTeX} 
+\clearpage
+\let\oldendindex\endtheindex
+\def\copyright{\vfill
+\null\hfill\begin{minipage}{.5\textwidth}
+\setlength\parindent{0pt}
+\obeyspaces
+Copyright \textcopyright{} 2003-\the\year{} Nicolas \textsc{Markey}
+
+This work may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either version 1.3
+of this license or (at your option) any later version.
+The latest version of this license is in\par
+\hfil\url{http://www.latex-project.org/lppl.txt}\par
+and version 1.3 or later is part of all distributions of LaTeX
+version 2003/12/01 or later.
+
+This work has the LPPL status "maintained".\par
+The current maintainer of this work is Nicolas \textsc{Markey}.
+	   \end{minipage}}
+
+
+\def\endtheindex{\label{lastpage}\copyright\oldendindex}
+\printindex{bibtex}{\bt}
+%\leavevmode\label{lastpage}
+
+
+
+\end{document}
+

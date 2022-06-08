@@ -1,0 +1,672 @@
+%% ttb_en.sec2.tex
+%% Copyright 2003-2005  Nicolas Markey
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt 
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+% 
+% This work has the LPPL maintenance status "maintained".
+% The Current Maintainer of this work is Nicolas Markey  
+% 
+% This work consists of the files
+%       ttb_en.tex
+%       ttb_en.sec1.tex  ttb_en.sec2.tex  ttb_en.sec3.tex
+%       ttb_en.sec4.tex  ttb_en.sec5.tex  ttb_style.sty
+%       local.bib        idxstyle.ist     Makefile
+% and the derived ttb_en.dvi, ttb_en.ps and ttb_en.pdf
+
+
+\mypart{How to use \bt?}
+\parttoc
+\mtcskip
+
+\mysection{How does it work?} \label{bibtex}
+
+As mentioned earlier, \bt can be seen as a general database manager:
+It extracts items from a database, sorts them, and exports the 
+result, generally as a \LaTeX{}able \env{thebibliography} 
+environment. 
+
+This description is a somewhat optimistic view, however, and reality
+is a little more complex: In order to tell \bt which entries have to
+be extracted, you have to first run \LaTeX on your document. And once
+\bt has finished its job, you have to run \LaTeX anew in order to take
+the resulting bibliography into account. Here are some more details:
+
+\begin{itemize}
+\item At the very first stage, you run \LaTeX on your document. Since this is
+  the first time you compile it, no bibliographic
+  information is included, and references are left
+  empty. Nevertheless, each time \LaTeX encounters a bibliographic reference 
+  in the document, it writes the key of the reference in the \ext{aux}
+  file\footnote{This is the role of the \cmd{citation} command issued
+  by the \cmd{cite} command (\cf page~\pageref{citation}).}. During
+  the compilation, \LaTeX also indicates in the \ext{aux} file which
+  databases have to be used, and which bibliography style has
+  to be applied for typesetting the bibliography;
+
+\item \bt can now be executed: It takes the \ext{aux} file as
+  argument, which contains all the relevant informations
+  for extracting the bibliography: The style (\ext{bst} file) to be
+  applied to the 
+  bibliography, the database (\ext{bib} file) to be used, and the
+  entries to be  extracted from the database.  With this stuff, \bt
+  will then extract the \cmd{cite}{}d references 
+  and write the bibliography in a \ext{bbl}
+  file. Logs of this operation are written in a \ext{blg} file;
+
+\item The next step is to rerun \LaTeX. The \ext{bbl} file will then
+  be included, and its \cmd{bibitem} commands executed. This writes
+  the necessary bibliographic cross references in the \ext{aux}
+  file. However, this does not define the cross references for the
+  current compilation, and bibliographic references still won't be
+  defined;
+
+\item We then run \LaTeX a third time: When reading the \ext{aux} file
+  at the beginning of the compilation, \LaTeX will store the
+  references of the bibliographic citations, and those references
+  will be correct in the document.
+\end{itemize}
+
+
+It follows that, in the best case, we need to compile the file three
+times, and to run \bt once. There are some cases where this is still
+not sufficient: If, for instance, a bibliographic entry cites another
+one, another run of both \bt and \LaTeX is needed. And so on. 
+Finally, here is the global pattern to be applied:
+\begin{center}
+\LaTeX (\bt {} \LaTeX )$^+$ \LaTeX.
+\end{center}
+
+
+Everything else works as in part~\ref{part1}, since \bt generally creates the
+complete \env{thebibliography} environments with all the \cmd{bibitem}{}s of
+the references that are cited in your document.
+There are two new \LaTeX commands, however: Those
+defining the style file to consider and bibliographic database(s):
+\begin{itemize}
+\item \cmd{bibliographystyle} is the command to be used to declare the
+  bibliography style to be used by \bt. Here is how it is defined:
+\begin{listing}{1}
+\def\bibliographystyle#1{%
+  \ifx\@begindocumenthook\@undefined\else
+    \expandafter\AtBeginDocument
+  \fi
+    {\if@filesw
+       \immediate\write\@auxout{\string\bibstyle{#1}}%
+     \fi}}
+\end{listing}
+
+
+This simply writes a \cmd{bibstyle} command in the \ext{aux} file,
+whose argument is the name of the style. \cmd{bibstyle} itself is a
+command that has one argument, but does nothing. Indeed, the
+name of the bibliography style is only needed by \bt, and \LaTeX doesn't
+care about it.
+
+\item \cmd{bibliography} is the command for defining the bibliographic
+  database to be used. Contrary to the previous command, the argument
+  of \cmd{bibliography} might be a comma-separated list of
+  bibliographic databases. Note that ``comma-separated'' is strict
+  here: No space and no line break are allowed. Apart from this, the
+  behavior of this command is similar to the behavior of the previous
+  one: It writes its argument in the \ext{aux} file, as the 
+  argument of
+  a command named \cmd{bibdata} (which is then read by \bt, 
+  but does nothing in \LaTeX).  Last, this
+  \cmd{bibliography} command includes the \ext{bbl} file, 
+  which writes
+  the bibliography. Here is the precise definition:
+\begin{listing}{1}
+\def\bibliography#1{%
+  \if@filesw
+    \immediate\write\@auxout{\string\bibdata{#1}}%
+  \fi
+  \@input@{\jobname.bbl}}
+\end{listing}
+
+You've probably already understood that \cmd{jobname} returns the name
+of the file being compiled.
+\end{itemize}
+
+
+Last precision: The \ext{aux} file also contains the list of keys of
+the entries to be extracted. This is achieved by the \cmd{citation}
+commands echoed by \cmd{cite} in the \ext{aux} file. \cmd{citation}
+does the same thing as \cmd{bibstyle} and \cmd{bibdata}: Nothing.
+
+
+\mysection{Some bibliography styles...}
+
+There exist quite a bunch
+of  bibliography styles, since each publisher has his own
+needs 
+and preferences. I'll present some generic styles here, together with  their
+specificities. 
+
+\mysubsection{Classical bibliography styles}
+
+The following four styles were originally written by Oren
+\textsc{Patashnik}, whom I forgot to introduce but is in fact the
+author of \bt. The styles are named \bst{plain}, \bst{alpha},
+\bst{unsrt} and \bst{abbrv}. If you want to use the
+\bst{plain}~style, you'll write \verb+\bibliographystyle{plain}+ 
+(anywhere) in your document.
+
+
+Globally speaking, the bibliography style has to manage
+everything. ``Everything'' here can be decomposed into three points:
+Defining the available entry types, with their relevant 
+fields\footnote{I insist that entry types and field names depend 
+on the bibliography style, and are not fixed by \bt.}; 
+Extracting and sorting 
+bibliographic items; And typesetting the bibliography.
+
+
+So the first role of the style file is to define entry types, such as
+\ent{book}, \ent{article} or \ent{inproceedings} in classical styles,
+and for each of them, the relevant fields  that will be
+either mandatory or optional or just ignored\footnote{The following
+  rule applies: A field that is neither mandatory nor optional, is
+  ignored. Thus you can add any comment or personal field in your
+  bibliography, even if they're not in the list below. Some other
+  fields might of course be used by other, non classical styles.}.
+The table below describes the role of the fields that are used in
+classical style files. Descriptions are short, but more details can be
+easily found in any \LaTeX book.\label{champ}
+
+\begin{center}
+%\centerline{%
+\begin{longtable}{|>{\vrule height8pt depth0pt width 0pt\noindent\bgroup\bfseries}p{.17\textwidth}<{\egroup}>{\noindent}p{.77\textwidth}<{\vrule height0pt depth7pt width 0pt}|}
+\hline\endfirsthead
+\hline\endhead
+\hline\endfoot
+\hline\endlastfoot
+address & Generally the city or complete address of the publisher.
+\\
+author & For author names. The input format is quite special, since
+\bt 
+has to be able to distinguish between the first and last
+names. Section~\ref{author} and~\ref{noms-start} are completely 
+dedicated to this topic.
+\\
+booktitle & For the title of a book one part of which is cited.
+\\
+chapter & The number of the chapter (or any part) of a book being
+cited. If not a chapter, the \texttt{type} field might be used for
+precising the type of sectioning.
+\\
+crossref & This one is quite peculiar. It's used to cross-reference
+within the bibliography. For instance, you might cite a 
+document, and a part of it. In that case, the second one 
+can reference
+the first one, or at least inherit some of its fields from the first
+one. This deserves some more comments, see section~\ref{crossref}.
+\label{cetaitla} \\
+edition & The edition number. Or in fact its ordinal, for instance
+\texttt{edition = "First"}. This  might raise
+problems when trying to export a bibliography into another language.
+\\
+editor & The name of the editor(s) of the entry. The format is the 
+same as for authors.
+\\
+howpublished & Only used in rare cases where the document being cited
+is not a classical type such as a \ent{book}, an \ent{article} or an
+\ent{inproceedings} publication.
+\\
+institution & For a technical report, the name of the institution that
+published it.
+\\
+journal & The name of the journal in which the cited article has 
+been published. 
+\\
+key & Used for defining the label, in case it cannot be computed by
+\bt. It does not force the label, but defines the label when
+\bt needs one but can't compute it.
+\\
+month & Well... The month during which the document has been
+published. This also raises the problem of the translation of the
+bibliography: It's better having a numerical value, or an abbreviation,
+instead of the 
+complete name of the month. Having the number would also allow \bt
+to sort the entries more precisely (even though, as far as I know, no
+bibliography style does this at the present time).
+\\
+note & For any additional data you would want to add. Since classical
+styles were written in 1985, they don't have a \texttt{url} field, and
+\texttt{note} is often used for this purpose, together with the
+\sty{url} package.
+\\
+number & A number... Not whichever, but the number of a report. For
+volume numbers, a special 
+\texttt{volume} field exists.
+\\
+organization & The organizing institution of a conference.
+\\
+pages & The relevant pages of the document. Useful for the reader when
+you cite a huge book; Note that such a precision could be added
+through the optional argument of \cmd{cite} (see
+page~\pageref{citeopt}), in which case it would appear in the document
+but not in the bibliography. 
+\\
+publisher & The institution that published the document.
+\\
+school & For theses, the name of the school the thesis has been
+prepared in.
+\\
+series & The name of a collection of series or books.
+\\
+title & The title of the document being cited. There are some rules to
+be observed when entering this field, see section~\ref{title}.
+\\
+type & The type. Which type? It depends... The type of publication, if
+needed. For thesis, for instance, in order to distinguish between
+a masters thesis and a PhD. Or the type of section being cited (see
+\texttt{chapter} above). 
+\\
+volume & The volume number in a series or collection of books.
+\\
+year & The publication year.
+\\
+%\hline
+%\caption{ }\label{chp}
+\end{longtable}
+\end{center}
+\label{fin-champ}
+
+
+The table below describes the different entry types. Once again, you
+can find more details in any \LaTeX documentation, so I won't go deep
+into the details. \label{type}
+{%
+\hfuzz=50pt%
+\begin{longtable}{|>{\vrule height11pt depth0pt width 0pt}p{.45\textwidth}
+%>{\noindent}p{.27\textwidth}
+>{\noindent\raggedright\relax}p{.22\textwidth}
+>{\noindent\raggedright\relax}p{.25\textwidth}<{\vrule height0pt depth9pt width 0pt}|}
+\hline\endfoot
+\hline\endlastfoot
+\hline
+\vrule depth7pt height 10pt width 0pt\normalfont Entry type & 
+Mandatory fields & Optional fields \tabularnewline\hline\endhead
+\hline\vrule depth7pt height 10pt width 0pt\normalfont Entry type  &
+Mandatory fields & Optional fields \tabularnewline\hline\endfirsthead
+
+\ent{article} :  An article published in a journal. &
+\chp{author}, \chp{title}, \chp{year}, \chp{journal}. &
+\chp{volume}, \chp{number}, \chp{pages}, \chp{month}, \chp{note}.\tabularnewline
+
+\ent{book} :  Well... A book. &
+\chp{author} or \chp{editor}, \chp{title}, \chp{publisher}, \chp{year}.&
+\chp{volume} or \chp{number}, \chp{series}, \chp{address}, \chp{edition}, \chp{month}, \chp{note}.\tabularnewline
+
+\ent{booklet} :  A \emph{small} book, that has no \chp{publisher} field.&
+\chp{title}.&
+\chp{author}, \chp{howpublished}, \chp{address}, \chp{address}, \chp{month}, \chp{year}, \chp{note}. \tabularnewline
+
+\ent{conference} : Article that appeared in the proceedings of a
+conference, a meeting... &
+\chp{author}, \chp{title}, \chp{booktitle}, \chp{year}.&
+\chp{editor}, \chp{volume} or \chp{number}, \chp{series}, \chp{pages},
+\chp{address}, \chp{month}, \chp{organization}, \chp{publisher}, \chp{note}.\tabularnewline
+
+\ent{inbook} :  Part (generally a chapter) of a book.&
+\chp{author} or \chp{editor}, \chp{title}, \chp{chapter} or \chp{pages}.&
+\chp{volume}, \chp{number}, \chp{series}, \chp{type}, \chp{address},
+\chp{edition}, \chp{month}, \chp{note}.\tabularnewline
+
+\ent{incollection} :  Part of a book having its own title. &
+\chp{author}, \chp{title}, \chp{booktitle}, \chp{publisher}, \chp{year}.&
+\chp{editor}, \chp{volume} or \chp{number}, \chp{series}, \chp{type},
+\chp{chapter}, \chp{pages}, \chp{address},
+\chp{edition}, \chp{month}, \chp{note}. \tabularnewline
+
+\ent{inproceedings} & \multicolumn{2}{c|}{Same as \ent{conference}.}
+\tabularnewline
+
+\ent{manual} :  A little manual, such as this one for instance. &
+\chp{title}.&
+\chp{author}, \chp{organization}, \chp{year}, \chp{address},
+\chp{edition}, \chp{month}, \chp{note}.\tabularnewline
+
+\ent{mastersthesis} :  Masters thesis, or something equivalent. &
+\chp{author}, \chp{title}, \chp{school}, \chp{year}.&
+\chp{type}, \chp{address}, \chp{month}, \chp{note}.\tabularnewline
+
+\ent{misc} :  When nothing else fits...&
+at least one of the optional fields. &
+\chp{author}, \chp{title}, \chp{howpublished}, \chp{year}, \chp{month}, \chp{note}.
+\tabularnewline
+
+\ent{phdthesis} :  PhD dissertation, or similar. &
+\chp{author}, \chp{title}, \chp{school}, \chp{year}.&
+\chp{type}, \chp{address}, \chp{month}, \chp{note}.\tabularnewline
+
+\ent{proceedings} :  Conference proceedings. &
+\chp{title}, \chp{year}.&
+\chp{editor}, \chp{volume} or \chp{number}, \chp{series},
+\chp{address}, \chp{month}, \chp{organization}, \chp{publisher}, \chp{note}.
+\tabularnewline
+
+\ent{techreport} :  Technical report, published by a laboratory, a
+research center, ... &
+\chp{author}, \chp{title}, \chp{institution}, \chp{year}.&
+\chp{type}, \chp{address}, \chp{number}, \chp{month}, \chp{note}.
+\tabularnewline
+
+\ent{unpublished} :  A document that has not been published. Very
+close to \ent{misc}, but \texttt{author} and \texttt{title} are needed
+here. &
+\chp{author}, \chp{title}, \chp{note}.&
+\chp{month}, \chp{year}.\tabularnewline
+%\hline
+\end{longtable}
+%\end{center}
+}
+
+
+Concerning the order and typesetting of all this stuff, it's similar
+in all the classical style files. Of course it depends on the entry
+type, but it generally begins with the author names and the
+title. Then the references of the journal or of the proceedings... 
+The best thing to do if you need more details is to give it a try, or
+have a look directly in the style files (but read Part~\ref{bst} before if
+you don't know how \bt style files are built).
+\medskip
+
+
+Up to now, there are no differences between the four standard 
+style files. 
+The only possible difference now can only be related to labelling and
+typesetting method to be used.
+
+
+\begin{itemize}
+\item the \bst{plain} style sorts the entries according to the name of
+  their authors (using the alphabetical order\footnote{The standard 
+alphabetical order with $26$~letters. Unfortunately, some language 
+have a different alphabet, for instance Swedish, in which 
+``\texttt{\aa}'' and~``\texttt{\"o}'' are considered as letters and placed 
+after~``\texttt{z}''.}, of course), and, for
+  papers by the same author(s), the year they have been published 
+(the
+  older first). The last criterion in case of equality is the title,
+  being a little bit modified. If two references can't be
+  distinguished with the above, the first one being cited in the
+  document appears first. Labels are numbers,
+  starting with $1$. 
+
+\item the \bst{alpha} style file is named \emph{alpha} because it uses
+  alphanumerical labels: Those labels are computed by \bt using the
+  first three letters of the author name 
+  (or initials of the author names
+  if multiple authors), followed by the last two digits of the
+  publication year. Sorting the entries is done according to the label
+  first, and then to the same criteria as for \bst{plain}, 
+  in case several
+  publication have the same label\footnote{You certainly don't want
+  that several publications have the same labels. Thus computing the
+  labels is done in two phases: First computing the label with the
+  standard method, and then adding a supplementary letter (``a'',
+  ``b'',~...) for multiple labels. And sorting is done just between
+  those two phases...};
+\item  you probably understood what \bst{unsrt} does: 
+It does not sort
+  its references, which appears in the order they are cited in the
+  document. Everything else is done as in \bst{plain};
+\item \bst{abbrv} abbreviates first names
+ of the authors and the names of predefined journal and month names.
+I forgot to mention that bibliography styles historically
+ predefine some shorthands for computer science journal names (Oren
+ \textsc{Patashnik} is a computer scientist...). Those shorthands are
+ abbreviated journal names in this style file. These are the only
+ difference between \bst{abbrv} and \bst{plain}.
+\end{itemize}
+
+
+That's all for classical styles. Those styles suffer from several
+problems, for instance not having a \texttt{url} field, or not being
+multilingual, or sorting in a weird way... Moreover, publishers 
+often impose  precise
+typographic rules for bibliographies. This entails that many other
+styles have been proposed. Let's have a look at some of them.
+
+
+
+
+\mysubsection{Some other bibliography styles}
+
+%There are numerous other bibliography style files. I really can't
+%describe all of them, just mentionning some of them together with
+%their main characteristics.
+
+\mysubsubsection{The \protect\nibst{apalike} style}
+
+\bst{apalike} was (also) written by Oren \textsc{Patashnik}. It uses a
+special construction for labels, generally called \emph{author-year}.
+I think the best way to understand is with some examples:
+
+\begin{myex}
+\makeatletter
+\def\@cite#1#2{(#1\if@tempswa , #2\fi)}
+\def\@biblabel#1{}
+\makeatother
+
+On page~$384$ of \cite{latex:lcici}, you'll find a complete example of
+what \bst{apalike} does.
+
+\begin{thebibliography}{}
+\bibitem[Goossens et~al., 1993]{latex:lcici}
+Goossens, M., Mittelbach, F., and Samarin, A. (1993).
+\newblock {\em the \LaTeX{} Companion}.
+\newblock Addison-Wesley.
+
+\bibitem[Lamport, 1997]{latex:dpsici}
+Lamport, L. (1997).
+\newblock {\em \LaTeX{}: A Document Preparation System}.
+\newblock Addison-Wesley.
+\end{thebibliography}
+\end{myex}
+
+Don't forget to include the \sty{apalike} package when using
+the \bst{apalike} style: Indeed, if you remember how \cmdat{biblabel}
+and \cmd{cite} are defined, you should have seen why... 
+Moreover, labels created
+by \bst{apalike} might be long, and you probably will accept that
+\LaTeX hyphenates them if necessary, which the default
+\cmd{cite} won't do (\cf section~\ref{cite}).
+
+%Last, I always like to quote the following comments
+%written in the \bst{apalike} file:
+%\begin{verbatim}
+%% Many journals require a style like `apalike', but I recommend that you
+%% not use it if you have a choice---use something like `plain' instead.
+%\end{verbatim}
+
+Also: There are some other \emph{author-year} style files, named 
+\bst{authordate1}, \bst{authordate2}, \bst{authordate3},
+\bst{authordate4}, and that slightly differ from \bst{apalike}.
+They must be used together with the 
+\sty{authordate1-4} package.
+
+Very last important thing: \sty{apalike} redefined \cmd{bibitem} 
+so that the optional argument becomes mandatory (but must still be
+within square brackets). But you probably don't care since, of course,
+the bibliography style file tells \bt to always output it.
+
+
+\mysubsubsection{The \protect\nisty{natbib} package}
+
+The \sty{natbib} package, written by Patrick~W. \textsc{Daly},
+goes a bit further: It mainly redefines \cmd{cite} so that you can
+get \emph{author-year} or numerical labels, in a very elegant way.
+
+Classical bibliography styles have been ported to \sty{natbib},
+except \bst{alpha} since it already was an \emph{author-year}
+style. The names of the ports are
+\bst{plainnat}, \bst{abbrvnat} et \bst{unsrtnat}. 
+Moreover, those styles have a \texttt{url} field for adding reference
+to articles on the web. Also note that \sty{natbib} can be used with 
+\bst{apalike} or \bst{authordate1} to \bst{authordate4}. 
+
+Last interesting remark: There is a very clean 
+documentation~\cite{natbib} for
+\sty{natbib}, it's really worth reading.
+
+\mysubsubsection{The \protect\nisty{jurabib} package}
+
+The package \sty{jurabib}, by Jens Berger, is another 
+package for adapting
+the output to the typographic rules used in legal studies. 
+It is associated to a bibliography style \bst{jurabib}, and
+rests on a very special format for the optional argument 
+of~\cmd{bibitem}. It also redefines \cmd{cite}, and defines 
+many flavors of that command.
+See~\cite{jurabib} for detailed comments on \sty{jurabib}.
+
+\mysubsubsection{\textsf{custom-bib}}
+
+Since there are many possible criteria for defining a bibliographic
+style, 
+Patrick~W. \textsc{Daly} decided to write a little piece of software
+for automatically generating customized bibliography styles. It asks
+you about $20$~questions and produces a pretty ready-to-use
+bibliography style file.
+
+As usual with Patrick~\textsc{Daly}, 
+the documentation~\cite{merlin} is excellent, and I
+won't go any further in the details. I just mention how to create your
+\ext{bst}-file:
+Simply type 
+\verb+latex makebst.tex+, and answer the questions. All along the
+execution, the style file is being created. It's really easy and
+intuitive. 
+
+
+
+\mysection{Questions and answers}
+
+This section ends the \LaTeX part of this manual with some
+frequently asked questions. We'll then tackle the \bt part, which was
+intended to be the central topic...
+
+
+
+\mysubsection{How to get several bibliographies?}
+
+I did not insist on that, but it is of course recommended that you
+only have one occurrence of each 
+\cmd{bibliography} and \cmd{bibliographystyle} commands.
+\LaTeX won't mind if it is not the case, but \bt won't appreciate,
+since it can't choose which style or bibliographic file to use.
+
+
+Thus the only possible thing is to write several \ext{aux} files, each
+of them containing a complete set of data for one bibliography.
+This is precisely what 
+\sty{multibib}, \sty{chapterbib} and \sty{bibunit} do. 
+\begin{itemize}
+\item \sty{multibib}, written by
+Thorsten \textsc{Hansen}, 
+allows for precising in which bibliography a document lies. 
+This is achieved by using different \cmd{cite} commands, one for each
+bibliography. 
+For this manual, I could have used \sty{multibib} to define special
+\nicmd{citelatex} and  \nicmd{citebibtex} commands defining two
+separate bibliographies\footnote{For those who know the \sty{multind}
+  package for getting multiple indexes, the idea is similar.}. 
+Of course, this requires that you run \bt against each of the
+\ext{aux} files created. For more details, refer to the
+documentation~\cite{multibib}, which (also) is really worth
+reading. The doc also mentions the main issue with such a method: The
+same label could be used in several bibliographies for different
+references. And you can't easily avoid this problem...
+
+\item The \sty{chapterbib} package, mainly written by 
+Donald \textsc{Arseneau},  provides a way to get 
+one bibliography for each
+chapter or part of a (long) document (short documents won't need
+several bibliographies). Indeed, a long document will be
+made of several files \cmd{include}{}d by a main file. 
+\sty{chapterbib} creates one \ext{aux} file for each of those included
+files, each of which being intended to contain the
+necessary \cmd{bibstyle}, \cmd{bibdata} and
+\cmd{citation} commands. 
+Documentation for this package may be found at the end of the package
+file itself.
+
+\item The \sty{bibunit} package, also written by 
+Thorsten \textsc{Hansen}, is pretty similar to \sty{chapterbib}:
+it allows to create one bibliography for each ``unit'', a unit
+being any part of the document beginning with 
+\verb+\begin{bibunit}+ and ending with
+\verb+\end{bibunit}+. 
+
+
+Inside such a unit, all occurrences of \cmd{cite} refer to the
+bibliography of the current unit. \cite{bibunit} gives many 
+details of how it works.
+\end{itemize}
+
+
+There are some other packages for creating several bibliographies: 
+\sty{camel}, \sty{bibtopic}... I can't detail everything since it is
+not the aim of this manual.
+
+
+\mysubsection{How to have references closer to where they are cited?}
+
+There are two solutions to this problem, depending on what you
+precisely want:  The first solution consists in putting references in
+footnotes. This might be practical for the reader, since he has the
+complete references without always going back and forth to the end of
+the book. There is a package just designed to this purpose:
+\sty{footbib}. It's quite well documented~\cite{footbib}.
+
+
+The second solution is to write the complete references in the
+text. Instead of citing~\cite{latex:lc}, you cite
+Michel Goossens, Franck Mittelbach et Alexander
+     Samarin, \emph{The \LaTeX Companion}, Addison Wesley, 1993. 
+This may enhance your document, but can sometimes become
+annoying for the reader. However, just have a look a the package \sty{bibentry}, and
+its documentation~\cite{bibentry}, if you want some more details.
+
+
+Note that both of these packages might conflict with some other ones,
+such as \sty{hyperref}. This is due to the fact that each of them
+wants to impose its own definition of the \env{thebibliography}
+environment or of the \cmd{bibitem} command. The last one being included
+will win, but the other ones will eventually complain. There is no 
+simple solution to avoid this, the only way, if any, is to merge all
+the definitions by hand.
+
+
+\mysubsection{How to add entries in the reference list without
+  citing them in the document?}
+
+This is achieved by the \cmd{nocite} command. It works exactly like
+\cmd{cite}, but writes nothing in the document. It just includes the
+\cmd{citation} command in the \ext{aux} file.
+
+
+A variant of this command is \verb+\nocite{*}+: it 
+amounts to \cmd{nocite}-ing the whole bibliography at one time. 
+Those references are included in the same order as they appear in the
+\ext{bib} file, except for those having been cited earlier.
+Note that \verb+\cite{*}+ is also correct, but I'm not sure it has 
+any interest...
+
+
+\bigskip
+
+
+Well... That's all for this part. 
+We now forget \LaTeX, and go closer to the core of the problem. The
+next section explains how to create a clean \ext{bib} file.
+
+

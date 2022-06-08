@@ -1,0 +1,570 @@
+%% ttb_en.sec1.tex
+%% Copyright 2003-2005  Nicolas Markey
+%
+% This work may be distributed and/or modified under the
+% conditions of the LaTeX Project Public License, either version 1.3
+% of this license or (at your option) any later version.
+% The latest version of this license is in
+%   http://www.latex-project.org/lppl.txt
+% and version 1.3 or later is part of all distributions of LaTeX
+% version 2003/12/01 or later.
+%
+% This work has the LPPL maintenance status "maintained".
+% The Current Maintainer of this work is Nicolas Markey
+%
+% This work consists of the files
+%       ttb_en.tex
+%       ttb_en.sec1.tex  ttb_en.sec2.tex  ttb_en.sec3.tex
+%       ttb_en.sec4.tex  ttb_en.sec5.tex  ttb_style.sty
+%       local.bib        idxstyle.ist     Makefile
+% and the derived ttb_en.dvi, ttb_en.ps and ttb_en.pdf
+
+\mypart{Basic bibliography with \LaTeX}\label{part1}
+\parttoc
+\mtcskip
+
+\bt is often seen as something magical, as well as \LaTeX
+bibliography-related commands in general. Many users simply copy and paste
+classical examples without trying to understand how it works. But in
+fact, a bibliography in \LaTeX is nothing but a \emph{list} of
+\emph{references} mentioned in a document. If we had to do it ``by
+hand'', 
+without knowing anything about the \env{thebibliography} environment,
+it could look like this:
+
+\medskip
+\begin{verbatim}
+This is the main matter of the document, mentioning 
+[\ref{doc1}] and [\ref{doc2}], for instance.
+\section*{References}
+\begin{enumerate}
+  \renewcommand\labelenumi{[\theenumi]}  %% numbers are surrounded with brackets
+  \item \label{doc1} Michel Goossens, Franck Mittelbach and Alexander
+        Samarin, \emph{The \LaTeX{} Companion}, Addison Wesley, 1993.
+  \item \label{doc2} Leslie Lamport, \emph{\LaTeX: A Document Preparation
+        System}, Addison Wesley, 1997.
+\end{enumerate}
+\end{verbatim}
+\noindent which, when compiled, gives
+\begin{myex}
+This is the main matter of the document, mentioning 
+[\ref{doc1}] and [\ref{doc2}], for instance.
+\section*{References}
+\begin{enumerate}
+  \renewcommand\labelenumi{[\theenumi]}  %% numbers are between brackets
+  \item \label{doc1} Michel Goossens, Franck Mittelbach and Alexander
+        Samarin, \emph{The \LaTeX Companion}, Addison Wesley, 1993.
+  \item \label{doc2} Leslie Lamport, \emph{\LaTeX: A Document Preparation
+        System}, Addison Wesley, 1997.
+\end{enumerate}
+\end{myex}
+
+This is mostly what the \env{thebibliography} environment does (it
+starts a \env{list} environment, similar to~\env{enumerate}), 
+\cmd{bibitem} corresponding
+to the \cmd{item} commands. One major difference is that \cmd{bibitem} 
+allows for more general cross-references than \cmd{item} and
+\cmd{label} (for example, one can cite~\cite{latex:lc}).
+
+
+This is what this part deals with: ``Writing a bibliography
+\emph{without} \bt''.  This is not the main goal of this manual, but 
+it is a cornerstone for understanding the sequel.
+
+
+\mysection{The \nienv{thebibliography} environment}
+
+
+%%
+%% Fin trad.
+%%
+
+The \env{thebibliography} environment is not defined in \LaTeX
+itself (neither is it in \TeX\footnote{\bt may be used with plain \TeX,
+you'll simply have to input the \sty[tex]{btxmac} package}, of course). It has
+to be defined by the  
+class file used in the document (\emph{e.g.} \cls{article} or
+\cls{book}). As mentioned earlier, it is a \env{list}-like
+environment inside a new \cmd{section} (or \cmd{chapter}, depending on
+the document class\footnote{This is the reason why \env{thebibliography}
+has to be defined in the class files. The
+other bibliographic commands are defined in the standard \LaTeX format.}). 
+This list has to be set up carefully, however, in order to avoid indentation
+problems. For instance, if we put ``alphanumerical'' labels in the previous
+example, we would get:
+\begin{myex}
+\section*{References}
+\begin{enumerate}
+\renewcommand\labelenumi{[\theenumi]}
+\item[{[GMS93]}] Michel Goossens, Franck Mittelbach, and Alexander
+Samarin, \emph{The \LaTeX Companion}, Addison Wesley, 1993.
+\item[{[Lam97]}] Leslie Lamport, \emph{\LaTeX: A Document Preparation
+System}, Addison Wesley, 1997.
+\end{enumerate}
+\end{myex}
+
+In order to avoid this problem, \env{thebibliography} has a mandatory
+argument, which should be the largest label occurring in the list. This will
+allow to set up margins properly.
+
+\medskip
+Let's now have a look at the precise definition of the
+\env{thebibliography} environment (as defined in the \cls{article}
+class, for instance):
+\begin{listing}{1}
+\newenvironment{thebibliography}[1]
+     {\section*{\refname
+        \@mkboth{\MakeUppercase\refname}{\MakeUppercase\refname}}%
+\end{listing}
+As mentioned earlier, \env{thebibliography} starts a new
+section\footnote{It is in fact a \cmd{section*}, so that it won't
+  appear in the table of contents. In order to cleanly insert the
+  bibliography in your table of contents, use the \sty{tocbibind}
+  package. Other methods you can think of will probably lead to wrong
+  page numbers.}. The environment also sets the page headers\footnote{The
+  standard  
+  \sty{apalike} package hard-codes the headers to ``REFERENCES'' or
+  ``BIBLIOGRAPHY'', depending on the class file. 
+  But another package (with the same name, unfortunately) correctly sets
+  the headers to \cmd{refname} or \cmd{bibname}. Simply check in the sources if you have
+  problems for redefining the headers with that package.}.
+
+\begin{listingcont}
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{#1}}%
+\end{listingcont}
+This is not surprising either: We start a new \env{list}
+environment\footnote{The \cmd{list} command is equivalent to a
+  \texttt{\bs begin\{list\}}, and has to be followed with a
+  \cmd{endlist}.}. It takes two mandatory arguments: 
+\begin{itemize}
+\item the first one (\texttt{\bs\at biblabel\{...\}}) defines the format of
+the default command for 
+  generating labels. Here it is defined with the \verb+enumiv+
+  counter, using \cmdat{biblabel}{}\footnote{\cmdat{biblabel} is
+  defined in \LaTeX. It outputs its argument surrounded with
+  brackets. The precise definition is:
+\texttt{\bs def\bs\at biblabel\#1\{[\#1]\}}.}. 
+ Thus we have [1], [2], ... Since \cmd{bibitem} is a sort of
+  \cmd{item}, it may have an optional argument for modifying this
+  default label. 
+\item The second argument(lines~5 above to~11 below) is a set of commands that
+  are run at  the 
+  beginning of the environment. They set the values
+  of different lengths and parameters of the \env{list} environment.
+  This is where we need the longest label (which the mandatory
+  argument of the \env{thebibliography} environment should be set to),
+  in order to correctly  indent the whole list.
+  People often write \verb+\begin{thebibliography}{99}+, but this is
+  correct only if there are between $10$ and $99$ cited references
+  (assuming all digits have the same length, which is the case with
+  the   \textsf{cmr} fonts). 
+\end{itemize}
+
+
+The rest of the definition of \env{thebibliography} contains some 
+borderline definitions for the list environment and the use of the
+\verb+enumiv+ counter:
+\begin{listingcont}
+            \leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+\end{listingcont}
+\cmdat{openbib\at code}, which is empty by default, allows 
+to modify some parameters if necessary. Option \texttt{openbib} of
+classical style files uses this command for resetting some parameters.
+Line~9 to~11 set the list counter.
+
+Last, within the reference list, spacing rules as well as some special
+penalties are used: 
+\begin{listingcont}
+      \sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+\end{listingcont}
+
+
+That's it for the initialization of this environment. Ending the
+\env{thebibliography} is much easier:
+we just echo a warning if no reference has been included, and we close
+the \env{list} environment:
+\begin{listingcont}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}%
+      \endlist}
+\end{listingcont}
+
+
+
+\mysection{The \protect\nicmd{bibitem} command}\label{bibitem}
+
+Inside the \env{list} environment described above, we have to insert
+\cmd{item}{}s, as is usual. It will be a special \cmd{item}, though, in
+order to have a correct rendering of each bibliographical item. The
+adequate command is named \cmd{bibitem}, and has two roles: Writing
+the new entry in the list, and defining the cross-reference to be used
+when citing this entry, which defaults to 
+\verb+\@biblabel{\@arabic\c@enumiv}+. The result is [1] for instance,
+but of course can be modified into [GMS94], say, 
+with an optional argument,
+exactly in the same way as for an \cmd{item}.
+Here is the precise definition of \cmd{bibitem}:
+\begin{listing}{1}
+\def\bibitem{\@ifnextchar[\@lbibitem\@bibitem}
+\end{listing}
+\cmd{bibitem} calls \cmdat{lbibitem} if
+there is an optional argument, and \cmdat{bibitem} otherwise.
+Those auxiliary commands are defined as follows:
+%
+\begin{listing}{1}
+\def\@lbibitem[#1]#2{\item[\@biblabel{#1}\hfill]\if@filesw
+      {\let\protect\noexpand
+       \immediate
+       \write\@auxout{\string\bibcite{#2}{#1}}}\fi\ignorespaces}
+\end{listing}
+%
+Let's take an example in order to see how it works: Assume we wrote 
+\verb+\bibitem[GMS94]{companion}+.
+The command first creates an item having the same optional argument,
+which will be surrounded with brackets by \cmdat{biblabel} and flushed
+to the left by \cmd{hfill}.\label{biblabel}
+It then write a \cmd{bibcite} command, with two arguments, into the
+\ext{aux} file\footnote{More precisely, the file pointed to by
+the \cmdat{auxout} command, but this generally is the \ext{aux}
+file.}.  
+\cmd{bibcite} is simply defined as follows:
+\label{bibcite}
+\begin{listing}{1}
+\def\bibcite{\@newl@bel b}
+\end{listing}
+
+The \cmdat{newl\at bel} command requires three arguments, \texttt{\#1},
+ \texttt{\#2} and \texttt{\#3}, and defines a command named
+ \texttt{\#1\at\#2} (with of course \texttt{\#1} and \texttt{\#2} being
+ replaced by their values) whose value is the third argument \texttt{\#3}.
+
+This behavior is the same as when defining a cross reference (with
+\cmd{label}) in the document: when the \ext{aux} file is read by
+\LaTeX (namely at the \verb+\begin{document}+ and
+\verb+\end{document}+), those \cmdat{newl\at bel} commands are 
+executed, and a \verb+\b@companion+ command is defined, containing,
+in our case, \texttt{GMS93}. 
+
+When there is no optional argument, it is quite similar:
+%
+\begin{listing}{1}
+\def\@bibitem#1{\item\if@filesw \immediate\write\@auxout
+       {\string\bibcite{#1}{\the\value{\@listctr}}}\fi\ignorespaces}
+\end{listing}
+%
+The new \cmd{item} is created, and the \cmd{bibcite} command is 
+output in the \ext{aux} file. The only new thing to know here is that
+\cmdat{listctr} is the list counter, and points to \verb+enumiv+ as requested
+by the \cmd{usecounter} command in the definition of \env{thebibliography}.
+Everything after the \cmd{bibitem} (and its argument(s)) is
+output  in the document, within the recently created item of the
+list, until the next \cmd{bibitem} or the end of the
+\env{thebibliography} environment\footnote{Some packages redefine
+  \cmd{bibitem} and could not meet this last rule. See
+  section~\ref{redefbibitem} on this topic.}.
+
+\medskip
+To conclude, here is a small example of a bibliography, having two
+entries, as it could be defined in a document:
+
+\begin{verbatim}
+\begin{thebibliography}{GMS93}   %% GMS93 is the longest label.
+\bibitem[GMS93]{companion} Michel Goossens, Franck Mittelbach and Alexander
+     Samarin, \emph{The \LaTeX{} Companion}, Addison Wesley, 1993.
+\bibitem[Lam97]{lamport} Leslie Lamport, \emph{\LaTeX: A Document Preparation
+     System}, Addison Wesley, 1997.
+\end{thebibliography}
+\end{verbatim}
+And here is the result:
+
+\begin{myex}
+\begin{thebibliography}{GMS93}
+\bibitem[GMS93]{companion1} Michel Goossens, Franck Mittelbach and Alexander
+     Samarin, \emph{The \LaTeX Companion}, Addison Wesley, 1993.
+\bibitem[Lam97]{lamport1} Leslie Lamport, \emph{\LaTeX: A Document Preparation
+     System}, Addison Wesley, 1997.
+\end{thebibliography}
+\end{myex}
+
+
+\mysection{The \protect\nicmd{cite} command}\label{cite}
+
+When considering a bibliography as a list of cross-references,
+\cmd{cite} is the equivalent for \cmd{ref}. It has one mandatory
+argument, which is the internal label to be cited. It also has an
+optional argument, that can be used to add some comments to the
+reference. For instance, a good reference concerning \bt is
+\cite[Chap.~13]{latex:lc}, which is obtained by entering 
+\verb+\cite[Chap.~13]{companion}+.\label{citeopt}
+
+
+Here is how it is defined\footnote{Details about
+  \cmd{DeclareRobustCommand} are given at page~\pageref{DRC}. If you
+  don't know what it is, you can see it as a simple
+  \cmd{newcommand}.}: 
+%
+\begin{listing}{1}
+\DeclareRobustCommand\cite{%
+  \@ifnextchar [{\@tempswatrue\@citex}{\@tempswafalse\@citex[]}}
+\end{listing}
+% 
+If there is an optional argument, the boolean variable \cmdat{tempswa}
+is set to true (we need to remember that an optional argument was provided), 
+and  \cmdat{citex} is called. Otherwise, \cmdat{tempswa} is false, and
+\cmdat{citex} is called with an empty optional argument.
+
+
+Before explaining \cmdat{citex}, we first have a quick look at
+\cmdat{cite}, which will be used by \cmdat{citex}. This will help 
+understand how \cmdat{tempswa} is used: 
+%
+\begin{listing}{1}
+\def\@cite#1#2{[{#1\if@tempswa , #2\fi}]}
+\end{listing}
+This is the command used for outputting the reference in the
+document. The second argument is used only if \cmdat{tempswa} has been
+set to true. Together with the first argument, they are put into
+brackets, and output in the document.
+
+Now \cmdat{citex}~will be the ``bridge'' between \cmd{cite} and \cmdat{cite}:
+\label{citex}
+%
+\begin{listing}{1}
+\def\@citex[#1]#2{%
+  \let\@citea\@empty
+  \@cite{\@for\@citeb:=#2\do
+\end{listing}
+
+This calls \cmdat{cite}. Its first argument will be computed by the
+\cmdat{for} command, in case several references are cited at one
+time.\index{latex}{citea@\texttt{\protect\bs\protect\at citea}}
+%
+\begin{listingcont}
+    {\@citea\def\@citea{,\penalty\@m\ }%
+\end{listingcont}
+%
+Starting from the second run through the \cmdat{for}-loop, we add a
+comma, and a penalty for a line break not to occur between references.
+The default is to never have a line break inside a set of references.
+%
+\begin{listingcont}
+     \edef\@citeb{\expandafter\@firstofone\@citeb\@empty}%
+\end{listingcont}
+%
+This redefines \cmdat{citeb}, the variable used in the loop. The
+\cmdat{for} command successively sets \cmdat{citeb} to all the values
+that have been cited, and \cmdat{citeb} is redefined here in order to
+remove extra spaces. This is somewhat tricky, but it works.
+\label{citation}
+
+\begin{listingcont}
+     \if@filesw\immediate\write\@auxout{\string\citation{\@citeb}}\fi
+\end{listingcont}
+%
+This writes a \cmd{citation} command in the \ext{aux} file, indicating
+that \cmdat{citeb} has been cited in the document. This is not useful
+here, but will be crucial for \bt to generate the bibliography (see
+section~\ref{bibtex}).
+
+\begin{listingcont}
+     \@ifundefined{b@\@citeb}{\mbox{\reset@font\bfseries ?}%
+       \G@refundefinedtrue
+       \@latex@warning
+         {Citation `\@citeb' on page \thepage \space undefined}}%
+\end{listingcont}
+%
+This handles cases where the requested reference does not exist yet. In
+that case, the reference is replaced by a boldface question mark. A
+warning is also echoed in the \ext{log} file.
+
+\begin{listingcont}
+       {\@cite@ofmt{\csname b@\@citeb\endcsname}}}}{#1}}
+\end{listingcont}
+If the reference exists, it is written here, using the 
+\nicmd{b\at...} command created when reading the \ext{aux} file (\cf
+page~\pageref{bibcite}). 
+\cmdat{cite\protect\at ofmt} is equivalent to~\cmd{hbox}\footnote{The
+command~\cmdat{citex} is defined with \cmd{hbox} in old (before 2003) versions
+of \LaTeX.}.
+The loop is executed for all the requested
+references, and the whole result is then passed to \cmdat{cite},
+together with the optional second argument, which is \verb+#1+ here. 
+
+\medskip
+This may look intricate, but it is really easy to use: You simply 
+enter \verb+\cite{companion, lamport}+ in order to get \cite{latex:lc,
+  latex:dps}, with the bibliographic items shown at the end of the previous
+  section. 
+
+
+
+\mysection{Some more little tricks}\label{truc1}
+
+\mysubsection{What is \protect\nicmd{DeclareRobustCommand}?}
+\label{DRC}
+
+A command having an optional argument, such as \cmd{cite}, is said to
+be \emph{fragile}: Generally speaking, they cannot be directly used
+in the argument of other commands (for instance, \cmd{cite} in the
+argument of a \cmd{section}). These problems can be overcome by preceding
+the fragile command by a \cmd{protect}, but this is annoying. The
+other solution is to declare the command as robust, by defining it
+with \cmd{DeclareRobustCommand} instead of \cmd{newcommand}.
+
+
+\mysubsection{Changing the name of the bibliography}
+
+This is obvious from the definition of the \env{thebibliography}
+environment: We simply have to redefine \cmd{refname}, which defaults
+to \emph{\refname}. However, this
+only works with the \cls{report} class. The \cls{book} and
+\cls{article} classes use \cmd{bibname} instead, which defaults to
+\emph{\bibname}. 
+
+For instance, when using \cls{report}, you'll write:
+\begin{verbatim}
+   \renewcommand{\refname}{Some references}
+\end{verbatim}
+while with \cls{book} or \cls{article}, it should be:
+\begin{verbatim}
+   \renewcommand{\bibname}{Some references}
+\end{verbatim}
+As mentioned earlier, \sty{apalike} does not use \cmd{refname} and hard-codes
+the reference name in the page headers.
+
+\mysubsection{Adding text before the first reference}
+
+Putting text just after the beginning of the \env{thebibliography}
+environment raises an error, since the \env{list} environment demands
+an \cmd{item} command. Thus we will put a real \cmd{item}, then add
+some negative horizontal space back to the left margin, and write our
+text within a \env{minipage} environment (in order to avoid
+indentation due to the list):
+
+\begin{verbatim}
+\begin{thebibliography}{GMS93}
+\item[]
+\hskip-\leftmargin
+\begin{minipage}{\textwidth}
+Here are some useful references about \LaTeX. They are
+available in every worthy bookshop. Much other good documentation
+may be found on the web (the FAQ of \textsf{comp.text.tex} for
+instance). 
+\end{minipage}
+\bigskip
+\bibitem[GMS93]{companion} Michel Goossens, Franck Mittelbach and
+     Alexander 
+     Samarin, \emph{The \LaTeX{} Companion}, Addison Wesley, 1993.
+\bibitem[Lam97]{lamport} Leslie Lamport, \emph{\LaTeX: A Document Preparation
+     System}, Addison Wesley, 1997.
+\end{thebibliography}
+\end{verbatim}
+This code gives:
+
+\begin{myex}
+\begin{thebibliography}{AAA00}
+\item[]
+\hskip-\leftmargin
+\begin{minipage}{\textwidth}
+Here are some useful references about \LaTeX. They are
+available in every worthy bookshop. Much other good documentation
+may be found on the web (the FAQ of \textsf{comp.text.tex} for
+instance). 
+\end{minipage}
+
+\bigskip
+\bibitem[GMS93]{companion2} Michel Goossens, Franck Mittelbach and
+     Alexander 
+     Samarin, \emph{The \LaTeX{} Companion}, Addison Wesley, 1993.
+\bibitem[Lam97]{lamport2} Leslie Lamport, \emph{\LaTeX: A Document Preparation
+     System}, Addison Wesley, 1997.
+\end{thebibliography}
+\end{myex}
+
+
+\mysubsection{Redefining \protect\nicmd{bibitem}}\label{redefbibitem}
+
+
+Some style files need redefining the \cmd{bibitem} command, or in 
+fact \cmdat{bibitem} and \cmdat{lbibitem}, so that an entry has to 
+end with a \cmd{par} command (or an empty line). \sty{backref} is an
+example of such a style file. Some other will turn the optional
+argument of \cmd{bibitem} into a mandatory one. \sty{apalike} does
+so. 
+
+I've nothing to add about that, but it is useful to know this to 
+avoid spending too much time on debugging...
+
+
+
+\mysubsection{Turning brackets into parentheses}
+
+
+As we saw earlier, \cmd{biblabel} is in charge of adding brackets
+around reference labels, in the reference list. It is easy 
+to redefine it in order to get parentheses: 
+
+\begin{verbatim}
+\makeatletter		% @ is now a letter
+\def\bibleftdelim{(}
+\def\bibrightdelim{)}
+\def\@biblabel#1{\bibleftdelim #1\bibrightdelim}
+\makeatother		% @ is a symbol
+\end{verbatim}
+
+This does the trick, and it is now easy to change parentheses into
+anything else, by redefining \nicmd{bibleftdelim} and
+\nicmd{bibrightdelim}. 
+
+However, this won't change the behavior of \cmdat{cite}, which will
+still write brackets around cited reference labels. Thus we also have
+to redefine \cmdat{cite}:
+\begin{verbatim}
+\makeatletter
+\def\@cite#1#2{\bibleftdelim{#1\if@tempswatrue , #2\fi}\bibrightdelim}
+\makeatother
+\end{verbatim}
+
+\mysubsection{... and more}
+
+Several packages have been written for modifying the look 
+of bibliographies and citations. For instance, 
+the package \sty{cite} allows to modify the result of the 
+\cmd{cite} command: turning brackets into parentheses, but also
+sorting and compressing a set of numeric references. 
+The package \sty{overcite} allows, moreover, to get references 
+displayed as superscript.
+
+The package \sty{splitbib} changes the output of the list of 
+references: it allows to split the bibliography into several 
+categories, and\slash or reordering that list. See the 
+documentation~\cite{splitbib} for more details.
+
+\mysubsection{Can the symbol \$ be used in an internal key?}
+
+Probably not, but I don't know exactly which character may or may not
+be used. Obviously, any letter and digit can be used, and my opinion
+is that it is quite enough. On the other hand, commas, curly brackets
+and backslashes are clearly forbidden. For the other ones, I don't
+know, just give it a try and you'll know. 
+
+
+\mysection*{Conclusion}
+
+Well... It could be over right now, since we know how to write a
+bibliography. However, typesetting all references by hand is long and
+annoying. Moreover, when writing several articles on related areas, 
+we often cite the same sets of references, but possibly with different styles. 
+It would be interesting to have a \emph{database} containing a large
+set of references, some of which would be picked up, formatted and typeset by
+\LaTeX. This does exist, and is described in the sequel.
