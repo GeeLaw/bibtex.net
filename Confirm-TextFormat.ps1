@@ -20,7 +20,7 @@ $txt = @(
   '.ps1xml'
 );
 $bin = @('.user');
-$dir = @('.git', '.vs', 'bin', 'obj');
+$dir = @('.git', '.vs', 'bin', 'obj', 'deps');
 
 $recursiveCheck = {
   If ($_.PSIsContainer)
