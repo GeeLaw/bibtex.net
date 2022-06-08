@@ -9,17 +9,20 @@ using Neat.Unicode;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a <c>@string{ key = "literal" # {literal} # 123 # reference }</c> entry.
+  /// Represents a <c>@string{ name = "literal" # {literal} # 123 # anothername }</c> entry.
   /// </summary>
   public sealed class Bib32StringEntry : Bib32Entry
   {
+    /// <summary>
+    /// The entry type of a <c>@string</c> entry.
+    /// </summary>
     public static readonly String32 EntryType = Utf.String16ToString32Strict("string");
 
     /// <summary>
-    /// The key of this referenceable string.
+    /// The name of this referenceable string.
     /// This string should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
     /// </summary>
-    public readonly String32 Key;
+    public readonly String32 Name;
 
     /// <summary>
     /// The value of this referenceable string.
@@ -29,24 +32,23 @@ namespace Neat.BibTeX.Data
     [MethodImpl(Helper.JustOptimize)]
     public override string ToString()
     {
-      /* @string{ key = value } */
+      /* @string{ name = value } */
       return Value.ToString(new StringBuilder()
         .Append('@')
         .Append(Type.ToString())
         .Append("{ ")
-        .Append(Key.ToString())
+        .Append(Name.ToString())
         .Append(" = ")
       ).Append(" }").ToString();
     }
 
-    /// <summary>
-    /// <paramref name="type"/> must be <c>string</c> (in any casing).
-    /// </summary>
+    /// <param name="type">Must be <c>string</c> (in any casing).</param>
+    /// <param name="name">Must be a valid identifier.</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32StringEntry(String32 type, String32 key, Bib32String value)
+    public Bib32StringEntry(String32 type, String32 name, Bib32String value)
       : base(type)
     {
-      Key = key;
+      Name = name;
       Value = value;
 #if BIB_DATA_CHECKS
       CtorCheckImpl(null);
@@ -59,9 +61,9 @@ namespace Neat.BibTeX.Data
       {
         throw new ArgumentException("Bib32StringEntry: Type is not \"string\".", name is null ? "type" : name);
       }
-      if (!BibBstChars.IsIdentifier(Key))
+      if (!BibBstChars.IsIdentifier(Name))
       {
-        throw new ArgumentException("Bib32StringEntry: Key is not a valid identifier.", name is null ? "key" : name);
+        throw new ArgumentException("Bib32StringEntry: Name is not a valid identifier.", name is null ? "name" : name);
       }
       Value.CtorCheckImpl(name is null ? "value" : name);
 #endif
@@ -72,13 +74,13 @@ namespace Neat.BibTeX.Data
     [MethodImpl(Helper.OptimizeInline)]
     public sealed override void AcceptVisitor<TVisitor>(ref TVisitor visitor)
     {
-      visitor.VisiString32Entry(this);
+      visitor.VisitStringEntry(this);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
     public sealed override void AcceptVisitor(IBib32EntryVisitor visitor)
     {
-      visitor.VisiString32Entry(this);
+      visitor.VisitStringEntry(this);
     }
 
     [MethodImpl(Helper.OptimizeInline)]

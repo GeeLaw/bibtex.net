@@ -9,35 +9,39 @@ using Neat.Unicode;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a field in a <see cref="Bib32GeneralEntry"/> (e.g., <c>key1 = {literal} # "literal" # 123 # reference</c>).
+  /// Represents a field in a <see cref="Bib32GeneralEntry"/> (e.g., <c>name1 = {literal} # "literal" # 123 # name</c>).
   /// </summary>
   public readonly struct Bib32Field
   {
     /// <summary>
-    /// The field name.
+    /// The name of this field.
     /// This string should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
     /// </summary>
-    public readonly String32 Key;
+    public readonly String32 Name;
 
     /// <summary>
     /// The value of this field.
     /// </summary>
     public readonly Bib32String Value;
 
+    /// <summary>
+    /// The string representation obtained by this method is informational and not necessarily valid BibTeX.
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     public override string ToString()
     {
-      /* key = value */
+      /* name = value */
       return Value.ToString(new StringBuilder()
-        .Append(Key.ToString())
+        .Append(Name.ToString())
         .Append(" = ")
       ).ToString();
     }
 
+    /// <param name="name">Must be a valid identifier.</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32Field(String32 key, Bib32String value)
+    public Bib32Field(String32 name, Bib32String value)
     {
-      Key = key;
+      Name = name;
       Value = value;
 #if BIB_DATA_CHECKS
       CtorCheckImpl(null);
@@ -46,9 +50,9 @@ namespace Neat.BibTeX.Data
     [MethodImpl(Helper.OptimizeNoInline)]
     internal void CtorCheckImpl(string name)
     {
-      if (!BibBstChars.IsIdentifier(Key))
+      if (!BibBstChars.IsIdentifier(Name))
       {
-        throw new ArgumentException("Bib32Field: Key is not a valid identifier.", name is null ? "key" : name);
+        throw new ArgumentException("Bib32Field: Name is not a valid identifier.", name is null ? "name" : name);
       }
       Value.CtorCheckImpl(name is null ? "value" : name);
 #endif

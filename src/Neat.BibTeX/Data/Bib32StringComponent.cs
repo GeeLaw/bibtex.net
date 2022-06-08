@@ -9,48 +9,52 @@ using Neat.Unicode;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a string component, which is either a reference to
+  /// Represents a string component, which is either a name (e.g., <c>name</c>) in reference to
   /// a macro defined in <c>.bst</c> files (<c>MACRO { ... } { ... }</c>) or
   /// a string defined by <see cref="Bib32StringEntry"/> (<c>@string{ ... }</c>),
-  /// or a literal string value (e.g., <c>reference</c>, <c>{literal}</c>, <c>"literal"</c>, <c>123</c>).
+  /// or a literal (e.g., <c>{literal}</c>, <c>"literal"</c>, <c>123</c>).
   /// </summary>
   public readonly struct Bib32StringComponent
   {
     /// <summary>
-    /// Indicates whether this component is a literal string value.
+    /// Indicates whether this component is a literal.
     /// </summary>
-    public readonly bool IsValue;
+    public readonly bool IsLiteral;
 
     /// <summary>
-    /// The key to the referenced string (if this component is a reference) or
-    /// the literal string value (if this component is a literal string value).
-    /// If this is the key, it should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
-    /// If this is the value, it should be valid and brace-balanced.
+    /// The name of the referenced string (if this component is a name) or the literal (if this component is a literal).
+    /// If this is the name, it should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
+    /// If this is the literal, it should be valid and brace-balanced.
     /// </summary>
-    public readonly String32 KeyOrValue;
+    public readonly String32 NameOrLiteral;
 
+    /// <summary>
+    /// The string representation obtained by this method is informational and not necessarily valid BibTeX.
+    /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     public override string ToString()
     {
-      /* {value} or reference */
-      return IsValue
-        ? "{" + KeyOrValue.ToString() + "}"
-        : KeyOrValue.ToString();
+      /* {literal} or name */
+      return IsLiteral
+        ? "{" + NameOrLiteral.ToString() + "}"
+        : NameOrLiteral.ToString();
     }
 
     [MethodImpl(Helper.JustOptimize)]
     internal StringBuilder ToString(StringBuilder sb)
     {
-      return IsValue
-        ? sb.Append('{').Append(KeyOrValue.ToString()).Append('}')
-        : sb.Append(KeyOrValue.ToString());
+      return IsLiteral
+        ? sb.Append('{').Append(NameOrLiteral.ToString()).Append('}')
+        : sb.Append(NameOrLiteral.ToString());
     }
 
+    /// <param name="nameOrLiteral">If <paramref name="isLiteral"/>, this value must be a valid identifier.
+    /// Otherwise, this value must be brace-balanced.</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32StringComponent(bool isValue, String32 keyOrValue)
+    public Bib32StringComponent(bool isLiteral, String32 nameOrLiteral)
     {
-      IsValue = isValue;
-      KeyOrValue = keyOrValue;
+      IsLiteral = isLiteral;
+      NameOrLiteral = nameOrLiteral;
 #if BIB_DATA_CHECKS
       CtorCheckImpl(null);
     }
@@ -58,19 +62,19 @@ namespace Neat.BibTeX.Data
     [MethodImpl(Helper.OptimizeNoInline)]
     internal void CtorCheckImpl(string name)
     {
-      name = (name is null ? "keyOrValue" : name);
-      if (IsValue)
+      name = (name is null ? "nameOrLiteral" : name);
+      if (IsLiteral)
       {
-        if (!BibBstChars.IsValidAndBraceBalanced(KeyOrValue))
+        if (!BibBstChars.IsBraceBalanced(NameOrLiteral))
         {
-          throw new ArgumentException("Bib32StringComponent: KeyOrValue (value) is not both valid and brace-balanced.", name);
+          throw new ArgumentException("Bib32StringComponent: NameOrLiteral (literal) is not brace-balanced.", name);
         }
       }
       else
       {
-        if (!BibBstChars.IsIdentifier(KeyOrValue))
+        if (!BibBstChars.IsIdentifier(NameOrLiteral))
         {
-          throw new ArgumentException("Bib32StringComponent:KeyOrValue (key) is a not valid identifier.", name);
+          throw new ArgumentException("Bib32StringComponent: NameOrLiteral (name) is a not valid identifier.", name);
         }
       }
 #endif
@@ -82,13 +86,13 @@ namespace Neat.BibTeX.Data
     [MethodImpl(Helper.OptimizeInline)]
     public void AcceptVisitor<TVisitor>(ref TVisitor visitor) where TVisitor : struct, IBib32StringComponentVisitor
     {
-      if (IsValue)
+      if (IsLiteral)
       {
-        visitor.VisitValue(KeyOrValue);
+        visitor.VisitLiteral(NameOrLiteral);
       }
       else
       {
-        visitor.VisitReference(KeyOrValue);
+        visitor.VisitName(NameOrLiteral);
       }
     }
 
@@ -98,13 +102,13 @@ namespace Neat.BibTeX.Data
     [MethodImpl(Helper.OptimizeInline)]
     public void AcceptVisitor(IBib32StringComponentVisitor visitor)
     {
-      if (IsValue)
+      if (IsLiteral)
       {
-        visitor.VisitValue(KeyOrValue);
+        visitor.VisitLiteral(NameOrLiteral);
       }
       else
       {
-        visitor.VisitReference(KeyOrValue);
+        visitor.VisitName(NameOrLiteral);
       }
     }
   }

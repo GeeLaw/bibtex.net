@@ -5,10 +5,11 @@ using Neat.Unicode;
 
 namespace Neat.BibTeX.Utils
 {
+  /// <summary>
+  /// Provides information about characters and strings in BibTeX.
+  /// </summary>
   public static class BibBstChars
   {
-    public const int Invalid = 127;
-
     /* BibTeX parser */
     public const int At = '@';
     public const int LeftBrace = '{';
@@ -34,52 +35,87 @@ namespace Neat.BibTeX.Utils
 
     #region Char32
 
+    /// <summary>
+    /// An identifier is non-<see langword="default"/>, non-empty, cannot start with a numeric character, and
+    /// consists of only identifier characters.
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsIdentifier(String32 str)
     {
       return IsIdentifierImpl(Unsafe.As<String32, Char32[]>(ref str));
     }
 
+    /// <summary>
+    /// Consult the original implementation of BibTeX for what constitutes a valid identifier character.
+    /// </summary>
+    /// <param name="ch"></param>
+    /// <returns></returns>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsIdentifier(Char32 ch)
     {
       return IsIdentifierImpl(ch.Value);
     }
 
+    /// <summary>
+    /// A database key must not be <see langword="default"/> or contain <c>,</c> or space characters.
+    /// It can be empty.
+    /// </summary>
+    /// <param name="str"></param>
+    /// <returns></returns>
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsCitationKey(String32 str)
+    public static bool IsDatabaseKey(String32 str)
     {
-      return IsCitationKeyImpl(Unsafe.As<String32, Char32[]>(ref str));
+      return IsDatabaseKey(Unsafe.As<String32, Char32[]>(ref str));
     }
 
+    /// <summary>
+    /// Determines whether a general entry with the specified database key
+    /// must use parentheses as its delimiters.
+    /// Parentheses must be used if the database key contains <c>}</c>.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool MustUseParenthesis(String32 key)
+    public static bool MustUseParentheses(String32 key)
     {
-      return MustUseParenthesisImpl(Unsafe.As<String32, Char32[]>(ref key));
+      return MustUseParenthesesImpl(Unsafe.As<String32, Char32[]>(ref key));
     }
 
+    /// <summary>
+    /// Determines whether the character is alphabetc (only A-Z and a-z are considered alphabetic).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsAlpha(Char32 ch)
     {
       return IsAlphaImpl(ch.Value);
     }
 
+    /// <summary>
+    /// Determines whether the character is numeric (only 0-9 are considered numeric).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsNumeric(Char32 ch)
     {
       return IsNumericImpl(ch.Value);
     }
 
+    /// <summary>
+    /// Determines whether the character is space (only <c>U+0020</c> and <c>\t\n\v\f\r</c> are considered space).
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsSpace(Char32 ch)
     {
       return IsSpaceImpl(ch.Value);
     }
 
+    /// <summary>
+    /// Determines whethe the literal is brace-balanced.
+    /// Such a literal must not be <see langword="default"/>.
+    /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsValidAndBraceBalanced(String32 str)
+    public static bool IsBraceBalanced(String32 str)
     {
-      return IsValidAndBraceBalancedImpl(Unsafe.As<String32, Char32[]>(ref str));
+      return IsBraceBalancedImpl(Unsafe.As<String32, Char32[]>(ref str));
     }
 
     #endregion Char32
@@ -231,9 +267,11 @@ namespace Neat.BibTeX.Utils
       {
         return false;
       }
-      for (int i = 0; i < data.Length; ++i)
+      for (int i = 0, value; i < data.Length; ++i)
       {
-        if (!IsIdentifierImpl(data[i].Value))
+        value = data[i].Value;
+        if ((uint)value >= 128u
+          || !Unsafe.Add(ref Unsafe.As<IsIdentifierCharacterData, bool>(ref theIsIdentifierCharacter), value))
         {
           return false;
         }
@@ -250,7 +288,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsCitationKeyImpl(Char32[] data)
+    internal static bool IsDatabaseKey(Char32[] data)
     {
       if (data is null)
       {
@@ -268,7 +306,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool MustUseParenthesisImpl(Char32[] data)
+    internal static bool MustUseParenthesesImpl(Char32[] data)
     {
       for (int i = 0, value; i < data.Length; ++i)
       {
@@ -301,7 +339,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsValidAndBraceBalancedImpl(Char32[] data)
+    internal static bool IsBraceBalancedImpl(Char32[] data)
     {
       if (data is null)
       {
@@ -310,21 +348,13 @@ namespace Neat.BibTeX.Utils
       int depth = 0;
       for (int i = 0, value; i < data.Length; ++i)
       {
-        value = data[i].Value;
-        if (value == Invalid)
-        {
-          return false;
-        }
-        else if (value == LeftBrace)
+        if ((value = data[i].Value) == LeftBrace)
         {
           ++depth;
         }
-        else if (value == RightBrace)
+        else if (value == RightBrace && depth-- == 0)
         {
-          if (depth-- == 0)
-          {
-            return false;
-          }
+          return false;
         }
       }
       return depth == 0;

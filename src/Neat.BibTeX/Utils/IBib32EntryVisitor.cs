@@ -7,7 +7,7 @@ namespace Neat.BibTeX.Utils
   /// </summary>
   public interface IBib32EntryVisitor
   {
-    void VisiString32Entry(Bib32StringEntry entry);
+    void VisitStringEntry(Bib32StringEntry entry);
     void VisitPreambleEntry(Bib32PreambleEntry entry);
     void VisitGeneralEntry(Bib32GeneralEntry entry);
   }

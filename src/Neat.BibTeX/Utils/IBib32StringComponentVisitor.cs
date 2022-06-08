@@ -8,7 +8,7 @@ namespace Neat.BibTeX.Utils
   /// </summary>
   public interface IBib32StringComponentVisitor
   {
-    void VisitReference(String32 key);
-    void VisitValue(String32 value);
+    void VisitName(String32 name);
+    void VisitLiteral(String32 literal);
   }
 }

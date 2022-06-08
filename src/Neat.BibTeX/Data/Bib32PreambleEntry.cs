@@ -9,37 +9,37 @@ using Neat.Unicode;
 namespace Neat.BibTeX.Data
 {
   /// <summary>
-  /// Represents a <c>@preamble{ "literal" # {literal} # 123 # reference }</c> entry.
+  /// Represents a <c>@preamble{ "literal" # {literal} # 123 # name }</c> entry.
   /// </summary>
   public sealed class Bib32PreambleEntry : Bib32Entry
   {
+    /// <summary>
+    /// The entry type of a <c>@preamble</c> entry.
+    /// </summary>
     public static readonly String32 EntryType = Utf.String16ToString32Strict("preamble");
 
     /// <summary>
     /// The preamble text.
-    /// This string should be valid and brace-balanced.
     /// </summary>
-    public readonly Bib32String Value;
+    public readonly Bib32String Text;
 
     [MethodImpl(Helper.JustOptimize)]
     public sealed override string ToString()
     {
-      /* @preamble{ value } */
-      return Value.ToString(new StringBuilder()
+      /* @preamble{ text } */
+      return Text.ToString(new StringBuilder()
         .Append('@')
         .Append(Type.ToString())
         .Append("{ ")
       ).Append(" }").ToString();
     }
 
-    /// <summary>
-    /// <paramref name="type"/> must be <c>preamble</c> (in any casing).
-    /// </summary>
+    /// <param name="type">Must be <c>preamble</c> (in any casing).</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32PreambleEntry(String32 type, Bib32String value)
+    public Bib32PreambleEntry(String32 type, Bib32String text)
       : base(type)
     {
-      Value = value;
+      Text = text;
 #if BIB_DATA_CHECKS
       CtorCheckImpl(null);
     }
@@ -51,7 +51,7 @@ namespace Neat.BibTeX.Data
       {
         throw new ArgumentException("Bib32PreambleEntry: Type is not \"preamble\".", name is null ? "type" : name);
       }
-      Value.CtorCheckImpl(name is null ? "value" : name);
+      Text.CtorCheckImpl(name is null ? "text" : name);
 #endif
     }
 

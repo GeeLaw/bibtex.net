@@ -9,7 +9,7 @@ namespace Neat.BibTeX.Data
   /// An instance could be <see cref="Bib32StringEntry"/>,
   /// <see cref="Bib32PreambleEntry"/>, or
   /// <see cref="Bib32GeneralEntry"/>
-  /// (e.g., <c>@entry_type{ ... }</c>).
+  /// (e.g., <c>@type{ ... }</c>).
   /// </summary>
   public abstract class Bib32Entry
   {
