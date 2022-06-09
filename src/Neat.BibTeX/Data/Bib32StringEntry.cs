@@ -22,12 +22,12 @@ namespace Neat.BibTeX.Data
     /// The name of this referenceable string.
     /// This string should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
     /// </summary>
-    public readonly String32 Name;
+    public String32 Name;
 
     /// <summary>
     /// The value of this referenceable string.
     /// </summary>
-    public readonly Bib32String Value;
+    public Bib32String Value;
 
     [MethodImpl(Helper.JustOptimize)]
     public override string ToString()
@@ -70,6 +70,14 @@ namespace Neat.BibTeX.Data
     }
 
     #region Bib32Entry overrides
+
+    [MethodImpl(Helper.JustOptimize)]
+    public sealed override bool IsValid()
+    {
+      return BibBstComparer.Equals(Type, EntryType)
+        && BibBstChars.IsIdentifier(Name)
+        && Value.IsValid();
+    }
 
     [MethodImpl(Helper.OptimizeInline)]
     public sealed override void AcceptVisitor<TVisitor>(ref TVisitor visitor)

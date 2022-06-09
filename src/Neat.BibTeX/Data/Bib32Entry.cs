@@ -19,7 +19,7 @@ namespace Neat.BibTeX.Data
     /// The special types are <c>string</c>, <c>preamble</c>, and <c>comment</c>.
     /// However, since comment entries are not modeled, this string should never be <c>comment</c>.
     /// </summary>
-    public readonly String32 Type;
+    public String32 Type;
 
     /// <summary>
     /// The string representation obtained by this method is informational and not necessarily valid BibTeX.
@@ -31,6 +31,11 @@ namespace Neat.BibTeX.Data
     {
       Type = type;
     }
+
+    /// <summary>
+    /// Determines whethe the entry is currently valid.
+    /// </summary>
+    public abstract bool IsValid();
 
     /// <summary>
     /// Dispatches the correct method for the value-type visitor.

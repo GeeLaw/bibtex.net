@@ -21,7 +21,7 @@ namespace Neat.BibTeX.Data
     /// <summary>
     /// The preamble text.
     /// </summary>
-    public readonly Bib32String Text;
+    public Bib32String Text;
 
     [MethodImpl(Helper.JustOptimize)]
     public sealed override string ToString()
@@ -56,6 +56,13 @@ namespace Neat.BibTeX.Data
     }
 
     #region Bib32Entry overrides
+
+    [MethodImpl(Helper.JustOptimize)]
+    public sealed override bool IsValid()
+    {
+      return BibBstComparer.Equals(Type, EntryType)
+        && Text.IsValid();
+    }
 
     [MethodImpl(Helper.OptimizeInline)]
     public sealed override void AcceptVisitor<TVisitor>(ref TVisitor visitor)

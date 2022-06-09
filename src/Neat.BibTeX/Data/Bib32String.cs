@@ -118,6 +118,34 @@ namespace Neat.BibTeX.Data
 #endif
 
     /// <summary>
+    /// Determines whether the string is currently valid.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public bool IsValid()
+    {
+      Bib32StringComponent[] components = Components;
+      if (components is null)
+      {
+        return OnlyComponent.IsValid();
+      }
+      else if (components.Length < 2)
+      {
+        return false;
+      }
+      else
+      {
+        for (int i = 0; i < components.Length; ++i)
+        {
+          if (!components[i].IsValid())
+          {
+            return false;
+          }
+        }
+        return true;
+      }
+    }
+
+    /// <summary>
     /// Dispatches the correct method on each component for the value-type visitor.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]

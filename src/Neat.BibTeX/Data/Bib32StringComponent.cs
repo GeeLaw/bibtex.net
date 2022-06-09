@@ -81,6 +81,17 @@ namespace Neat.BibTeX.Data
     }
 
     /// <summary>
+    /// Determines whether the component is currently valid.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public bool IsValid()
+    {
+      return IsLiteral
+        ? BibBstChars.IsBraceBalanced(NameOrLiteral)
+        : BibBstChars.IsIdentifier(NameOrLiteral);
+    }
+
+    /// <summary>
     /// Dispatches the correct method for the value-type visitor.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]

@@ -57,5 +57,15 @@ namespace Neat.BibTeX.Data
       Value.CtorCheckImpl(name is null ? "value" : name);
 #endif
     }
+
+    /// <summary>
+    /// Determines whether the field is currently valid.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public bool IsValid()
+    {
+      return BibBstChars.IsIdentifier(Name)
+        && Value.IsValid();
+    }
   }
 }

@@ -24,12 +24,12 @@ namespace Neat.BibTeX.Data
     /// A valid database key must not contain "," or space characters
     /// (there is no other requirement for validity, and it can be empty).
     /// </summary>
-    public readonly String32 Key;
+    public String32 Key;
 
     /// <summary>
     /// The fields of this entry.
     /// </summary>
-    public readonly Bib32Field[] Fields;
+    public Bib32Field[] Fields;
 
     [MethodImpl(Helper.JustOptimize)]
     public sealed override string ToString()
@@ -87,6 +87,24 @@ namespace Neat.BibTeX.Data
     }
 
     #region Bib32Entry overrides
+
+    [MethodImpl(Helper.JustOptimize)]
+    public sealed override bool IsValid()
+    {
+      Bib32Field[] fields = Fields;
+      if (fields is null || !IsValidGeneralEntryType(Type) || !BibBstChars.IsDatabaseKey(Key))
+      {
+        return false;
+      }
+      for (int i = 0; i < fields.Length; ++i)
+      {
+        if (!fields[i].IsValid())
+        {
+          return false;
+        }
+      }
+      return true;
+    }
 
     [MethodImpl(Helper.OptimizeInline)]
     public sealed override void AcceptVisitor<TVisitor>(ref TVisitor visitor)
