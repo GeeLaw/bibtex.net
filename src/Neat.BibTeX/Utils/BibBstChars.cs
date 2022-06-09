@@ -67,7 +67,7 @@ namespace Neat.BibTeX.Utils
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsDatabaseKey(String32 str)
     {
-      return IsDatabaseKey(Unsafe.As<String32, Char32[]>(ref str));
+      return IsDatabaseKeyImpl(Unsafe.As<String32, Char32[]>(ref str));
     }
 
     /// <summary>
@@ -288,7 +288,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsDatabaseKey(Char32[] data)
+    internal static bool IsDatabaseKeyImpl(Char32[] data)
     {
       if (data is null)
       {
