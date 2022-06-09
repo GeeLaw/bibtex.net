@@ -1,8 +1,5 @@
 using System;
 using System.Runtime.CompilerServices;
-using Neat.BibTeX.BibModel;
-using Neat.Collections;
-using Neat.Unicode;
 
 namespace Neat.BibTeX.Utils
 {
@@ -18,21 +15,6 @@ namespace Neat.BibTeX.Utils
     /// Provides direct access to the embedded overrides.
     /// </summary>
     public TOverrides Overrides;
-
-    /// <summary>
-    /// The entries.
-    /// </summary>
-    public readonly List2<Bib32Entry> Entries;
-
-    /// <summary>
-    /// The components of the string being parsed.
-    /// </summary>
-    public readonly List2<Bib32StringComponent> StringComponents;
-
-    /// <summary>
-    /// The fields of the general entry being parsed.
-    /// </summary>
-    public readonly List2<Bib32Field> Fields;
 
     private int myCount;
 
@@ -90,20 +72,6 @@ namespace Neat.BibTeX.Utils
       }
     }
 
-    private String32 myEntryType;
-
-    /// <summary>
-    /// Gets the entry type of the entry being parsed.
-    /// </summary>
-    public String32 EntryType
-    {
-      [MethodImpl(Helper.OptimizeInline)]
-      get
-      {
-        return myEntryType;
-      }
-    }
-
     private bool myEntryIsBrace;
 
     /// <summary>
@@ -115,34 +83,6 @@ namespace Neat.BibTeX.Utils
       get
       {
         return myEntryIsBrace;
-      }
-    }
-
-    private String32 myStringOrFieldName;
-
-    /// <summary>
-    /// Gets the name of the string entry or the field being parsed.
-    /// </summary>
-    public String32 StringOrFieldName
-    {
-      [MethodImpl(Helper.OptimizeInline)]
-      get
-      {
-        return myStringOrFieldName;
-      }
-    }
-
-    private String32 myDatabaseKey;
-
-    /// <summary>
-    /// Gets the database key of the general entry being parsed.
-    /// </summary>
-    public String32 DatabaseKey
-    {
-      [MethodImpl(Helper.OptimizeInline)]
-      get
-      {
-        return myDatabaseKey;
       }
     }
 
