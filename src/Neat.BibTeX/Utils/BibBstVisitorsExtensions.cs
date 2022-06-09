@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using Neat.BibTeX.Data;
+using Neat.BibTeX.BibModel;
 
 namespace Neat.BibTeX.Utils
 {

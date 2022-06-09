@@ -1,4 +1,4 @@
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
 using System;
 #endif
 using System.Runtime.CompilerServices;
@@ -6,7 +6,7 @@ using System.Text;
 using Neat.BibTeX.Utils;
 using Neat.Unicode;
 
-namespace Neat.BibTeX.Data
+namespace Neat.BibTeX.BibModel
 {
   /// <summary>
   /// Represents a <c>@string{ name = "literal" # {literal} # 123 # anothername }</c> entry.
@@ -50,7 +50,7 @@ namespace Neat.BibTeX.Data
     {
       Name = name;
       Value = value;
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
       CtorCheckImpl(null);
     }
 

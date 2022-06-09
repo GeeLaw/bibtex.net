@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
-using Neat.BibTeX.Data;
+using Neat.BibTeX.BibModel;
 using Neat.Collections;
 using Neat.Unicode;
 

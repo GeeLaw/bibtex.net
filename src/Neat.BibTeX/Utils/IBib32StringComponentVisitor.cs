@@ -1,4 +1,4 @@
-using Neat.BibTeX.Data;
+using Neat.BibTeX.BibModel;
 using Neat.Unicode;
 
 namespace Neat.BibTeX.Utils

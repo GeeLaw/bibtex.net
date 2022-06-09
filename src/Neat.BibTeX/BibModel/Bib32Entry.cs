@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Neat.BibTeX.Utils;
 using Neat.Unicode;
 
-namespace Neat.BibTeX.Data
+namespace Neat.BibTeX.BibModel
 {
   /// <summary>
   /// Represents an entry in <c>.bib</c> files.

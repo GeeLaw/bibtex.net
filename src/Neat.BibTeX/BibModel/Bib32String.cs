@@ -1,11 +1,11 @@
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
 using System;
 #endif
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
 
-namespace Neat.BibTeX.Data
+namespace Neat.BibTeX.BibModel
 {
   /// <summary>
   /// Represents a string that is a concatenation of referenced strings and literals (e.g., <c>"literal" # {literal} # 123 # name</c>).
@@ -69,7 +69,7 @@ namespace Neat.BibTeX.Data
     {
       OnlyComponent = onlyComponent;
       Components = null;
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
       CtorCheckImpl("onlyComponent");
 #endif
     }
@@ -83,12 +83,12 @@ namespace Neat.BibTeX.Data
     {
       OnlyComponent = default(Bib32StringComponent);
       Components = components;
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
       CtorCheckImpl("components");
 #endif
     }
 
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
 
     [MethodImpl(Helper.OptimizeNoInline)]
     internal void CtorCheckImpl(string name)

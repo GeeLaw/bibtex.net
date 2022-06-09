@@ -1,4 +1,4 @@
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
 using System;
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using Neat.BibTeX.Utils;
 using Neat.Unicode;
 
-namespace Neat.BibTeX.Data
+namespace Neat.BibTeX.BibModel
 {
   /// <summary>
   /// Represents a general <c>@type{ key, name1 = {literal} # "literal" # 123 # name, ... }</c> entry.
@@ -48,7 +48,7 @@ namespace Neat.BibTeX.Data
     {
       Key = key;
       Fields = fields;
-#if BIB_DATA_CHECKS
+#if BIB_MODEL_CHECKS
       CtorCheckImpl(null);
     }
 

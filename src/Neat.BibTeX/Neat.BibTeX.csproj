@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
-    <DefineConstants>$(DefineConstants);BIB_DATA_CHECKS</DefineConstants>
+    <DefineConstants>$(DefineConstants);BIB_MODEL_CHECKS</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
