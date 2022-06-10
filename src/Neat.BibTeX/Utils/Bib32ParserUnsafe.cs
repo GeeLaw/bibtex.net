@@ -34,6 +34,7 @@ namespace Neat.BibTeX.Utils
 
     /// <summary>
     /// Gets the number of characters that have been processed.
+    /// This property is meaningful only in exception methods.
     /// </summary>
     public int Eaten
     {
@@ -62,6 +63,7 @@ namespace Neat.BibTeX.Utils
 
     /// <summary>
     /// Gets the (1-based) column number of the space at the next character.
+    /// This property is meaningful only in exception methods.
     /// </summary>
     public int Column
     {
@@ -86,18 +88,19 @@ namespace Neat.BibTeX.Utils
       }
     }
 
-    private bool myLiteralIsBrace;
+    private int myBraceDepth;
 
     /// <summary>
-    /// Indicates whether the literal being parsed uses <c>{}</c> as its delimiters with the alternate being <c>""</c>.
-    /// (A bare numeric literal cannot be seen by the overrides.)
+    /// Gets the outstanding left braces of the delimited literal being parsed
+    /// (not counting the opening delimiter if it is <c>{</c>).
+    /// This property is meaningful only in certain exception methods.
     /// </summary>
-    public bool LiteralIsBrace
+    public int BraceDepth
     {
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return myLiteralIsBrace;
+        return myBraceDepth;
       }
     }
 
