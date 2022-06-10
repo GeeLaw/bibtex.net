@@ -26,18 +26,19 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public sealed override string ToString()
     {
+      bool isBrace = IsBrace;
       /* @preamble{ text } */
       return Text.ToString(new StringBuilder()
         .Append('@')
         .Append(Type.ToString())
-        .Append("{ ")
-      ).Append(" }").ToString();
+        .Append(isBrace ? "{ " : "( ")
+      ).Append(isBrace ? " }" : " )").ToString();
     }
 
     /// <param name="type">Must be <c>preamble</c> (in any casing).</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32PreambleEntry(String32 type, Bib32String text)
-      : base(type)
+    public Bib32PreambleEntry(String32 type, bool isBrace, Bib32String text)
+      : base(type, isBrace)
     {
       Text = text;
 #if BIB_MODEL_CHECKS

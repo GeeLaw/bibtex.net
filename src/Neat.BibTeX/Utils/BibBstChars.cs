@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Neat.BibTeX.BibModel;
 using Neat.Unicode;
 
 namespace Neat.BibTeX.Utils
@@ -39,8 +40,6 @@ namespace Neat.BibTeX.Utils
     /// An identifier is non-<see langword="default"/>, non-empty, cannot start with a numeric character, and
     /// consists of only identifier characters.
     /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsIdentifier(String32 str)
     {
@@ -50,8 +49,6 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Consult the original implementation of BibTeX for what constitutes a valid identifier character.
     /// </summary>
-    /// <param name="ch"></param>
-    /// <returns></returns>
     [MethodImpl(Helper.OptimizeInline)]
     public static bool IsIdentifier(Char32 ch)
     {
@@ -59,26 +56,15 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
+    /// Determines whether the database key is valid and whether the general entry must use parentheses.
     /// A database key must not be <see langword="default"/> or contain <c>,</c> or space characters.
     /// It can be empty.
-    /// </summary>
-    /// <param name="str"></param>
-    /// <returns></returns>
-    [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsDatabaseKey(String32 str)
-    {
-      return IsDatabaseKeyImpl(Unsafe.As<String32, Char32[]>(ref str));
-    }
-
-    /// <summary>
-    /// Determines whether a general entry with the specified database key
-    /// must use parentheses as its delimiters.
-    /// Parentheses must be used if the database key contains <c>}</c>.
+    /// The general entry must use parenthesis if the database key contains <c>}</c>.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool MustUseParentheses(String32 key)
+    public static BibDatabaseKeyType GetDatabaseKeyType(String32 str)
     {
-      return MustUseParenthesesImpl(Unsafe.As<String32, Char32[]>(ref key));
+      return GetDatabaseKeyTypeImpl(Unsafe.As<String32, Char32[]>(ref str));
     }
 
     /// <summary>
@@ -549,35 +535,28 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsDatabaseKeyImpl(Char32[] data)
+    internal static BibDatabaseKeyType GetDatabaseKeyTypeImpl(Char32[] data)
     {
       if (data is null)
       {
-        return false;
+        return new BibDatabaseKeyType(BibDatabaseKeyType.InvalidValue);
       }
+      bool mustUseParentheses = false;
       for (int i = 0, value; i < data.Length; ++i)
       {
         value = data[i].Value;
         if (value == Comma || IsSpaceImpl(value))
         {
-          return false;
+          return new BibDatabaseKeyType(BibDatabaseKeyType.InvalidValue);
         }
-      }
-      return true;
-    }
-
-    [MethodImpl(Helper.JustOptimize)]
-    internal static bool MustUseParenthesesImpl(Char32[] data)
-    {
-      for (int i = 0, value; i < data.Length; ++i)
-      {
-        value = data[i].Value;
         if (value == RightBrace)
         {
-          return true;
+          mustUseParentheses = true;
         }
       }
-      return false;
+      return new BibDatabaseKeyType(mustUseParentheses
+        ? BibDatabaseKeyType.MustUseParenthesesValue
+        : BibDatabaseKeyType.UseBracesOrParenthesesValue);
     }
 
     [MethodImpl(Helper.OptimizeInline)]

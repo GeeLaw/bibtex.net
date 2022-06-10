@@ -22,14 +22,20 @@ namespace Neat.BibTeX.BibModel
     public String32 Type;
 
     /// <summary>
+    /// Indicates whethe this entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
+    /// </summary>
+    public bool IsBrace;
+
+    /// <summary>
     /// The string representation obtained by this method is informational and not necessarily valid BibTeX.
     /// </summary>
     public abstract override string ToString();
 
     [MethodImpl(Helper.OptimizeInline)]
-    private protected Bib32Entry(String32 type)
+    private protected Bib32Entry(String32 type, bool isBrace)
     {
       Type = type;
+      IsBrace = isBrace;
     }
 
     /// <summary>

@@ -32,21 +32,22 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public override string ToString()
     {
+      bool isBrace = IsBrace;
       /* @string{ name = value } */
       return Value.ToString(new StringBuilder()
         .Append('@')
         .Append(Type.ToString())
-        .Append("{ ")
+        .Append(isBrace ? "{ " : "( ")
         .Append(Name.ToString())
         .Append(" = ")
-      ).Append(" }").ToString();
+      ).Append(isBrace ? " }" : " )").ToString();
     }
 
     /// <param name="type">Must be <c>string</c> (in any casing).</param>
     /// <param name="name">Must be a valid identifier.</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32StringEntry(String32 type, String32 name, Bib32String value)
-      : base(type)
+    public Bib32StringEntry(String32 type, bool isBrace, String32 name, Bib32String value)
+      : base(type, isBrace)
     {
       Name = name;
       Value = value;

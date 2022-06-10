@@ -34,17 +34,18 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public sealed override string ToString()
     {
-      /* @type{ key, ... } or @type( key, ... ) */
-      return string.Format(BibBstChars.MustUseParentheses(Key) ? "@{0}{{ {1}, ... }}" : "@{0}( {1}, ... )",
+      /* @type{ key, ... } */
+      return string.Format(IsBrace ? "@{0}{{ {1}, ... }}" : "@{0}( {1}, ... )",
         Type.ToString(), Key.ToString());
     }
 
+    /// <param name="isBrace">Must be <see langword="false"/> if <paramref name="key"/> must use parentheses.</param>
     /// <param name="type">Must be a valid identifier but not any of <c>string</c>, <c>preamble</c>, or <c>comment</c> (in any casing).</param>
     /// <param name="key">Must be a valid database key.</param>
     /// <param name="fields">Must not be <see langword="null"/> (can be empty).</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32GeneralEntry(String32 type, String32 key, Bib32Field[] fields)
-      : base(type)
+    public Bib32GeneralEntry(String32 type, bool isBrace, String32 key, Bib32Field[] fields)
+      : base(type, isBrace)
     {
       Key = key;
       Fields = fields;
@@ -60,9 +61,17 @@ namespace Neat.BibTeX.BibModel
       {
         throw new ArgumentException("Bib32GeneralEntry: Type is not a valid general entry type.", name is null ? "type" : name);
       }
-      if (!BibBstChars.IsDatabaseKey(Key))
+      byte type = BibBstChars.GetDatabaseKeyType(Key).Value;
+      if (type == BibDatabaseKeyType.MustUseParenthesesValue)
       {
-        throw new ArgumentException("Bib32GeneralString: Key is not a valid database key.", name is null ? "key" : name);
+        if (IsBrace)
+        {
+          throw new ArgumentException("Bib32GeneralEntry: IsBrace is incompatible with Key (must use parentheses).", name is null ? "isBrace" : name);
+        }
+      }
+      else if (type != BibDatabaseKeyType.UseBracesOrParenthesesValue)
+      {
+        throw new ArgumentException("Bib32GeneralEntry: Key is not a valid database key.", name is null ? "key" : name);
       }
       name = (name is null ? "fields" : name);
       Bib32Field[] fields = Fields;
@@ -92,7 +101,19 @@ namespace Neat.BibTeX.BibModel
     public sealed override bool IsValid()
     {
       Bib32Field[] fields = Fields;
-      if (fields is null || !IsValidGeneralEntryType(Type) || !BibBstChars.IsDatabaseKey(Key))
+      if (fields is null || !IsValidGeneralEntryType(Type))
+      {
+        return false;
+      }
+      byte type = BibBstChars.GetDatabaseKeyType(Key).Value;
+      if (type == BibDatabaseKeyType.MustUseParenthesesValue)
+      {
+        if (IsBrace)
+        {
+          return false;
+        }
+      }
+      else if (type != BibDatabaseKeyType.UseBracesOrParenthesesValue)
       {
         return false;
       }
