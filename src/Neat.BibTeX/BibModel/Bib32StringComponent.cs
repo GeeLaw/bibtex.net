@@ -17,14 +17,16 @@ namespace Neat.BibTeX.BibModel
   public readonly struct Bib32StringComponent
   {
     /// <summary>
-    /// Indicates whether this component is a literal.
+    /// The type of the literal.
     /// </summary>
-    public readonly bool IsLiteral;
+    public readonly BibStringComponentType Type;
 
     /// <summary>
     /// The name of the referenced string (if this component is a name) or the literal (if this component is a literal).
     /// If this is the name, it should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
-    /// If this is the literal, it should be valid and brace-balanced.
+    /// If this is the quote literal, it should not be <see langword="default"/>, should not contain <c>"</c> outside braces, and should be brace-balanced.
+    /// If this is the numeric literal, it should not be <see langword="default"/> or empty and should contain only numeric characters.
+    /// If this is the delimited literal, it should not be <see langword="default"/> and should be brace-balanced.
     /// </summary>
     public readonly String32 NameOrLiteral;
 
@@ -34,26 +36,29 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public override string ToString()
     {
-      /* {literal} or name */
-      return IsLiteral
+      byte type = Type.Value;
+      return type == BibStringComponentType.BraceLiteralValue
         ? "{" + NameOrLiteral.ToString() + "}"
+        : type == BibStringComponentType.QuoteLiteralValue
+        ? "\"" + NameOrLiteral.ToString() + "\""
         : NameOrLiteral.ToString();
     }
 
     [MethodImpl(Helper.JustOptimize)]
     internal StringBuilder ToString(StringBuilder sb)
     {
-      return IsLiteral
+      byte type = Type.Value;
+      return type == BibStringComponentType.BraceLiteralValue
         ? sb.Append('{').Append(NameOrLiteral.ToString()).Append('}')
+        : type == BibStringComponentType.QuoteLiteralValue
+        ? sb.Append('"').Append(NameOrLiteral.ToString()).Append('"')
         : sb.Append(NameOrLiteral.ToString());
     }
 
-    /// <param name="nameOrLiteral">If <paramref name="isLiteral"/>, this value must be a valid identifier.
-    /// Otherwise, this value must be brace-balanced.</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32StringComponent(bool isLiteral, String32 nameOrLiteral)
+    public Bib32StringComponent(BibStringComponentType type, String32 nameOrLiteral)
     {
-      IsLiteral = isLiteral;
+      Type = type;
       NameOrLiteral = nameOrLiteral;
 #if BIB_MODEL_CHECKS
       CtorCheckImpl(null);
@@ -62,20 +67,35 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.OptimizeNoInline)]
     internal void CtorCheckImpl(string name)
     {
-      name = (name is null ? "nameOrLiteral" : name);
-      if (IsLiteral)
+      String32 nameOrLiteral = NameOrLiteral;
+      switch (Type.Value)
       {
-        if (!BibBstChars.IsBraceBalanced(NameOrLiteral))
+      case BibStringComponentType.NameValue:
+        if (!BibBstChars.IsIdentifier(nameOrLiteral))
         {
-          throw new ArgumentException("Bib32StringComponent: NameOrLiteral (literal) is not brace-balanced.", name);
+          throw new ArgumentException("Bib32StringComponent: NameOrLiteral is not a valid identifier.", name is null ? "nameOrLiteral" : name);
         }
-      }
-      else
-      {
-        if (!BibBstChars.IsIdentifier(NameOrLiteral))
+        break;
+      case BibStringComponentType.QuoteLiteralValue:
+        if (!BibBstChars.IsQuoteLiteral(nameOrLiteral))
         {
-          throw new ArgumentException("Bib32StringComponent: NameOrLiteral (name) is a not valid identifier.", name);
+          throw new ArgumentException("Bib32StringComponent: NameOrLiteral is not a valid quote-delimited literal.", name is null ? "nameOrLiteral" : name);
         }
+        break;
+      case BibStringComponentType.NumericLiteralValue:
+        if (!BibBstChars.IsNumericLiteral(nameOrLiteral))
+        {
+          throw new ArgumentException("Bib32StringComponent: NameOrLiteral is not a valid numeric literal.", name is null ? "nameOrLiteral" : name);
+        }
+        break;
+      case BibStringComponentType.BraceLiteralValue:
+        if (!BibBstChars.IsBraceBalanced(nameOrLiteral))
+        {
+          throw new ArgumentException("Bib32StringComponent: NameOrLiteral is not brace-balanced.", name is null ? "nameOrLiteral" : name);
+        }
+        break;
+      default:
+        throw new ArgumentException("Bib32StringComponent: Type is not valid.", name is null ? "type" : name);
       }
 #endif
     }
@@ -86,40 +106,65 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public bool IsValid()
     {
-      return IsLiteral
-        ? BibBstChars.IsBraceBalanced(NameOrLiteral)
-        : BibBstChars.IsIdentifier(NameOrLiteral);
+      String32 nameOrLiteral = NameOrLiteral;
+      switch (Type.Value)
+      {
+      case BibStringComponentType.NameValue:
+        return BibBstChars.IsIdentifier(nameOrLiteral);
+      case BibStringComponentType.QuoteLiteralValue:
+        return BibBstChars.IsQuoteLiteral(nameOrLiteral);
+      case BibStringComponentType.NumericLiteralValue:
+        return BibBstChars.IsNumericLiteral(nameOrLiteral);
+      case BibStringComponentType.BraceLiteralValue:
+        return BibBstChars.IsBraceBalanced(nameOrLiteral);
+      default:
+        return false;
+      }
     }
 
     /// <summary>
     /// Dispatches the correct method for the value-type visitor.
     /// </summary>
-    [MethodImpl(Helper.OptimizeInline)]
+    [MethodImpl(Helper.JustOptimize)]
     public void AcceptVisitor<TVisitor>(ref TVisitor visitor) where TVisitor : struct, IBib32StringComponentVisitor
     {
-      if (IsLiteral)
+      switch (Type.Value)
       {
-        visitor.VisitLiteral(NameOrLiteral);
-      }
-      else
-      {
-        visitor.VisitName(NameOrLiteral);
+      default:
+        visitor.VisitName(this);
+        break;
+      case BibStringComponentType.QuoteLiteralValue:
+        visitor.VisitQuoteLiteral(this);
+        break;
+      case BibStringComponentType.NumericLiteralValue:
+        visitor.VisitNumericLiteral(this);
+        break;
+      case BibStringComponentType.BraceLiteralValue:
+        visitor.VisitBraceLiteral(this);
+        break;
       }
     }
 
     /// <summary>
     /// Dispatches the correct method for the reference-type visitor.
     /// </summary>
-    [MethodImpl(Helper.OptimizeInline)]
+    [MethodImpl(Helper.JustOptimize)]
     public void AcceptVisitor(IBib32StringComponentVisitor visitor)
     {
-      if (IsLiteral)
+      switch (Type.Value)
       {
-        visitor.VisitLiteral(NameOrLiteral);
-      }
-      else
-      {
-        visitor.VisitName(NameOrLiteral);
+      default:
+        visitor.VisitName(this);
+        break;
+      case BibStringComponentType.QuoteLiteralValue:
+        visitor.VisitQuoteLiteral(this);
+        break;
+      case BibStringComponentType.NumericLiteralValue:
+        visitor.VisitNumericLiteral(this);
+        break;
+      case BibStringComponentType.BraceLiteralValue:
+        visitor.VisitBraceLiteral(this);
+        break;
       }
     }
   }

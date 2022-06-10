@@ -1,5 +1,4 @@
 using Neat.BibTeX.BibModel;
-using Neat.Unicode;
 
 namespace Neat.BibTeX.Utils
 {
@@ -8,7 +7,14 @@ namespace Neat.BibTeX.Utils
   /// </summary>
   public interface IBib32StringComponentVisitor
   {
-    void VisitName(String32 name);
-    void VisitLiteral(String32 literal);
+    /// <summary>
+    /// This method is called if the component is not a literal,
+    /// including the case when <see cref="Bib32StringComponent.Type"/> is not defined.
+    /// </summary>
+    void VisitName(Bib32StringComponent name);
+
+    void VisitQuoteLiteral(Bib32StringComponent quoteLiteral);
+    void VisitNumericLiteral(Bib32StringComponent numericLiteral);
+    void VisitBraceLiteral(Bib32StringComponent braceLiteral);
   }
 }

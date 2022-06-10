@@ -95,6 +95,26 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
+    /// Determines whethe the literal can be quote-delimited.
+    /// Such a literal must not be <see langword="default"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsQuoteLiteral(String32 str)
+    {
+      return IsQuoteLiteralImpl(Unsafe.As<String32, Char32[]>(ref str));
+    }
+
+    /// <summary>
+    /// Determines whethe the literal is a valid numeric literal.
+    /// Such a literal must not be <see langword="default"/> or empty.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsNumericLiteral(String32 str)
+    {
+      return IsNumericLiteralImpl(Unsafe.As<String32, Char32[]>(ref str));
+    }
+
+    /// <summary>
     /// Determines whethe the literal is brace-balanced.
     /// Such a literal must not be <see langword="default"/>.
     /// </summary>
@@ -576,6 +596,52 @@ namespace Neat.BibTeX.Utils
     {
       /* space, \t, \n, \v, \f, \r */
       return value == 32 || (uint)(value - 9) <= 4u;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool IsQuoteLiteralImpl(Char32[] data)
+    {
+      if (data is null)
+      {
+        return false;
+      }
+      int depth = 0;
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        if ((value = data[i].Value) == LeftBrace)
+        {
+          ++depth;
+        }
+        else if (value == RightBrace)
+        {
+          if (depth-- == 0)
+          {
+            return false;
+          }
+        }
+        else if (value == DoubleQuote && depth == 0)
+        {
+          return false;
+        }
+      }
+      return depth == 0;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool IsNumericLiteralImpl(Char32[] data)
+    {
+      if (data is null || data.Length == 0)
+      {
+        return false;
+      }
+      for (int i = 0; i < data.Length; ++i)
+      {
+        if (!IsNumericImpl(data[i].Value))
+        {
+          return false;
+        }
+      }
+      return true;
     }
 
     [MethodImpl(Helper.JustOptimize)]
