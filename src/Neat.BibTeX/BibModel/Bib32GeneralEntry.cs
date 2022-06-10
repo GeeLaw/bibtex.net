@@ -57,7 +57,7 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.OptimizeNoInline)]
     internal void CtorCheckImpl(string name)
     {
-      if (!IsValidGeneralEntryType(Type))
+      if (!IsGeneralEntryType(Type))
       {
         throw new ArgumentException("Bib32GeneralEntry: Type is not a valid general entry type.", name is null ? "type" : name);
       }
@@ -87,7 +87,7 @@ namespace Neat.BibTeX.BibModel
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsValidGeneralEntryType(String32 type)
+    public static bool IsGeneralEntryType(String32 type)
     {
       return BibBstChars.IsIdentifier(type)
         && !BibBstComparer.Equals(type, Bib32StringEntry.EntryType)
@@ -101,7 +101,7 @@ namespace Neat.BibTeX.BibModel
     public sealed override bool IsValid()
     {
       Bib32Field[] fields = Fields;
-      if (fields is null || !IsValidGeneralEntryType(Type))
+      if (fields is null || !IsGeneralEntryType(Type))
       {
         return false;
       }
