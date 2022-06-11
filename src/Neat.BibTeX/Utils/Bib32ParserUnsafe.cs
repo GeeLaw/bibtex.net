@@ -185,6 +185,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Skips until the current character is <c>@</c>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatJunk(ref int data0, int eaten, int count)
     {
       bool wasCR = false;
@@ -214,6 +215,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Skips the space characters.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatSpace(ref int data0, int eaten, int count)
     {
       bool wasCR = false;
@@ -243,6 +245,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Reads an identifier starting at <paramref name="data0"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatIdentifier(ref int data0, int count)
     {
       int eaten = 0;
@@ -260,6 +263,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Eats a string entry (<paramref name="data0"/> is immediately after <c>@string</c>).
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatStringEntry(ref int data0, int eaten, int count)
     {
       int value;
@@ -330,6 +334,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Eats a preamble entry (<paramref name="data0"/> is immediately after <c>@type</c>).
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatPreambleEntry(ref int data0, int eaten, int count)
     {
       int value;
@@ -378,6 +383,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Eats a general entry.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatGeneralEntry(ref int data0, int eaten, int count)
     {
       int valueOrLength;
@@ -498,6 +504,7 @@ namespace Neat.BibTeX.Utils
     /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[newEaten]</c> is a non-space character.
     /// This method returns <see langword="true"/> if an exception method was called.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private bool EatString(ref int data0, ref int oldNewEaten, int count)
     {
       int eaten = oldNewEaten, valueOrNewEatenOrLength;
@@ -581,6 +588,7 @@ namespace Neat.BibTeX.Utils
     /// This method returns <see langword="true"/> if an exception method was called.
     /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveBraceLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref int, int)"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private bool EatBraceLiteral(ref int data0, ref int oldNewEaten, int count)
     {
       int eaten = oldNewEaten, depth = 0;
@@ -615,6 +623,7 @@ namespace Neat.BibTeX.Utils
     /// This method returns <see langword="true"/> if an exception method was called.
     /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveQuoteLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref int, int)"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private bool EatQuoteLiteral(ref int data0, ref int oldNewEaten, int count)
     {
       int eaten = oldNewEaten, depth = 0;
@@ -655,6 +664,7 @@ namespace Neat.BibTeX.Utils
     /// Note that the character at <paramref name="data0"/> is not read (again), and
     /// <paramref name="count"/> is assumed to be positive without checking.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatNumericLiteral(ref int data0, int count)
     {
       int eaten = 1;
@@ -668,6 +678,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Reads a database key (of a brace-delimited entry) starting at <paramref name="data0"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatBraceDatabaseKey(ref int data0, int count)
     {
       int eaten, value;
@@ -686,6 +697,7 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Reads a database key (of a parenthesis-delimited entry) starting at <paramref name="data0"/>.
     /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
     private int EatParenthesisDatabaseKey(ref int data0, int count)
     {
       int eaten, value;
