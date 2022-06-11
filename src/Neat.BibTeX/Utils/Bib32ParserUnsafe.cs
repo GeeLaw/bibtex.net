@@ -632,7 +632,6 @@ namespace Neat.BibTeX.Utils
             continue;
           }
           myEaten = eaten;
-          myBraceDepth = depth;
           Overrides.StringQuoteLiteralGotNegativeBraceDepth(ref this);
           oldNewEaten = eaten;
           return true;
