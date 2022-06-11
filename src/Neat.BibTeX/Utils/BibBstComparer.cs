@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -16,6 +17,18 @@ namespace Neat.BibTeX.Utils
       IEqualityComparer2<string>, IComparer<string>,
       IEqualityComparer2<String8>, IComparer<String8>
   {
+    /// <summary>
+    /// This method should never be called.
+    /// In Visual Studio, use Find All References to verify that this method is never called.
+    /// </summary>
+    [SuppressMessage("Style", "IDE0060", Justification = "They must match with the base method.")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [MethodImpl(Helper.OptimizeNoInline)]
+    public static new void Equals(object objA, object objB)
+    {
+      throw new InvalidOperationException("This method is used to hide static bool object.Equals(object objA, object objB). Do not use it.");
+    }
+
     #region String32
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make interger promotion explicit.")]
