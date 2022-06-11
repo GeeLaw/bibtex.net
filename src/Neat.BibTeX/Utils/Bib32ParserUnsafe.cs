@@ -65,6 +65,20 @@ namespace Neat.BibTeX.Utils
     private int myLastLineEndsAfter;
 
     /// <summary>
+    /// Gets the index of the first character in the current line.
+    /// If this property is equal to <see cref="Eaten"/>, then <see cref="Column"/> is <c>1</c>.
+    /// This property is meaningful only in exception methods.
+    /// </summary>
+    public int LineStartsOn
+    {
+      [MethodImpl(Helper.OptimizeInline)]
+      get
+      {
+        return myLastLineEndsAfter + 1;
+      }
+    }
+
+    /// <summary>
     /// Gets the (1-based) column number of the space at the next character.
     /// This property is meaningful only in exception methods.
     /// </summary>

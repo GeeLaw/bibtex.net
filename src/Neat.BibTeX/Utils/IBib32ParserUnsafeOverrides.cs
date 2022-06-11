@@ -82,7 +82,7 @@ namespace Neat.BibTeX.Utils
     void SaveFieldName(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
 
     /// <summary>
-    /// Indicates that the parser has seen <c>name1 = {literal} # "literal" # 123 # anothername</c> plus optional space and has not reached the end of input.
+    /// Indicates that the parser has seen <c>name1 = {literal} # "literal" # 123 # anothername</c> plus optional space plus <c>,</c> or the closing delimiter.
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the general entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
     void SaveField(ref Bib32ParserUnsafe<TOverrides> that);
