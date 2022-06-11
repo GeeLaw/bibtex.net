@@ -387,13 +387,13 @@ namespace Neat.BibTeX.Utils
     /// </summary>
     private int EatGeneralEntry(ref int data0, int eaten, int count)
     {
-      int value;
+      int valueOrLength;
       bool isBrace;
       /* Skip optional space, and expect '{' or '('. */
       eaten = EatSpace(ref data0, eaten, count);
       if (eaten == count
-        || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
-          && value != BibBstChars.LeftParenthesis))
+        || (!(isBrace = ((valueOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
+          && valueOrLength != BibBstChars.LeftParenthesis))
       {
         goto ErrorOpen;
       }
@@ -404,24 +404,23 @@ namespace Neat.BibTeX.Utils
       {
         goto ErrorDatabaseKey;
       }
-      int extractedLength = (isBrace
+      valueOrLength = (isBrace
         ? EatBraceDatabaseKey(ref Unsafe.Add(ref data0, eaten), count - eaten)
         : EatParenthesisDatabaseKey(ref Unsafe.Add(ref data0, eaten), count - eaten));
-      Overrides.SaveDatabaseKey(ref this, ref Unsafe.Add(ref data0, eaten), extractedLength);
+      Overrides.SaveDatabaseKey(ref this, ref Unsafe.Add(ref data0, eaten), valueOrLength);
       /* Skip the database key, optional space, and expect ',' or '}' or ')'. */
-      eaten = EatSpace(ref data0, eaten + extractedLength, count);
+      eaten = EatSpace(ref data0, eaten + valueOrLength, count);
       if (eaten == count)
       {
         goto ErrorFirstCommaOrClose;
       }
       int entryClose = (isBrace ? BibBstChars.RightBrace : BibBstChars.RightParenthesis);
-      value = Unsafe.Add(ref data0, eaten);
-      if (value == BibBstChars.Comma)
+      if ((valueOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
       {
         ++eaten;
         goto ExpectSpaceThenFieldNameOrClose;
       }
-      if (value == entryClose)
+      if (valueOrLength == entryClose)
       {
         goto Save;
       }
@@ -433,14 +432,14 @@ namespace Neat.BibTeX.Utils
       {
         goto Save;
       }
-      extractedLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
-      if (extractedLength == 0)
+      valueOrLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
+      if (valueOrLength == 0)
       {
         goto ErrorFieldNameOrClose;
       }
-      Overrides.SaveFieldName(ref this, ref Unsafe.Add(ref data0, eaten), extractedLength);
+      Overrides.SaveFieldName(ref this, ref Unsafe.Add(ref data0, eaten), valueOrLength);
       /* Skip the field name, optional space, and expect '='. */
-      eaten = EatSpace(ref data0, eaten + extractedLength, count);
+      eaten = EatSpace(ref data0, eaten + valueOrLength, count);
       if (Unsafe.Add(ref data0, eaten) != BibBstChars.Assignment)
       {
         goto ErrorAssignment;
@@ -455,13 +454,13 @@ namespace Neat.BibTeX.Utils
       {
         goto ErrorEndOfInput;
       }
-      if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
+      if ((valueOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
       {
         Overrides.SaveField(ref this);
         ++eaten;
         goto ExpectSpaceThenFieldNameOrClose;
       }
-      if (value != entryClose)
+      if (valueOrLength != entryClose)
       {
         goto ErrorCommaOrClose;
       }
@@ -508,57 +507,57 @@ namespace Neat.BibTeX.Utils
     /// </summary>
     private bool EatString(ref int data0, ref int oldNewEaten, int count)
     {
-      int eaten = oldNewEaten, valueOrEndOrLength;
+      int eaten = oldNewEaten, valueOrNewEatenOrLength;
     ExpectComponent:
       if (eaten == count)
       {
         goto ErrorComponent;
       }
-      if ((valueOrEndOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
+      if ((valueOrNewEatenOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
       {
         /* Skip '{'. */
-        valueOrEndOrLength = ++eaten;
-        if (EatBraceLiteral(ref data0, ref valueOrEndOrLength, count))
+        valueOrNewEatenOrLength = ++eaten;
+        if (EatBraceLiteral(ref data0, ref valueOrNewEatenOrLength, count))
         {
           goto ErrorHandled;
         }
-        Overrides.SaveBraceLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength - eaten);
+        Overrides.SaveBraceLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength - eaten);
         /* Skip the brace-delimited literal and '}'. */
-        eaten = valueOrEndOrLength + 1;
+        eaten = valueOrNewEatenOrLength + 1;
         /* Fall through to skip optional space and check for '#'. */
       }
-      else if (valueOrEndOrLength == BibBstChars.DoubleQuote)
+      else if (valueOrNewEatenOrLength == BibBstChars.DoubleQuote)
       {
         /* Skip '"'. */
-        valueOrEndOrLength = ++eaten;
-        if (EatQuoteLiteral(ref data0, ref valueOrEndOrLength, count))
+        valueOrNewEatenOrLength = ++eaten;
+        if (EatQuoteLiteral(ref data0, ref valueOrNewEatenOrLength, count))
         {
           goto ErrorHandled;
         }
-        Overrides.SaveQuoteLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength - eaten);
+        Overrides.SaveQuoteLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength - eaten);
         /* Skip the quote-delimited literal and '"'. */
-        eaten = valueOrEndOrLength + 1;
+        eaten = valueOrNewEatenOrLength + 1;
         /* Fall through to skip optional space and check for '#'. */
       }
-      else if (BibBstChars.IsNumericImpl(valueOrEndOrLength))
+      else if (BibBstChars.IsNumericImpl(valueOrNewEatenOrLength))
       {
-        valueOrEndOrLength = EatNumericLiteral(ref Unsafe.Add(ref data0, eaten), count - eaten);
-        Overrides.SaveNumericLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength);
+        valueOrNewEatenOrLength = EatNumericLiteral(ref Unsafe.Add(ref data0, eaten), count - eaten);
+        Overrides.SaveNumericLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength);
         /* Skip the numeric literal. */
-        eaten += valueOrEndOrLength;
+        eaten += valueOrNewEatenOrLength;
         /* Fall through to skip optional space and check for '#'. */
       }
       else
       {
         /* Expect an identifier (name of the referenced string). */
-        valueOrEndOrLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
-        if (valueOrEndOrLength == 0)
+        valueOrNewEatenOrLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
+        if (valueOrNewEatenOrLength == 0)
         {
           goto ErrorComponent;
         }
-        Overrides.SaveNameComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength);
+        Overrides.SaveNameComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength);
         /* Skip the name of the referenced string. */
-        eaten += valueOrEndOrLength;
+        eaten += valueOrNewEatenOrLength;
         /* Fall through to skip optional space and check for '#'. */
       }
       /* Skip optional space and check if the next character is '#'. */
@@ -579,7 +578,7 @@ namespace Neat.BibTeX.Utils
       return true;
     ErrorHandled:
       /* We jump here from an error handled by EatBraceLiteral or EatQuoteLiteral. */
-      oldNewEaten = valueOrEndOrLength;
+      oldNewEaten = valueOrNewEatenOrLength;
       return true;
     }
 
