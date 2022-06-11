@@ -223,7 +223,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '{' or '(' after '@string'.",
+          "Ln {0} Ch {1}: Expecting '{{' or '(' after '@string'.",
           that.Line, that.Column));
 #endif
       }
@@ -233,7 +233,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting identifier (string name) after '@string{'.",
+          "Ln {0} Ch {1}: Expecting identifier (string name) after '@string{{'.",
           that.Line, that.Column));
 #endif
       }
@@ -243,7 +243,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '=' after '@string{ name'.",
+          "Ln {0} Ch {1}: Expecting '=' after '@string{{ name'.",
           that.Line, that.Column));
 #endif
       }
@@ -253,7 +253,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '}' or ')' after '@string{ name = value', got end of input.",
+          "Ln {0} Ch {1}: Expecting '}}' or ')' after '@string{{ name = value', got end of input.",
           that.Line, that.Column));
 #endif
       }
@@ -263,7 +263,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '}' or ')' after '@string{ name = value'.",
+          "Ln {0} Ch {1}: Expecting '}}' or ')' after '@string{{ name = value'.",
           that.Line, that.Column));
 #else
         SaveStringEntry(ref that);
@@ -275,7 +275,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '{' or '(' after '@preamble'.",
+          "Ln {0} Ch {1}: Expecting '{{' or '(' after '@preamble'.",
           that.Line, that.Column));
 #endif
       }
@@ -285,7 +285,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '}' or ')' after '@preamble{ text', got end of input.",
+          "Ln {0} Ch {1}: Expecting '}}' or ')' after '@preamble{{ text', got end of input.",
           that.Line, that.Column));
 #endif
       }
@@ -295,7 +295,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '}' or ')' after '@preamble{ text'.",
+          "Ln {0} Ch {1}: Expecting '}}' or ')' after '@preamble{{ text'.",
           that.Line, that.Column));
 #else
         SavePreambleEntry(ref that);
@@ -307,7 +307,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '{' or '(' after '@type'.",
+          "Ln {0} Ch {1}: Expecting '{{' or '(' after '@type'.",
           that.Line, that.Column));
 #endif
       }
@@ -317,7 +317,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting database key after '@type{', got end of input.",
+          "Ln {0} Ch {1}: Expecting database key after '@type{{', got end of input.",
           that.Line, that.Column));
 #endif
       }
@@ -327,7 +327,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting ',' or '}' or ')' after '@type{ key'.",
+          "Ln {0} Ch {1}: Expecting ',' or '}}' or ')' after '@type{{ key'.",
           that.Line, that.Column));
 #else
         SaveGeneralEntry(ref that);
@@ -339,7 +339,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting identifier (field name) or '}' after '@type{ key,'.",
+          "Ln {0} Ch {1}: Expecting identifier (field name) or '}}' after '@type{{ key,'.",
           that.Line, that.Column));
 #else
         SaveGeneralEntry(ref that);
@@ -351,7 +351,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting '=' after '@type{ key, name'.",
+          "Ln {0} Ch {1}: Expecting '=' after '@type{{ key, name'.",
           that.Line, that.Column));
 #else
         SaveGeneralEntry(ref that);
@@ -363,7 +363,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting ',' or '}' or ')' after '@type{ key, name = value', got end of input.",
+          "Ln {0} Ch {1}: Expecting ',' or '}}' or ')' after '@type{{ key, name = value', got end of input.",
           that.Line, that.Column));
 #else
         SaveGeneralEntry(ref that);
@@ -375,7 +375,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting ',' or '}' or ')' after '@type{ key, name = value'.",
+          "Ln {0} Ch {1}: Expecting ',' or '}}' or ')' after '@type{{ key, name = value'.",
           that.Line, that.Column));
 #else
         SaveField(ref that);
@@ -388,7 +388,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Expecting brace-delimited, quote-delimited, or pure numeric literal, or identifier (name of referenced string) after '@type{ key, name = '.",
+          "Ln {0} Ch {1}: Expecting brace-delimited, quote-delimited, or pure numeric literal, or identifier (name of referenced string) after '@type{{ key, name = '.",
           that.Line, that.Column));
 #else
         if (EntryTypeCode == 0)
@@ -403,7 +403,7 @@ namespace Neat.BibTeX.BibParsers
       {
 #if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
-          "Ln {0} Ch {1}: Extra '}' in quote-delimited literal.",
+          "Ln {0} Ch {1}: Extra '}}' in quote-delimited literal.",
           that.Line, that.Column));
 #else
         if (EntryTypeCode == 0)
