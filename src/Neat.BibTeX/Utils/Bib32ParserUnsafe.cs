@@ -142,7 +142,7 @@ namespace Neat.BibTeX.Utils
       myCount = count;
       myLine = 1;
       myLastLineEndsAfter = -1;
-      for (int eaten = EatJunk(ref data0, 0, count); eaten != count; EatJunk(ref data0, 0, count))
+      for (int eaten = EatJunk(ref data0, 0, count); eaten != count; eaten = EatJunk(ref data0, eaten, count))
       {
 #if BIB_PARSER_CHECKS
         /* The data were rudely modified (either by Overrides or from another thread) during parsing. */
@@ -288,8 +288,8 @@ namespace Neat.BibTeX.Utils
         goto ErrorName;
       }
       Overrides.SaveStringName(ref this, ref Unsafe.Add(ref data0, eaten), nameLength);
-      /* Skip the string name and expect '='. */
-      eaten += nameLength;
+      /* Skip the string name, optional space, and expect '='. */
+      eaten = EatSpace(ref data0, eaten + nameLength, count);
       if (eaten == count || Unsafe.Add(ref data0, eaten) != BibBstChars.Assignment)
       {
         goto ErrorAssignment;
@@ -455,7 +455,7 @@ namespace Neat.BibTeX.Utils
       {
         goto ErrorEndOfInput;
       }
-      if ((value = Unsafe.Add(ref data0, count)) == BibBstChars.Comma)
+      if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
       {
         Overrides.SaveField(ref this);
         ++eaten;
@@ -523,7 +523,7 @@ namespace Neat.BibTeX.Utils
           goto ErrorHandled;
         }
         Overrides.SaveBraceLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength - eaten);
-        /* Skip the brace-delimited literal, '}'. */
+        /* Skip the brace-delimited literal and '}'. */
         eaten = valueOrEndOrLength + 1;
         /* Fall through to skip optional space and check for '#'. */
       }
@@ -536,7 +536,7 @@ namespace Neat.BibTeX.Utils
           goto ErrorHandled;
         }
         Overrides.SaveQuoteLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength - eaten);
-        /* Skip the brace-delimited literal, '"'. */
+        /* Skip the quote-delimited literal and '"'. */
         eaten = valueOrEndOrLength + 1;
         /* Fall through to skip optional space and check for '#'. */
       }
@@ -575,8 +575,11 @@ namespace Neat.BibTeX.Utils
     ErrorComponent:
       myEaten = eaten;
       Overrides.StringExpectingComponent(ref this);
-    ErrorHandled:
       oldNewEaten = eaten;
+      return true;
+    ErrorHandled:
+      /* We jump here from an error handled by EatBraceLiteral or EatQuoteLiteral. */
+      oldNewEaten = valueOrEndOrLength;
       return true;
     }
 
