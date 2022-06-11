@@ -144,13 +144,6 @@ namespace Neat.BibTeX.Utils
       myLastLineEndsAfter = -1;
       for (int eaten = EatJunk(ref data0, 0, count); eaten != count; eaten = EatJunk(ref data0, eaten, count))
       {
-#if BIB_PARSER_CHECKS
-        /* The data were rudely modified (either by Overrides or from another thread) during parsing. */
-        if (Unsafe.Add(ref data0, eaten) != BibBstChars.At)
-        {
-          throw new InvalidOperationException("An '@' disappeared.");
-        }
-#endif
         /* Skip '@', optional space, and expect an identifier (entry type). */
         eaten = EatSpace(ref data0, eaten + 1, count);
         int entryTypeLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
