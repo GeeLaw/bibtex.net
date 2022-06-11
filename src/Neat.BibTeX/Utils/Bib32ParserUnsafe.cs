@@ -251,7 +251,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Eats a string entry.
+    /// Eats a string entry (<paramref name="data0"/> is immediately after <c>@string</c>).
     /// </summary>
     private int EatStringEntry(ref int data0, int eaten, int count)
     {
@@ -270,7 +270,44 @@ namespace Neat.BibTeX.Utils
       myEntryIsBrace = isBrace;
       /* Skip '{' or '(', optional space, and expect an identifier (string name). */
       eaten = EatSpace(ref data0, eaten + 1, count);
-      throw new NotImplementedException();
+      int nameLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
+      if (nameLength == 0)
+      {
+        myEaten = eaten;
+        Overrides.StringEntryExpectingName(ref this);
+        return eaten;
+      }
+      Overrides.SaveStringName(ref this, ref Unsafe.Add(ref data0, eaten), nameLength);
+      /* Skip the string name and expect '='. */
+      eaten += nameLength;
+      if (eaten == count || Unsafe.Add(ref data0, eaten) != BibBstChars.Assignment)
+      {
+        myEaten = eaten;
+        Overrides.StringEntryExpectingAssignment(ref this);
+        return eaten;
+      }
+      /* Skip '=', optional space, and expect a series of concatenated components (string value). */
+      eaten = EatSpace(ref data0, eaten + 1, count);
+      if (EatString(ref data0, ref eaten, count))
+      {
+        return eaten;
+      }
+      /* Expect '}' or ')'. */
+      if (eaten == count)
+      {
+        myEaten = eaten;
+        Overrides.StringEntryGotEndOfInput(ref this);
+        return eaten;
+      }
+      if (Unsafe.Add(ref data0, eaten) != (isBrace ? BibBstChars.RightBrace : BibBstChars.RightParenthesis))
+      {
+        myEaten = eaten;
+        Overrides.StringEntryExpectingClose(ref this);
+        return eaten;
+      }
+      Overrides.SaveStringEntry(ref this);
+      /* Skip '}' or ')'. */
+      return eaten + 1;
     }
 
     /// <summary>
@@ -316,6 +353,16 @@ namespace Neat.BibTeX.Utils
       myEntryIsBrace = isBrace;
       /* Skip '{' or '(', optional space, and parse a database key. */
       eaten = EatSpace(ref data0, eaten + 1, count);
+      throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Eats a series of concatenated components starting at <c>data[eaten]</c>.
+    /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[eaten]</c> is a non-space character.
+    /// This method returns <see langword="true"/> if an exception method was called.
+    /// </summary>
+    private bool EatString(ref int data0, ref int eaten, int count)
+    {
       throw new NotImplementedException();
     }
   }
