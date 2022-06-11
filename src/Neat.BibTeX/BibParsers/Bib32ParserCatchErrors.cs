@@ -1,7 +1,9 @@
 #define BIB_PARSER_CATCH_ERRORS
 
 using System.Collections.Generic;
+#if BIB_PARSER_CATCH_ERRORS
 using System.Globalization;
+#endif
 using System.Runtime.CompilerServices;
 using Neat.BibTeX.BibModel;
 using Neat.BibTeX.Utils;

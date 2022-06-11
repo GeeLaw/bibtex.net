@@ -23,7 +23,7 @@ namespace Neat.BibTeX.BibModel
     public StringT Type;
 
     /// <summary>
-    /// Indicates whethe this entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
+    /// Indicates whether this entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
     public bool IsBrace;
 
@@ -40,7 +40,7 @@ namespace Neat.BibTeX.BibModel
     }
 
     /// <summary>
-    /// Determines whethe the entry is currently valid.
+    /// Determines whether the entry is currently valid.
     /// </summary>
     public abstract bool IsValid();
 

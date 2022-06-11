@@ -98,7 +98,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal can be quote-delimited.
+    /// Determines whether the literal can be quote-delimited.
     /// Such a literal must not be <see langword="default"/>.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
@@ -108,7 +108,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal is a valid numeric literal.
+    /// Determines whether the literal is a valid numeric literal.
     /// Such a literal must not be <see langword="default"/> or empty.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
@@ -118,7 +118,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal is brace-balanced.
+    /// Determines whether the literal is brace-balanced.
     /// Such a literal must not be <see langword="default"/>.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
@@ -222,7 +222,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal can be quote-delimited.
+    /// Determines whether the literal can be quote-delimited.
     /// Such a literal must not be <see langword="default"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
@@ -255,7 +255,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal is a valid numeric literal.
+    /// Determines whether the literal is a valid numeric literal.
     /// Such a literal must not be <see langword="default"/> or empty.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
@@ -276,7 +276,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal is brace-balanced.
+    /// Determines whether the literal is brace-balanced.
     /// Such a literal must not be <see langword="default"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
@@ -364,7 +364,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal can be quote-delimited.
+    /// Determines whether the literal can be quote-delimited.
     /// Such a literal must not be <see langword="default"/>.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
@@ -374,7 +374,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal is a valid numeric literal.
+    /// Determines whether the literal is a valid numeric literal.
     /// Such a literal must not be <see langword="default"/> or empty.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
@@ -384,7 +384,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Determines whethe the literal is brace-balanced.
+    /// Determines whether the literal is brace-balanced.
     /// Such a literal must not be <see langword="default"/>.
     /// </summary>
     [MethodImpl(Helper.OptimizeInline)]
@@ -797,7 +797,7 @@ namespace Neat.BibTeX.Utils
     private static IsIdentifierCharacterData theIsIdentifierCharacter = new IsIdentifierCharacterData(0);
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsIdentifierImpl(Char32[] data)
+    private static bool IsIdentifierImpl(Char32[] data)
     {
       if (data is null || data.Length == 0 || IsNumericImpl(data[0].Value))
       {
@@ -816,7 +816,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsIdentifierImpl(Char8[] data)
+    private static bool IsIdentifierImpl(Char8[] data)
     {
       if (data is null || data.Length == 0 || IsNumericImpl(data[0].Value))
       {
@@ -843,7 +843,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static BibDatabaseKeyType GetDatabaseKeyTypeImpl(Char32[] data)
+    private static BibDatabaseKeyType GetDatabaseKeyTypeImpl(Char32[] data)
     {
       if (data is null)
       {
@@ -868,7 +868,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static BibDatabaseKeyType GetDatabaseKeyTypeImpl(Char8[] data)
+    private static BibDatabaseKeyType GetDatabaseKeyTypeImpl(Char8[] data)
     {
       if (data is null)
       {
@@ -893,7 +893,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    internal static bool IsAlphaImpl(int value)
+    private static bool IsAlphaImpl(int value)
     {
       return (uint)(value - 65) <= 25u || (uint)(value - 97) <= 25u;
     }
@@ -912,7 +912,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsQuoteLiteralImpl(Char32[] data)
+    private static bool IsQuoteLiteralImpl(Char32[] data)
     {
       if (data is null)
       {
@@ -941,7 +941,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsQuoteLiteralImpl(Char8[] data)
+    private static bool IsQuoteLiteralImpl(Char8[] data)
     {
       if (data is null)
       {
@@ -970,7 +970,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsNumericLiteralImpl(Char32[] data)
+    private static bool IsNumericLiteralImpl(Char32[] data)
     {
       if (data is null || data.Length == 0)
       {
@@ -987,7 +987,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsNumericLiteralImpl(Char8[] data)
+    private static bool IsNumericLiteralImpl(Char8[] data)
     {
       if (data is null || data.Length == 0)
       {
@@ -1004,7 +1004,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsBraceBalancedImpl(Char32[] data)
+    private static bool IsBraceBalancedImpl(Char32[] data)
     {
       if (data is null)
       {
@@ -1026,7 +1026,7 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool IsBraceBalancedImpl(Char8[] data)
+    private static bool IsBraceBalancedImpl(Char8[] data)
     {
       if (data is null)
       {

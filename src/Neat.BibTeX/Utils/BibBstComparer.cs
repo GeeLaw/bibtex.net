@@ -17,7 +17,7 @@ namespace Neat.BibTeX.Utils
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make interger promotion explicit.")]
     [MethodImpl(Helper.JustOptimize)]
-    internal static int CompareImpl(Char32[] x, Char32[] y)
+    private static int CompareImpl(Char32[] x, Char32[] y)
     {
       if (ReferenceEquals(x, y))
       {
@@ -50,7 +50,7 @@ namespace Neat.BibTeX.Utils
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make interger promotion explicit.")]
     [MethodImpl(Helper.JustOptimize)]
-    internal static bool EqualsImpl(Char32[] x, Char32[] y)
+    private static bool EqualsImpl(Char32[] x, Char32[] y)
     {
       if (ReferenceEquals(x, y))
       {
@@ -81,7 +81,7 @@ namespace Neat.BibTeX.Utils
 
     [SuppressMessage("Style", "IDE0004", Justification = "Make interger promotion explicit.")]
     [MethodImpl(Helper.JustOptimize)]
-    internal static int GetHashCodeImpl(Char32[] x)
+    private static int GetHashCodeImpl(Char32[] x)
     {
       if (x is null)
       {
