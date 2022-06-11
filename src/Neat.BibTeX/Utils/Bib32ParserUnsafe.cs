@@ -311,7 +311,7 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Eats a preamble entry.
+    /// Eats a preamble entry (<paramref name="data0"/> is immediately after <c>@type</c>).
     /// </summary>
     private int EatPreambleEntry(ref int data0, int eaten, int count)
     {
@@ -328,9 +328,28 @@ namespace Neat.BibTeX.Utils
         return eaten;
       }
       myEntryIsBrace = isBrace;
-      /* Skip '{' or '(', optional space, and expect a series of concatenated strings (preamble text). */
+      /* Skip '{' or '(', optional space, and expect a series of concatenated components (preamble text). */
       eaten = EatSpace(ref data0, eaten + 1, count);
-      throw new NotImplementedException();
+      if (EatString(ref data0, ref eaten, count))
+      {
+        return eaten;
+      }
+      /* Expect '}' or ')'. */
+      if (eaten == count)
+      {
+        myEaten = eaten;
+        Overrides.PreambleEntryGotEndOfInput(ref this);
+        return eaten;
+      }
+      if (Unsafe.Add(ref data0, eaten) != (isBrace ? BibBstChars.RightBrace : BibBstChars.RightParenthesis))
+      {
+        myEaten = eaten;
+        Overrides.PreambleEntryExpectingClose(ref this);
+        return eaten;
+      }
+      Overrides.SavePreambleEntry(ref this);
+      /* Skip '}' or ')'. */
+      return eaten + 1;
     }
 
     /// <summary>
