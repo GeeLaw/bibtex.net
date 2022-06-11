@@ -37,7 +37,7 @@ namespace Neat.BibTeX.Utils
     /* change.case$ */
     public const int Colon = ':';
 
-    #region Char32
+    #region String32, Char32
 
     /// <summary>
     /// An identifier is non-<see langword="default"/>, non-empty, cannot start with a numeric character, and
@@ -127,7 +127,273 @@ namespace Neat.BibTeX.Utils
       return IsBraceBalancedImpl(Unsafe.As<String32, Char32[]>(ref str));
     }
 
-    #endregion Char32
+    #endregion String32, Char32
+
+    #region String16, Char16
+
+    /// <summary>
+    /// An identifier is non-<see langword="default"/>, non-empty, cannot start with a numeric character, and
+    /// consists of only identifier characters.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool IsIdentifier(string str)
+    {
+      if (str is null || str.Length == 0 || IsNumericImpl(str[0]))
+      {
+        return false;
+      }
+      for (int i = 0, value; i < str.Length; ++i)
+      {
+        value = str[i];
+        if ((uint)value >= 128u
+          || !Unsafe.Add(ref Unsafe.As<IsIdentifierCharacterData, bool>(ref theIsIdentifierCharacter), value))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /// <summary>
+    /// Consult the original implementation of BibTeX for what constitutes a valid identifier character.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsIdentifier(char ch)
+    {
+      return IsIdentifierImpl(ch);
+    }
+
+    /// <summary>
+    /// Determines whether the database key is valid and whether the general entry must use parentheses.
+    /// A database key must not be <see langword="default"/> or contain <c>,</c> or space characters.
+    /// It can be empty.
+    /// The general entry must use parenthesis if the database key contains <c>}</c>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static BibDatabaseKeyType GetDatabaseKeyType(string str)
+    {
+      if (str is null)
+      {
+        return new BibDatabaseKeyType(BibDatabaseKeyType.InvalidValue);
+      }
+      bool mustUseParentheses = false;
+      for (int i = 0, value; i < str.Length; ++i)
+      {
+        value = str[i];
+        if (value == Comma || IsSpaceImpl(value))
+        {
+          return new BibDatabaseKeyType(BibDatabaseKeyType.InvalidValue);
+        }
+        if (value == RightBrace)
+        {
+          mustUseParentheses = true;
+        }
+      }
+      return new BibDatabaseKeyType(mustUseParentheses
+        ? BibDatabaseKeyType.MustUseParenthesesValue
+        : BibDatabaseKeyType.UseBracesOrParenthesesValue);
+    }
+
+    /// <summary>
+    /// Determines whether the character is alphabetc (only A-Z and a-z are considered alphabetic).
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsAlpha(char ch)
+    {
+      return IsAlphaImpl(ch);
+    }
+
+    /// <summary>
+    /// Determines whether the character is numeric (only 0-9 are considered numeric).
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsNumeric(char ch)
+    {
+      return IsNumericImpl(ch);
+    }
+
+    /// <summary>
+    /// Determines whether the character is space (only <c>U+0020</c> and <c>\t\n\v\f\r</c> are considered space).
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsSpace(char ch)
+    {
+      return IsSpaceImpl(ch);
+    }
+
+    /// <summary>
+    /// Determines whethe the literal can be quote-delimited.
+    /// Such a literal must not be <see langword="default"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool IsQuoteLiteral(string str)
+    {
+      if (str is null)
+      {
+        return false;
+      }
+      int depth = 0;
+      for (int i = 0, value; i < str.Length; ++i)
+      {
+        if ((value = str[i]) == LeftBrace)
+        {
+          ++depth;
+        }
+        else if (value == RightBrace)
+        {
+          if (depth-- == 0)
+          {
+            return false;
+          }
+        }
+        else if (value == DoubleQuote && depth == 0)
+        {
+          return false;
+        }
+      }
+      return depth == 0;
+    }
+
+    /// <summary>
+    /// Determines whethe the literal is a valid numeric literal.
+    /// Such a literal must not be <see langword="default"/> or empty.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool IsNumericLiteral(string str)
+    {
+      if (str is null || str.Length == 0)
+      {
+        return false;
+      }
+      for (int i = 0; i < str.Length; ++i)
+      {
+        if (!IsNumericImpl(str[i]))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /// <summary>
+    /// Determines whethe the literal is brace-balanced.
+    /// Such a literal must not be <see langword="default"/>.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static bool IsBraceBalanced(string str)
+    {
+      if (str is null)
+      {
+        return false;
+      }
+      int depth = 0;
+      for (int i = 0, value; i < str.Length; ++i)
+      {
+        if ((value = str[i]) == LeftBrace)
+        {
+          ++depth;
+        }
+        else if (value == RightBrace && depth-- == 0)
+        {
+          return false;
+        }
+      }
+      return depth == 0;
+    }
+
+    #endregion String16, Char16
+
+    #region String8, Char8
+
+    /// <summary>
+    /// An identifier is non-<see langword="default"/>, non-empty, cannot start with a numeric character, and
+    /// consists of only identifier characters.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsIdentifier(String8 str)
+    {
+      return IsIdentifierImpl(Unsafe.As<String8, Char8[]>(ref str));
+    }
+
+    /// <summary>
+    /// Consult the original implementation of BibTeX for what constitutes a valid identifier character.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsIdentifier(Char8 ch)
+    {
+      return IsIdentifierImpl(ch.Value);
+    }
+
+    /// <summary>
+    /// Determines whether the database key is valid and whether the general entry must use parentheses.
+    /// A database key must not be <see langword="default"/> or contain <c>,</c> or space characters.
+    /// It can be empty.
+    /// The general entry must use parenthesis if the database key contains <c>}</c>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static BibDatabaseKeyType GetDatabaseKeyType(String8 str)
+    {
+      return GetDatabaseKeyTypeImpl(Unsafe.As<String8, Char8[]>(ref str));
+    }
+
+    /// <summary>
+    /// Determines whether the character is alphabetc (only A-Z and a-z are considered alphabetic).
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsAlpha(Char8 ch)
+    {
+      return IsAlphaImpl(ch.Value);
+    }
+
+    /// <summary>
+    /// Determines whether the character is numeric (only 0-9 are considered numeric).
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsNumeric(Char8 ch)
+    {
+      return IsNumericImpl(ch.Value);
+    }
+
+    /// <summary>
+    /// Determines whether the character is space (only <c>U+0020</c> and <c>\t\n\v\f\r</c> are considered space).
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsSpace(Char8 ch)
+    {
+      return IsSpaceImpl(ch.Value);
+    }
+
+    /// <summary>
+    /// Determines whethe the literal can be quote-delimited.
+    /// Such a literal must not be <see langword="default"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsQuoteLiteral(String8 str)
+    {
+      return IsQuoteLiteralImpl(Unsafe.As<String8, Char8[]>(ref str));
+    }
+
+    /// <summary>
+    /// Determines whethe the literal is a valid numeric literal.
+    /// Such a literal must not be <see langword="default"/> or empty.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsNumericLiteral(String8 str)
+    {
+      return IsNumericLiteralImpl(Unsafe.As<String8, Char8[]>(ref str));
+    }
+
+    /// <summary>
+    /// Determines whethe the literal is brace-balanced.
+    /// Such a literal must not be <see langword="default"/>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsBraceBalanced(String8 str)
+    {
+      return IsBraceBalancedImpl(Unsafe.As<String8, Char8[]>(ref str));
+    }
+
+    #endregion String8, Char8
 
     [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 128)]
     private readonly struct IsIdentifierCharacterData
@@ -549,6 +815,25 @@ namespace Neat.BibTeX.Utils
       return true;
     }
 
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool IsIdentifierImpl(Char8[] data)
+    {
+      if (data is null || data.Length == 0 || IsNumericImpl(data[0].Value))
+      {
+        return false;
+      }
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        value = data[i].Value;
+        if ((uint)value >= 128u
+          || !Unsafe.Add(ref Unsafe.As<IsIdentifierCharacterData, bool>(ref theIsIdentifierCharacter), value))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
     [MethodImpl(Helper.OptimizeInline)]
     internal static bool IsIdentifierImpl(int value)
     {
@@ -559,6 +844,31 @@ namespace Neat.BibTeX.Utils
 
     [MethodImpl(Helper.JustOptimize)]
     internal static BibDatabaseKeyType GetDatabaseKeyTypeImpl(Char32[] data)
+    {
+      if (data is null)
+      {
+        return new BibDatabaseKeyType(BibDatabaseKeyType.InvalidValue);
+      }
+      bool mustUseParentheses = false;
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        value = data[i].Value;
+        if (value == Comma || IsSpaceImpl(value))
+        {
+          return new BibDatabaseKeyType(BibDatabaseKeyType.InvalidValue);
+        }
+        if (value == RightBrace)
+        {
+          mustUseParentheses = true;
+        }
+      }
+      return new BibDatabaseKeyType(mustUseParentheses
+        ? BibDatabaseKeyType.MustUseParenthesesValue
+        : BibDatabaseKeyType.UseBracesOrParenthesesValue);
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static BibDatabaseKeyType GetDatabaseKeyTypeImpl(Char8[] data)
     {
       if (data is null)
       {
@@ -631,6 +941,35 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
+    internal static bool IsQuoteLiteralImpl(Char8[] data)
+    {
+      if (data is null)
+      {
+        return false;
+      }
+      int depth = 0;
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        if ((value = data[i].Value) == LeftBrace)
+        {
+          ++depth;
+        }
+        else if (value == RightBrace)
+        {
+          if (depth-- == 0)
+          {
+            return false;
+          }
+        }
+        else if (value == DoubleQuote && depth == 0)
+        {
+          return false;
+        }
+      }
+      return depth == 0;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
     internal static bool IsNumericLiteralImpl(Char32[] data)
     {
       if (data is null || data.Length == 0)
@@ -648,7 +987,46 @@ namespace Neat.BibTeX.Utils
     }
 
     [MethodImpl(Helper.JustOptimize)]
+    internal static bool IsNumericLiteralImpl(Char8[] data)
+    {
+      if (data is null || data.Length == 0)
+      {
+        return false;
+      }
+      for (int i = 0; i < data.Length; ++i)
+      {
+        if (!IsNumericImpl(data[i].Value))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
     internal static bool IsBraceBalancedImpl(Char32[] data)
+    {
+      if (data is null)
+      {
+        return false;
+      }
+      int depth = 0;
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        if ((value = data[i].Value) == LeftBrace)
+        {
+          ++depth;
+        }
+        else if (value == RightBrace && depth-- == 0)
+        {
+          return false;
+        }
+      }
+      return depth == 0;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal static bool IsBraceBalancedImpl(Char8[] data)
     {
       if (data is null)
       {
