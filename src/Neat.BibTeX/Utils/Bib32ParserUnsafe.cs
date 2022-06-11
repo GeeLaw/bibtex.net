@@ -263,9 +263,7 @@ namespace Neat.BibTeX.Utils
         || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
           && value != BibBstChars.LeftParenthesis))
       {
-        myEaten = eaten;
-        Overrides.StringEntryExpectingOpen(ref this);
-        return eaten;
+        goto ErrorOpen;
       }
       myEntryIsBrace = isBrace;
       /* Skip '{' or '(', optional space, and expect an identifier (string name). */
@@ -273,18 +271,14 @@ namespace Neat.BibTeX.Utils
       int nameLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
       if (nameLength == 0)
       {
-        myEaten = eaten;
-        Overrides.StringEntryExpectingName(ref this);
-        return eaten;
+        goto ErrorName;
       }
       Overrides.SaveStringName(ref this, ref Unsafe.Add(ref data0, eaten), nameLength);
       /* Skip the string name and expect '='. */
       eaten += nameLength;
       if (eaten == count || Unsafe.Add(ref data0, eaten) != BibBstChars.Assignment)
       {
-        myEaten = eaten;
-        Overrides.StringEntryExpectingAssignment(ref this);
-        return eaten;
+        goto ErrorAssignment;
       }
       /* Skip '=', optional space, and expect a series of concatenated components (string value). */
       eaten = EatSpace(ref data0, eaten + 1, count);
@@ -295,19 +289,35 @@ namespace Neat.BibTeX.Utils
       /* Expect '}' or ')'. */
       if (eaten == count)
       {
-        myEaten = eaten;
-        Overrides.StringEntryGotEndOfInput(ref this);
-        return eaten;
+        goto ErrorEndOfInput;
       }
       if (Unsafe.Add(ref data0, eaten) != (isBrace ? BibBstChars.RightBrace : BibBstChars.RightParenthesis))
       {
-        myEaten = eaten;
-        Overrides.StringEntryExpectingClose(ref this);
-        return eaten;
+        goto ErrorClose;
       }
       Overrides.SaveStringEntry(ref this);
       /* Skip '}' or ')'. */
       return eaten + 1;
+    ErrorOpen:
+      myEaten = eaten;
+      Overrides.StringEntryExpectingOpen(ref this);
+      return eaten;
+    ErrorName:
+      myEaten = eaten;
+      Overrides.StringEntryExpectingName(ref this);
+      return eaten;
+    ErrorAssignment:
+      myEaten = eaten;
+      Overrides.StringEntryExpectingAssignment(ref this);
+      return eaten;
+    ErrorEndOfInput:
+      myEaten = eaten;
+      Overrides.StringEntryGotEndOfInput(ref this);
+      return eaten;
+    ErrorClose:
+      myEaten = eaten;
+      Overrides.StringEntryExpectingClose(ref this);
+      return eaten;
     }
 
     /// <summary>
@@ -323,9 +333,7 @@ namespace Neat.BibTeX.Utils
         || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
           && value != BibBstChars.LeftParenthesis))
       {
-        myEaten = eaten;
-        Overrides.PreambleEntryExpectingOpen(ref this);
-        return eaten;
+        goto ErrorOpen;
       }
       myEntryIsBrace = isBrace;
       /* Skip '{' or '(', optional space, and expect a series of concatenated components (preamble text). */
@@ -337,19 +345,27 @@ namespace Neat.BibTeX.Utils
       /* Expect '}' or ')'. */
       if (eaten == count)
       {
-        myEaten = eaten;
-        Overrides.PreambleEntryGotEndOfInput(ref this);
-        return eaten;
+        goto ErrorEndOfInput;
       }
       if (Unsafe.Add(ref data0, eaten) != (isBrace ? BibBstChars.RightBrace : BibBstChars.RightParenthesis))
       {
-        myEaten = eaten;
-        Overrides.PreambleEntryExpectingClose(ref this);
-        return eaten;
+        goto ErrorClose;
       }
       Overrides.SavePreambleEntry(ref this);
       /* Skip '}' or ')'. */
       return eaten + 1;
+    ErrorOpen:
+      myEaten = eaten;
+      Overrides.PreambleEntryExpectingOpen(ref this);
+      return eaten;
+    ErrorEndOfInput:
+      myEaten = eaten;
+      Overrides.PreambleEntryGotEndOfInput(ref this);
+      return eaten;
+    ErrorClose:
+      myEaten = eaten;
+      Overrides.PreambleEntryExpectingClose(ref this);
+      return eaten;
     }
 
     /// <summary>
