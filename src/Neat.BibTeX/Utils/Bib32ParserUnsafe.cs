@@ -365,14 +365,110 @@ namespace Neat.BibTeX.Utils
         || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
           && value != BibBstChars.LeftParenthesis))
       {
-        myEaten = eaten;
-        Overrides.GeneralEntryExpectingOpen(ref this);
-        return eaten;
+        goto ErrorOpen;
       }
       myEntryIsBrace = isBrace;
-      /* Skip '{' or '(', optional space, and parse a database key. */
+      /* Skip '{' or '(', optional space, and expect a database key. */
       eaten = EatSpace(ref data0, eaten + 1, count);
-      throw new NotImplementedException();
+      if (eaten == count)
+      {
+        goto ErrorDatabaseKey;
+      }
+      int extractedLength = (isBrace
+        ? EatBraceDatabaseKey(ref Unsafe.Add(ref data0, eaten), count - eaten)
+        : EatParenthesisDatabaseKey(ref Unsafe.Add(ref data0, eaten), count - eaten));
+      Overrides.SaveDatabaseKey(ref this, ref Unsafe.Add(ref data0, eaten), extractedLength);
+      /* Skip the database key, optional space, and expect ',' or '}' or ')'. */
+      eaten = EatSpace(ref data0, eaten + extractedLength, count);
+      if (eaten == count)
+      {
+        goto ErrorFirstCommaOrClose;
+      }
+      int entryClose = (isBrace ? BibBstChars.RightBrace : BibBstChars.RightParenthesis);
+      value = Unsafe.Add(ref data0, eaten);
+      if (value == BibBstChars.Comma)
+      {
+        ++eaten;
+        goto ExpectSpaceThenFieldNameOrClose;
+      }
+      if (value == entryClose)
+      {
+        goto Save;
+      }
+      goto ErrorFirstCommaOrClose;
+    ExpectSpaceThenFieldNameOrClose:
+      /* Skip optional space and expect '}' or ')' or an identifier (field name). */
+      eaten = EatSpace(ref data0, eaten, count);
+      if (Unsafe.Add(ref data0, eaten) == entryClose)
+      {
+        goto Save;
+      }
+      extractedLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
+      if (extractedLength == 0)
+      {
+        goto ErrorFieldNameOrClose;
+      }
+      Overrides.SaveFieldName(ref this, ref Unsafe.Add(ref data0, eaten), extractedLength);
+      /* Skip the field name, optional space, and expect '='. */
+      eaten = EatSpace(ref data0, eaten + extractedLength, count);
+      if (Unsafe.Add(ref data0, eaten) != BibBstChars.Assignment)
+      {
+        goto ErrorAssignment;
+      }
+      /* Skip '=', optional space, and expect a series of concatenated components (field value). */
+      eaten = EatSpace(ref data0, eaten + 1, count);
+      if (EatString(ref data0, ref eaten, count))
+      {
+        return eaten;
+      }
+      if (eaten == count)
+      {
+        goto ErrorEndOfInput;
+      }
+      if ((value = Unsafe.Add(ref data0, count)) == BibBstChars.Comma)
+      {
+        Overrides.SaveField(ref this);
+        ++eaten;
+        goto ExpectSpaceThenFieldNameOrClose;
+      }
+      if (value != entryClose)
+      {
+        goto ErrorCommaOrClose;
+      }
+      Overrides.SaveField(ref this);
+      /* Fall through to save. */
+    Save:
+      Overrides.SaveGeneralEntry(ref this);
+      /* Skip '}' or ')'. */
+      return eaten + 1;
+    ErrorOpen:
+      myEaten = eaten;
+      Overrides.GeneralEntryExpectingOpen(ref this);
+      return eaten;
+    ErrorDatabaseKey:
+      myEaten = eaten;
+      Overrides.GeneralEntryExpectingDatabaseKey(ref this);
+      return eaten;
+    ErrorFirstCommaOrClose:
+      myEaten = eaten;
+      Overrides.GeneralEntryExpectingFirstCommaOrClose(ref this);
+      return eaten;
+    ErrorFieldNameOrClose:
+      myEaten = eaten;
+      Overrides.GeneralEntryExpectingFieldNameOrClose(ref this);
+      return eaten;
+    ErrorAssignment:
+      myEaten = eaten;
+      Overrides.GeneralEntryExpectingAssignment(ref this);
+      return eaten;
+    ErrorEndOfInput:
+      myEaten = eaten;
+      Overrides.GeneralEntryGotEndOfInput(ref this);
+      return eaten;
+    ErrorCommaOrClose:
+      myEaten = eaten;
+      Overrides.GeneralEntryExpectingCommaOrClose(ref this);
+      return eaten;
     }
 
     /// <summary>
@@ -383,6 +479,41 @@ namespace Neat.BibTeX.Utils
     private bool EatString(ref int data0, ref int eaten, int count)
     {
       throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// Reads a database key (of a brace-delimited entry) starting at <paramref name="data0"/>.
+    /// </summary>
+    private int EatBraceDatabaseKey(ref int data0, int count)
+    {
+      int eaten, value;
+      for (eaten = 0; eaten != count; ++eaten)
+      {
+        if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma
+          || value == BibBstChars.RightBrace
+          || BibBstChars.IsSpaceImpl(value))
+        {
+          break;
+        }
+      }
+      return eaten;
+    }
+
+    /// <summary>
+    /// Reads a database key (of a parenthesis-delimited entry) starting at <paramref name="data0"/>.
+    /// </summary>
+    private int EatParenthesisDatabaseKey(ref int data0, int count)
+    {
+      int eaten, value;
+      for (eaten = 0; eaten != count; ++eaten)
+      {
+        if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma
+          || BibBstChars.IsSpaceImpl(value))
+        {
+          break;
+        }
+      }
+      return eaten;
     }
   }
 }

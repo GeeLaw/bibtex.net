@@ -199,7 +199,7 @@ namespace Neat.BibTeX.Utils
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the general entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// The original implementation of BibTeX saves the current entry with all the previously parsed fields (excluding the current field that is incomplete).
     /// </summary>
-    void GeneralEntryFieldExpectingAssignment(ref Bib32ParserUnsafe<TOverrides> that);
+    void GeneralEntryExpectingAssignment(ref Bib32ParserUnsafe<TOverrides> that);
 
     /// <summary>
     /// The parser has read <c>@type{ key, name1 = {literal} # "literal" # 123 # name</c>, but
@@ -207,7 +207,7 @@ namespace Neat.BibTeX.Utils
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the general entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// The original implementation of BibTeX saves the current entry with all the previously parsed fields (excluding the current field).
     /// </summary>
-    void GeneralEntryFieldGotEndOfInput(ref Bib32ParserUnsafe<TOverrides> that);
+    void GeneralEntryGotEndOfInput(ref Bib32ParserUnsafe<TOverrides> that);
 
     /// <summary>
     /// The parser has read <c>@type{ key, name1 = {literal} # "literal" # 123 # name</c>, but
@@ -215,7 +215,7 @@ namespace Neat.BibTeX.Utils
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the general entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// The original implementation of BibTeX saves the current entry with all the previously parsed fields plus the current field.
     /// </summary>
-    void GeneralEntryFieldExpectingCommaOrClose(ref Bib32ParserUnsafe<TOverrides> that);
+    void GeneralEntryExpectingCommaOrClose(ref Bib32ParserUnsafe<TOverrides> that);
 
     /// <summary>
     /// The parser is about to read the next component in a series of concatenated components, potentially due to having read <c>#</c>, but
