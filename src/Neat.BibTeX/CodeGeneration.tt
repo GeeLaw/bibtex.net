@@ -1,0 +1,185 @@
+<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.CodeDom.Compiler" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ output extension=".tmp" #>
+<#
+
+/* Visual Studio will automatically insert a new line at the end (perhaps due to using LF).
+/* This makes it impossible to use class feature control blocks (including defining helper methods).
+/* We use delegates for helper methods. */
+
+Func<string, IEnumerable<string>> RecursivelyGetGenericCSharpSources = null;
+RecursivelyGetGenericCSharpSources = (string directory) =>
+{
+  IEnumerable<string> files = Directory.EnumerateFiles(directory, "*Bib32*.cs");
+  files = files.Where(file => !file.EndsWith(".g.cs", StringComparison.OrdinalIgnoreCase));
+  IEnumerable<string> subdirectories = Directory.EnumerateDirectories(directory);
+  subdirectories = subdirectories.Where(subdirectory =>
+    !string.Equals(Path.GetFileName(subdirectory), "obj", StringComparison.OrdinalIgnoreCase)
+    && !string.Equals(Path.GetFileName(subdirectory), "bin", StringComparison.OrdinalIgnoreCase)
+    && !string.Equals(Path.GetFileName(subdirectory), "CodeGeneration", StringComparison.OrdinalIgnoreCase)
+  );
+  IEnumerable<string> subfiles = subdirectories.SelectMany(subdirectory => RecursivelyGetGenericCSharpSources(subdirectory));
+  return files.Concat(subfiles);
+};
+
+Func<string, string, string, bool> IsParserFile = (string file, string fileName, string content) =>
+{
+  var fromFileName = string.Equals(fileName, "Bib32ParserCatchErrors.cs", StringComparison.OrdinalIgnoreCase);
+  var fromContent = content.StartsWith("#define BIB_PARSER_CATCH_ERRORS\n\nusing ");
+  if (fromFileName != fromContent)
+  {
+    var message = "Ambiguous detection of parser source code: " + file;
+    Host.LogErrors(new CompilerErrorCollection()
+    {
+      new CompilerError(Host.TemplateFile, 1, 1, "BIB_CODE_GENERATION", message)
+    });
+    throw new InvalidOperationException(message);
+  }
+  return fromFileName;
+};
+
+Func<string, string, string> GetInterfacePrefix = (string file, string fileName) =>
+{
+  if (fileName.StartsWith("IBib32", StringComparison.OrdinalIgnoreCase))
+  {
+    return "I";
+  }
+  if (fileName.StartsWith("Bib32", StringComparison.OrdinalIgnoreCase))
+  {
+    return "";
+  }
+  var message = "Failed detection of class/struct/interface: " + file;
+  Host.LogErrors(new CompilerErrorCollection()
+  {
+    new CompilerError(Host.TemplateFile, 1, 1, "BIB_CODE_GENERATION", message)
+  });
+  throw new InvalidOperationException(message);
+};
+
+var projectDirectory = Path.GetDirectoryName(Host.TemplateFile);
+var projectDirectory1 = projectDirectory + "/";
+var projectDirectory2 = projectDirectory + "\\";
+var codeGenerationDirectory = Path.Combine(projectDirectory, "CodeGeneration");
+
+Func<string, string, string> GetNewFileParent = (string file, string fileParent) =>
+{
+  if (string.Equals(fileParent, projectDirectory, StringComparison.OrdinalIgnoreCase)
+    || fileParent.StartsWith(projectDirectory1, StringComparison.OrdinalIgnoreCase)
+    || fileParent.StartsWith(projectDirectory2, StringComparison.OrdinalIgnoreCase))
+  {
+    var result = codeGenerationDirectory + fileParent.Substring(projectDirectory.Length);
+    Directory.CreateDirectory(result);
+    return result;
+  }
+  var message = "File not in project: " + file;
+  Host.LogErrors(new CompilerErrorCollection()
+  {
+    new CompilerError(Host.TemplateFile, 1, 1, "BIB_CODE_GENERATION", message)
+  });
+  throw new InvalidOperationException(message);
+};
+
+var lineEndings = new Regex(@"\r\n|[\r\n]", RegexOptions.Compiled);
+var bib32ibib32 = new Regex(@"\b(I?)Bib32", RegexOptions.Compiled);
+var parserCatchErrors = new Regex(@"ParserCatchErrors\b", RegexOptions.Compiled);
+
+var u32codes = new []
+{
+  "using PrimitiveCharT = System.Int32;\n",
+  "using StringT = Neat.Unicode.String32;\n",
+  "using Utf = Neat.Unicode.Utf;\n",
+  "public static readonly StringT EntryType = Utf.String16ToString32Strict(\"string\");",
+  "public static readonly StringT EntryType = Utf.String16ToString32Strict(\"preamble\");",
+  "public static readonly StringT CommentEntryType = Utf.String16ToString32Strict(\"comment\");"
+};
+
+var u8u16u32codes = new []
+{
+  new
+  {
+    Target = "Bib32",
+    BibIBib = "$1Bib32",
+    Codes = new []
+    {
+      "using PrimitiveCharT = System.Int32;\n",
+      "using StringT = Neat.Unicode.String32;\n",
+      "using Utf = Neat.Unicode.Utf;\n",
+      "public static readonly StringT EntryType = Utf.String16ToString32Strict(\"string\");",
+      "public static readonly StringT EntryType = Utf.String16ToString32Strict(\"preamble\");",
+      "public static readonly StringT CommentEntryType = Utf.String16ToString32Strict(\"comment\");"
+    }
+  },
+  new
+  {
+    Target = "Bib16",
+    BibIBib = "$1Bib16",
+    Codes = new []
+    {
+      "using PrimitiveCharT = System.Char;\n",
+      "using StringT = System.String;\n",
+      "",
+      "public const StringT EntryType = \"string\";",
+      "public const StringT EntryType = \"preamble\";",
+      "public const StringT CommentEntryType = \"comment\";"
+    }
+  },
+  new
+  {
+    Target = "Bib8",
+    BibIBib = "$1Bib8",
+    Codes = new []
+    {
+      "using PrimitiveCharT = System.Byte;\n",
+      "using StringT = Neat.Unicode.String8;\n",
+      "using Utf = Neat.Unicode.Utf;\n",
+      "public static readonly StringT EntryType = Utf.String16ToString8Strict(\"string\");",
+      "public static readonly StringT EntryType = Utf.String16ToString8Strict(\"preamble\");",
+      "public static readonly StringT CommentEntryType = Utf.String16ToString8Strict(\"comment\");"
+    }
+  }
+};
+
+foreach (var file in RecursivelyGetGenericCSharpSources(projectDirectory).ToArray())
+{
+  var fileName = Path.GetFileName(file);
+  var fileParent = Path.GetDirectoryName(file);
+  var interfacePrefix = GetInterfacePrefix(file, fileName);
+  var content = lineEndings.Replace(File.ReadAllText(file), "\n");
+  for (int i = 1; i < u8u16u32codes.Length; ++i)
+  {
+    var target = u8u16u32codes[i];
+    var newFileName = interfacePrefix + target.Target + fileName.Substring(interfacePrefix.Length + "Bib32".Length);
+    var newFileParent = GetNewFileParent(file, fileParent);
+    var newContent = bib32ibib32.Replace(content, target.BibIBib);
+    for (int j = 0; j < u32codes.Length; ++j)
+    {
+      /* The version of .NET used by Visual Studio does not support the overload with StringComparison. */
+      newContent = newContent.Replace(u32codes[j], target.Codes[j]);
+    }
+    File.WriteAllText(Path.Combine(newFileParent, newFileName), newContent);
+  }
+  if (IsParserFile(file, fileName, content))
+  {
+    content = parserCatchErrors.Replace(content.Substring("#define BIB_PARSER_CATCH_ERRORS\n\n".Length), "ParserIgnoreErrors");
+    fileName = fileName.Substring(0, fileName.Length - "ParserCatchErrors.cs".Length) + "ParserIgnoreErrors.cs";
+    for (int i = 0; i < u8u16u32codes.Length; ++i)
+    {
+      var target = u8u16u32codes[i];
+      var newFileName = interfacePrefix + target.Target + fileName.Substring(interfacePrefix.Length + "Bib32".Length);
+      var newFileParent = GetNewFileParent(file, fileParent);
+      var newContent = bib32ibib32.Replace(content, target.BibIBib);
+      for (int j = 0; j < u32codes.Length; ++j)
+      {
+        newContent = newContent.Replace(u32codes[j], target.Codes[j]);
+      }
+      File.WriteAllText(Path.Combine(newFileParent, newFileName), newContent);
+    }
+  }
+}
+
+#>

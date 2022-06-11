@@ -19,7 +19,7 @@ $txt = @(
   '.json',
   '.ps1xml'
 );
-$bin = @('.user');
+$bin = @('.user', '.tmp');
 $dir = @('.git', '.vs', 'bin', 'obj', 'deps');
 
 $recursiveCheck = {

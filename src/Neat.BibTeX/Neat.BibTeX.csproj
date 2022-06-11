@@ -16,4 +16,20 @@
     <ProjectReference Include="..\..\deps\neat\src\Neat.Unicode\Neat.Unicode.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="CodeGeneration.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>CodeGeneration.tmp</LastGenOutput>
+    </None>
+    <None Update="CodeGeneration.tmp">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CodeGeneration.tt</DependentUpon>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
 </Project>
