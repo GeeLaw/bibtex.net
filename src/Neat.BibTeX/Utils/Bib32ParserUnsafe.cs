@@ -488,13 +488,173 @@ namespace Neat.BibTeX.Utils
     }
 
     /// <summary>
-    /// Eats a series of concatenated components starting at <c>data[eaten]</c>.
-    /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[eaten]</c> is a non-space character.
+    /// Eats a series of concatenated components starting at <c>data[oldEaten]</c>.
+    /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[newEaten]</c> is a non-space character.
     /// This method returns <see langword="true"/> if an exception method was called.
     /// </summary>
-    private bool EatString(ref int data0, ref int eaten, int count)
+    private bool EatString(ref int data0, ref int oldNewEaten, int count)
     {
-      throw new NotImplementedException();
+      int eaten = oldNewEaten, valueOrEndOrLength;
+    ExpectComponent:
+      if (eaten == count)
+      {
+        goto ErrorComponent;
+      }
+      if ((valueOrEndOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
+      {
+        /* Skip '{'. */
+        valueOrEndOrLength = ++eaten;
+        if (EatBraceLiteral(ref data0, ref valueOrEndOrLength, count))
+        {
+          goto ErrorHandled;
+        }
+        Overrides.SaveBraceLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength - eaten);
+        /* Skip the brace-delimited literal, '}'. */
+        eaten = valueOrEndOrLength + 1;
+        /* Fall through to skip optional space and check for '#'. */
+      }
+      else if (valueOrEndOrLength == BibBstChars.DoubleQuote)
+      {
+        /* Skip '"'. */
+        valueOrEndOrLength = ++eaten;
+        if (EatQuoteLiteral(ref data0, ref valueOrEndOrLength, count))
+        {
+          goto ErrorHandled;
+        }
+        Overrides.SaveQuoteLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength - eaten);
+        /* Skip the brace-delimited literal, '"'. */
+        eaten = valueOrEndOrLength + 1;
+        /* Fall through to skip optional space and check for '#'. */
+      }
+      else if (BibBstChars.IsNumericImpl(valueOrEndOrLength))
+      {
+        valueOrEndOrLength = EatNumericLiteral(ref Unsafe.Add(ref data0, eaten), count - eaten);
+        Overrides.SaveNumericLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength);
+        /* Skip the numeric literal. */
+        eaten += valueOrEndOrLength;
+        /* Fall through to skip optional space and check for '#'. */
+      }
+      else
+      {
+        /* Expect an identifier (name of the referenced string). */
+        valueOrEndOrLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
+        if (valueOrEndOrLength == 0)
+        {
+          goto ErrorComponent;
+        }
+        Overrides.SaveNameComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrEndOrLength);
+        /* Skip the name of the referenced string. */
+        eaten += valueOrEndOrLength;
+        /* Fall through to skip optional space and check for '#'. */
+      }
+      /* Skip optional space and check if the next character is '#'. */
+      eaten = EatSpace(ref data0, eaten, count);
+      if (eaten != count && Unsafe.Add(ref data0, eaten) == BibBstChars.Concatenation)
+      {
+        /* Skip '#', optional space, and expect a component. */
+        eaten = EatSpace(ref data0, eaten + 1, count);
+        goto ExpectComponent;
+      }
+      /* No more components. */
+      oldNewEaten = eaten;
+      return false;
+    ErrorComponent:
+      myEaten = eaten;
+      Overrides.StringExpectingComponent(ref this);
+    ErrorHandled:
+      oldNewEaten = eaten;
+      return true;
+    }
+
+    /// <summary>
+    /// Eats a brace-delimited literal (<c>data[oldEaten]</c> is right after the opening delimiter <c>{</c>).
+    /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[newEaten]</c> is right at the closing delimiter <c>}</c>.
+    /// This method returns <see langword="true"/> if an exception method was called.
+    /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveBraceLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref int, int)"/>.
+    /// </summary>
+    private bool EatBraceLiteral(ref int data0, ref int oldNewEaten, int count)
+    {
+      int eaten = oldNewEaten, depth = 0;
+      for (int value; eaten != count; ++eaten)
+      {
+        if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
+        {
+          ++depth;
+          continue;
+        }
+        if (value == BibBstChars.RightBrace)
+        {
+          if (depth-- != 0)
+          {
+            continue;
+          }
+          oldNewEaten = eaten;
+          return false;
+        }
+      }
+      /* The end of input is reached but the literal is not closed. */
+      myEaten = eaten;
+      myBraceDepth = depth;
+      Overrides.StringBraceLiteralGotEndOfInput(ref this);
+      oldNewEaten = eaten;
+      return true;
+    }
+
+    /// <summary>
+    /// Eats a quote-delimited literal (<c>data[oldEaten]</c> is right after the opening delimiter <c>"</c>).
+    /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[newEaten]</c> is right at the closing delimiter <c>"</c>.
+    /// This method returns <see langword="true"/> if an exception method was called.
+    /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveQuoteLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref int, int)"/>.
+    /// </summary>
+    private bool EatQuoteLiteral(ref int data0, ref int oldNewEaten, int count)
+    {
+      int eaten = oldNewEaten, depth = 0;
+      for (int value; eaten != count; ++eaten)
+      {
+        if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
+        {
+          ++depth;
+          continue;
+        }
+        if (value == BibBstChars.RightBrace)
+        {
+          if (depth-- != 0)
+          {
+            continue;
+          }
+          myEaten = eaten;
+          myBraceDepth = depth;
+          Overrides.StringQuoteLiteralGotNegativeBraceDepth(ref this);
+          oldNewEaten = eaten;
+          return true;
+        }
+        if (depth == 0 && value == BibBstChars.DoubleQuote)
+        {
+          oldNewEaten = eaten;
+          return false;
+        }
+      }
+      /* The end of input is reached but the literal is not closed. */
+      myEaten = eaten;
+      myBraceDepth = depth;
+      Overrides.StringQuoteLiteralGotEndOfInput(ref this);
+      oldNewEaten = eaten;
+      return true;
+    }
+
+    /// <summary>
+    /// Eats a numeric literal starting at <paramref name="data0"/>.
+    /// Note that the character at <paramref name="data0"/> is not read (again), and
+    /// <paramref name="count"/> is assumed to be positive without checking.
+    /// </summary>
+    private int EatNumericLiteral(ref int data0, int count)
+    {
+      int eaten = 1;
+      while (eaten != count && BibBstChars.IsNumericImpl(Unsafe.Add(ref data0, eaten)))
+      {
+        ++eaten;
+      }
+      return eaten;
     }
 
     /// <summary>
