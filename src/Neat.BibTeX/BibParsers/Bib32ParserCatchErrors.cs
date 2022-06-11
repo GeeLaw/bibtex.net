@@ -1,12 +1,20 @@
-using System;
+/* @< BIB_PARSER_CATCH_ERRORS */
+#define BIB_PARSER_CATCH_ERRORS
+/* @> */
+
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Neat.BibTeX.BibModel;
 using Neat.BibTeX.Utils;
 using Neat.Collections;
-using Neat.Unicode;
+
+/* @< PrimitiveCharT */
+using PrimitiveCharT = System.Int32;
+/* @> */
+/* @< StringT */
+using StringT = Neat.Unicode.String32;
+/* @> */
 
 namespace Neat.BibTeX.BibParsers
 {
@@ -14,14 +22,23 @@ namespace Neat.BibTeX.BibParsers
   {
     private struct Overrides : IBib32ParserUnsafeOverrides<Overrides>
     {
-      public String32 EntryType;
-      public int EntryTypeCode;
+#if BIB_PARSER_CATCH_ERRORS
+      private const MethodImplOptions ForExceptionMethods = Helper.OptimizeNoInline;
+#else
+      private const MethodImplOptions ForExceptionMethods = Helper.OptimizeInline;
+#endif
+
       public List2<Bib32Entry> Entries;
-      public String32 StringNameOrFieldName;
-      public List2<Bib32StringComponent> StringComponents;
-      public String32 DatabaseKey;
-      public List2<Bib32Field> Fields;
-      public Dictionary<String32, String32> InternedStrings;
+      private List2<Bib32StringComponent> StringComponents;
+      private List2<Bib32Field> Fields;
+      private Dictionary<StringT, StringT> InternedStrings;
+      private StringT EntryType;
+#if BIB_PARSER_CATCH_ERRORS
+#else
+      private int EntryTypeCode;
+#endif
+      private StringT StringNameOrFieldName;
+      private StringT DatabaseKey;
 
       [MethodImpl(Helper.JustOptimize)]
       public void Initialize()
@@ -29,76 +46,30 @@ namespace Neat.BibTeX.BibParsers
         Entries = new List2<Bib32Entry>();
         StringComponents = new List2<Bib32StringComponent>();
         Fields = new List2<Bib32Field>();
-        InternedStrings = new Dictionary<String32, String32>();
+        InternedStrings = new Dictionary<StringT, StringT>();
       }
 
       [MethodImpl(Helper.JustOptimize)]
       public void Cleanup()
       {
-        EntryType = default(String32);
-        StringNameOrFieldName = default(String32);
         StringComponents.Clear();
-        DatabaseKey = default(String32);
         Fields.Clear();
+        EntryType = default(StringT);
+        StringNameOrFieldName = default(StringT);
+        DatabaseKey = default(StringT);
       }
 
       [MethodImpl(Helper.JustOptimize)]
-      private String32 GetInternedString(ref int start, uint length)
+      private StringT GetInternedString(ref PrimitiveCharT start, uint length)
       {
-        String32 str = GetString(ref start, length);
-        String32 interned;
+        StringT str = Helper.GenericGetString(ref start, length);
+        StringT interned;
         if (!InternedStrings.TryGetValue(str, out interned))
         {
           InternedStrings.Add(str, str);
           interned = str;
         }
         return interned;
-      }
-
-      [MethodImpl(Helper.JustOptimize)]
-      private String32 GetString(ref int start, uint length)
-      {
-        if (length == 0)
-        {
-          return String32.Empty;
-        }
-        if (length < uint.MaxValue / 4u)
-        {
-          Char32[] data = new Char32[length];
-          Unsafe.CopyBlockUnaligned(
-            ref Unsafe.As<Char32, byte>(ref MemoryMarshal.GetArrayDataReference(data)),
-            ref Unsafe.As<int, byte>(ref start),
-            length * 4u
-          );
-          return Unsafe.As<Char32[], String32>(ref data);
-        }
-        /* This must be some stress test or insane! */
-        return GetStringRare(ref Unsafe.As<int, byte>(ref start), length);
-      }
-
-      [MethodImpl(Helper.JustOptimize)]
-      private String32 GetStringRare(ref byte start, uint length)
-      {
-        Char32[] data = GC.AllocateUninitializedArray<Char32>((int)length, false);
-        ref byte data0 = ref Unsafe.As<Char32, byte>(ref MemoryMarshal.GetArrayDataReference(data));
-        uint block = length & ~3u;
-        Unsafe.CopyBlockUnaligned(ref data0, ref start, block);
-        Unsafe.CopyBlockUnaligned(
-          ref Unsafe.Add(ref data0, block),
-          ref Unsafe.Add(ref start, block),
-          block
-        );
-        Unsafe.CopyBlockUnaligned(
-          ref Unsafe.Add(ref Unsafe.Add(ref data0, block), block),
-          ref Unsafe.Add(ref Unsafe.Add(ref start, block), block),
-          block
-        );
-        Unsafe.CopyBlockUnaligned(
-          ref Unsafe.Add(ref Unsafe.Add(ref Unsafe.Add(ref data0, block), block), block),
-          ref Unsafe.Add(ref Unsafe.Add(ref Unsafe.Add(ref start, block), block), block),
-          length + 3u * (length & 3u)
-        );
-        return Unsafe.As<Char32[], String32>(ref data);
       }
 
       [MethodImpl(Helper.JustOptimize)]
@@ -120,27 +91,39 @@ namespace Neat.BibTeX.BibParsers
       #region normal processing
 
       [MethodImpl(Helper.JustOptimize)]
-      public int SaveEntryType(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public int SaveEntryType(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
-        String32 entryType = GetInternedString(ref start, (uint)length);
+        StringT entryType = GetInternedString(ref start, (uint)length);
         EntryType = entryType;
         if (BibBstComparer.Equals(entryType, Bib32StringEntry.EntryType))
         {
+#if BIB_PARSER_CATCH_ERRORS
+#else
           EntryTypeCode = 1;
+#endif
           return 1;
         }
         if (BibBstComparer.Equals(entryType, Bib32PreambleEntry.EntryType))
         {
+#if BIB_PARSER_CATCH_ERRORS
+#else
           EntryTypeCode = 2;
+#endif
           StringComponents.Clear();
           return 2;
         }
         if (BibBstComparer.Equals(entryType, Bib32GeneralEntry.CommentEntryType))
         {
+#if BIB_PARSER_CATCH_ERRORS
+#else
           EntryTypeCode = 3;
+#endif
           return 3;
         }
+#if BIB_PARSER_CATCH_ERRORS
+#else
         EntryTypeCode = 0;
+#endif
         return 0;
       }
 
@@ -163,14 +146,14 @@ namespace Neat.BibTeX.BibParsers
       }
 
       [MethodImpl(Helper.OptimizeInline)]
-      public void SaveStringName(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public void SaveStringName(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
         StringNameOrFieldName = GetInternedString(ref start, (uint)length);
         StringComponents.Clear();
       }
 
       [MethodImpl(Helper.OptimizeInline)]
-      public void SaveNameComponent(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public void SaveNameComponent(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
         StringComponents.Add(new Bib32StringComponent(
           new BibStringComponentType(BibStringComponentType.NameValue),
@@ -178,38 +161,38 @@ namespace Neat.BibTeX.BibParsers
       }
 
       [MethodImpl(Helper.OptimizeInline)]
-      public void SaveQuoteLiteralComponent(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public void SaveQuoteLiteralComponent(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
         StringComponents.Add(new Bib32StringComponent(
           new BibStringComponentType(BibStringComponentType.QuoteLiteralValue),
-          GetString(ref start, (uint)length)));
+          Helper.GenericGetString(ref start, (uint)length)));
       }
 
       [MethodImpl(Helper.OptimizeInline)]
-      public void SaveNumericLiteralComponent(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public void SaveNumericLiteralComponent(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
         StringComponents.Add(new Bib32StringComponent(
           new BibStringComponentType(BibStringComponentType.NumericLiteralValue),
-          GetString(ref start, (uint)length)));
+          Helper.GenericGetString(ref start, (uint)length)));
       }
 
       [MethodImpl(Helper.OptimizeInline)]
-      public void SaveBraceLiteralComponent(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public void SaveBraceLiteralComponent(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
         StringComponents.Add(new Bib32StringComponent(
           new BibStringComponentType(BibStringComponentType.BraceLiteralValue),
-          GetString(ref start, (uint)length)));
+          Helper.GenericGetString(ref start, (uint)length)));
       }
 
       [MethodImpl(Helper.OptimizeInline)]
-      public void SaveDatabaseKey(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public void SaveDatabaseKey(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
-        DatabaseKey = GetString(ref start, (uint)length);
+        DatabaseKey = Helper.GenericGetString(ref start, (uint)length);
         Fields.Clear();
       }
 
       [MethodImpl(Helper.OptimizeInline)]
-      public void SaveFieldName(ref Bib32ParserUnsafe<Overrides> that, ref int start, int length)
+      public void SaveFieldName(ref Bib32ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
         StringNameOrFieldName = GetInternedString(ref start, (uint)length);
         StringComponents.Clear();
@@ -225,164 +208,239 @@ namespace Neat.BibTeX.BibParsers
 
       #region exceptions
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void EntryExpectingType(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting identifier (entry type).",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringEntryExpectingOpen(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '{' or '(' after '@string'.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringEntryExpectingName(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting identifier (string name) after '@string{'.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringEntryExpectingAssignment(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '=' after '@string{ name'.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringEntryGotEndOfInput(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '}' or ')' after '@string{ name = value', got end of input.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringEntryExpectingClose(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '}' or ')' after '@string{ name = value'.",
           that.Line, that.Column));
+#else
+        SaveStringEntry(ref that);
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void PreambleEntryExpectingOpen(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '{' or '(' after '@preamble'.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void PreambleEntryGotEndOfInput(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '}' or ')' after '@preamble{ text', got end of input.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void PreambleEntryExpectingClose(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '}' or ')' after '@preamble{ text'.",
           that.Line, that.Column));
+#else
+        SavePreambleEntry(ref that);
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void GeneralEntryExpectingOpen(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '{' or '(' after '@type'.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void GeneralEntryExpectingDatabaseKey(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting database key after '@type{', got end of input.",
           that.Line, that.Column));
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void GeneralEntryExpectingFirstCommaOrClose(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting ',' or '}' or ')' after '@type{ key'.",
           that.Line, that.Column));
+#else
+        SaveGeneralEntry(ref that);
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void GeneralEntryExpectingFieldNameOrClose(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting identifier (field name) or '}' after '@type{ key,'.",
           that.Line, that.Column));
+#else
+        SaveGeneralEntry(ref that);
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void GeneralEntryExpectingAssignment(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting '=' after '@type{ key, name'.",
           that.Line, that.Column));
+#else
+        SaveGeneralEntry(ref that);
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void GeneralEntryGotEndOfInput(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting ',' or '}' or ')' after '@type{ key, name = value', got end of input.",
           that.Line, that.Column));
+#else
+        SaveGeneralEntry(ref that);
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void GeneralEntryExpectingCommaOrClose(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting ',' or '}' or ')' after '@type{ key, name = value'.",
           that.Line, that.Column));
+#else
+        SaveField(ref that);
+        SaveGeneralEntry(ref that);
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringExpectingComponent(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Expecting brace-delimited, quote-delimited, or pure numeric literal, or identifier (name of referenced string) after '@type{ key, name = '.",
           that.Line, that.Column));
+#else
+        if (EntryTypeCode == 0)
+        {
+          SaveGeneralEntry(ref that);
+        }
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringQuoteLiteralGotNegativeBraceDepth(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Extra '}' in quote-delimited literal.",
           that.Line, that.Column));
+#else
+        if (EntryTypeCode == 0)
+        {
+          SaveGeneralEntry(ref that);
+        }
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringQuoteLiteralGotEndOfInput(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Unclosed quote-delimited literal with {2} outstanding left brace(s).",
           that.Line, that.Column, that.BraceDepth));
+#else
+        if (EntryTypeCode == 0)
+        {
+          SaveGeneralEntry(ref that);
+        }
+#endif
       }
 
-      [MethodImpl(Helper.OptimizeNoInline)]
+      [MethodImpl(ForExceptionMethods)]
       public void StringBraceLiteralGotEndOfInput(ref Bib32ParserUnsafe<Overrides> that)
       {
+#if BIB_PARSER_CATCH_ERRORS
         throw new BibParserException(string.Format(CultureInfo.InvariantCulture,
           "Ln {0} Ch {1}: Unclosed brace-delimited literal with ({2} + 1) outstanding left brace(s).",
           that.Line, that.Column, that.BraceDepth));
+#else
+        if (EntryTypeCode == 0)
+        {
+          SaveGeneralEntry(ref that);
+        }
+#endif
       }
 
       #endregion exceptions
@@ -404,17 +462,15 @@ namespace Neat.BibTeX.BibParsers
     /// </summary>
     /// <exception cref="BibParserException">If the original implementation of BibTeX would complain about the content.</exception>
     [MethodImpl(Helper.JustOptimize)]
-    public void Parse(String32 bib)
+    public void Parse(StringT bib)
     {
-      if (bib.IsDefault)
+      if (bib.GenericIsDefault())
       {
         return;
       }
       try
       {
-        myParser.Parse(
-          ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(Unsafe.As<String32, Char32[]>(ref bib))),
-          bib.Length);
+        myParser.Parse(ref bib.GenericGetData0(), bib.Length);
       }
       finally
       {

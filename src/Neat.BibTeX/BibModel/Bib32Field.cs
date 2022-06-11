@@ -4,7 +4,10 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
-using Neat.Unicode;
+
+/* @< StringT */
+using StringT = Neat.Unicode.String32;
+/* @> */
 
 namespace Neat.BibTeX.BibModel
 {
@@ -17,7 +20,7 @@ namespace Neat.BibTeX.BibModel
     /// The name of this field.
     /// This string should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
     /// </summary>
-    public readonly String32 Name;
+    public readonly StringT Name;
 
     /// <summary>
     /// The value of this field.
@@ -32,14 +35,14 @@ namespace Neat.BibTeX.BibModel
     {
       /* name = value */
       return Value.ToString(new StringBuilder()
-        .Append(Name.ToString())
+        .Append(Name.GenericToString())
         .Append(" = ")
       ).ToString();
     }
 
     /// <param name="name">Must be a valid identifier.</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32Field(String32 name, Bib32String value)
+    public Bib32Field(StringT name, Bib32String value)
     {
       Name = name;
       Value = value;

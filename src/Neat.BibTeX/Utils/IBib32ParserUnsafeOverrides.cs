@@ -1,3 +1,7 @@
+/* @< PrimitiveCharT */
+using PrimitiveCharT = System.Int32;
+/* @> */
+
 namespace Neat.BibTeX.Utils
 {
   /// <summary>
@@ -17,7 +21,7 @@ namespace Neat.BibTeX.Utils
     /// </summary>
     /// <returns><c>0</c>, <c>1</c>, <c>2</c>, <c>3</c>
     /// for general, string, preamble, comment entry, respectively.</returns>
-    int SaveEntryType(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    int SaveEntryType(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>@string{ name = {literal} # "literal" # 123 # anothername }</c> without error.
@@ -41,45 +45,45 @@ namespace Neat.BibTeX.Utils
     /// Indicates that the parser has seen <c>@string { name</c>.
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the string entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
-    void SaveStringName(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    void SaveStringName(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>name</c> (e.g., in <c>{literal} # "literal" # 123 # name</c>) without error.
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
-    void SaveNameComponent(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    void SaveNameComponent(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>"literal"</c> without error.
     /// The range passed into this method is precisely the range of <c>literal</c> (without <c>""</c>).
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
-    void SaveQuoteLiteralComponent(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    void SaveQuoteLiteralComponent(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>123</c> (e.g., in <c>{literal} # "literal" # 123</c>) without error.
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
-    void SaveNumericLiteralComponent(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    void SaveNumericLiteralComponent(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>{literal}</c> without error.
     /// The range passed into this method is precisely the range of <c>literal</c> (without <c>{}</c>).
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
-    void SaveBraceLiteralComponent(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    void SaveBraceLiteralComponent(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>@type { key</c>.
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the general entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
-    void SaveDatabaseKey(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    void SaveDatabaseKey(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>@type{ key, name1</c>.
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the general entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
-    void SaveFieldName(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
+    void SaveFieldName(ref Bib32ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
     /// Indicates that the parser has seen <c>name1 = {literal} # "literal" # 123 # anothername</c> plus optional space plus <c>,</c> or the closing delimiter.

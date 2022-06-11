@@ -4,7 +4,13 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
-using Neat.Unicode;
+
+/* @< StringT */
+using StringT = Neat.Unicode.String32;
+/* @> */
+/* @< Utf */
+using Utf = Neat.Unicode.Utf;
+/* @> */
 
 namespace Neat.BibTeX.BibModel
 {
@@ -16,7 +22,7 @@ namespace Neat.BibTeX.BibModel
     /// <summary>
     /// The entry type of a <c>@preamble</c> entry.
     /// </summary>
-    public static readonly String32 EntryType = Utf.String16ToString32Strict("preamble");
+    public static readonly StringT EntryType = Utf.String16ToString32Strict("preamble");
 
     /// <summary>
     /// The preamble text.
@@ -30,14 +36,14 @@ namespace Neat.BibTeX.BibModel
       /* @preamble{ text } */
       return Text.ToString(new StringBuilder()
         .Append('@')
-        .Append(Type.ToString())
+        .Append(Type.GenericToString())
         .Append(isBrace ? "{ " : "( ")
       ).Append(isBrace ? " }" : " )").ToString();
     }
 
     /// <param name="type">Must be <c>preamble</c> (in any casing).</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32PreambleEntry(String32 type, bool isBrace, Bib32String text)
+    public Bib32PreambleEntry(StringT type, bool isBrace, Bib32String text)
       : base(type, isBrace)
     {
       Text = text;

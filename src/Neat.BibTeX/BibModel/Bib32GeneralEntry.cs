@@ -4,7 +4,13 @@ using System.Diagnostics.CodeAnalysis;
 #endif
 using System.Runtime.CompilerServices;
 using Neat.BibTeX.Utils;
-using Neat.Unicode;
+
+/* @< StringT */
+using StringT = Neat.Unicode.String32;
+/* @> */
+/* @< Utf */
+using Utf = Neat.Unicode.Utf;
+/* @> */
 
 namespace Neat.BibTeX.BibModel
 {
@@ -16,7 +22,7 @@ namespace Neat.BibTeX.BibModel
     /// <summary>
     /// The entry type of a <c>@comment</c> entry.
     /// </summary>
-    public static readonly String32 CommentEntryType = Utf.String16ToString32Strict("comment");
+    public static readonly StringT CommentEntryType = Utf.String16ToString32Strict("comment");
 
     /// <summary>
     /// The database key of this entry.
@@ -24,7 +30,7 @@ namespace Neat.BibTeX.BibModel
     /// A valid database key must not contain "," or space characters
     /// (there is no other requirement for validity, and it can be empty).
     /// </summary>
-    public String32 Key;
+    public StringT Key;
 
     /// <summary>
     /// The fields of this entry.
@@ -36,7 +42,7 @@ namespace Neat.BibTeX.BibModel
     {
       /* @type{ key, ... } */
       return string.Format(IsBrace ? "@{0}{{ {1}, ... }}" : "@{0}( {1}, ... )",
-        Type.ToString(), Key.ToString());
+        Type.GenericToString(), Key.GenericToString());
     }
 
     /// <param name="isBrace">Must be <see langword="false"/> if <paramref name="key"/> must use parentheses.</param>
@@ -44,7 +50,7 @@ namespace Neat.BibTeX.BibModel
     /// <param name="key">Must be a valid database key.</param>
     /// <param name="fields">Must not be <see langword="null"/> (can be empty).</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32GeneralEntry(String32 type, bool isBrace, String32 key, Bib32Field[] fields)
+    public Bib32GeneralEntry(StringT type, bool isBrace, StringT key, Bib32Field[] fields)
       : base(type, isBrace)
     {
       Key = key;
@@ -87,7 +93,7 @@ namespace Neat.BibTeX.BibModel
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    public static bool IsGeneralEntryType(String32 type)
+    public static bool IsGeneralEntryType(StringT type)
     {
       return BibBstChars.IsIdentifier(type)
         && !BibBstComparer.Equals(type, Bib32StringEntry.EntryType)

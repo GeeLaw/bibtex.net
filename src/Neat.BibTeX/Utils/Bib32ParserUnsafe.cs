@@ -2,6 +2,10 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
+/* @< PrimitiveCharT */
+using PrimitiveCharT = System.Int32;
+/* @> */
+
 namespace Neat.BibTeX.Utils
 {
   /// <summary>
@@ -127,7 +131,7 @@ namespace Neat.BibTeX.Utils
     /// Parses a BibTeX file.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    public void Parse(ref int data0, int count)
+    public void Parse(ref PrimitiveCharT data0, int count)
     {
 #if BIB_PARSER_CHECKS
       if (Unsafe.IsNullRef(ref data0))
@@ -186,10 +190,10 @@ namespace Neat.BibTeX.Utils
     /// Skips until the current character is <c>@</c>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatJunk(ref int data0, int eaten, int count)
+    private int EatJunk(ref PrimitiveCharT data0, int eaten, int count)
     {
       bool wasCR = false;
-      for (int value; eaten != count; ++eaten)
+      for (PrimitiveCharT value; eaten != count; ++eaten)
       {
         value = Unsafe.Add(ref data0, eaten);
         if (wasCR && value == BibBstChars.LF)
@@ -216,10 +220,10 @@ namespace Neat.BibTeX.Utils
     /// Skips the space characters.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatSpace(ref int data0, int eaten, int count)
+    private int EatSpace(ref PrimitiveCharT data0, int eaten, int count)
     {
       bool wasCR = false;
-      for (int value; eaten != count; ++eaten)
+      for (PrimitiveCharT value; eaten != count; ++eaten)
       {
         value = Unsafe.Add(ref data0, eaten);
         if (wasCR && value == BibBstChars.LF)
@@ -246,10 +250,10 @@ namespace Neat.BibTeX.Utils
     /// Reads an identifier starting at <paramref name="data0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatIdentifier(ref int data0, int count)
+    private int EatIdentifier(ref PrimitiveCharT data0, int count)
     {
       int eaten = 0;
-      for (int value; eaten != count; ++eaten)
+      for (PrimitiveCharT value; eaten != count; ++eaten)
       {
         value = Unsafe.Add(ref data0, eaten);
         if (!BibBstChars.IsIdentifierImpl(value) || (eaten == 0 && BibBstChars.IsNumericImpl(value)))
@@ -264,9 +268,9 @@ namespace Neat.BibTeX.Utils
     /// Eats a string entry (<paramref name="data0"/> is immediately after <c>@string</c>).
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatStringEntry(ref int data0, int eaten, int count)
+    private int EatStringEntry(ref PrimitiveCharT data0, int eaten, int count)
     {
-      int value;
+      PrimitiveCharT value;
       bool isBrace;
       /* Skip optional space, and expect '{' or '('. */
       eaten = EatSpace(ref data0, eaten, count);
@@ -335,9 +339,9 @@ namespace Neat.BibTeX.Utils
     /// Eats a preamble entry (<paramref name="data0"/> is immediately after <c>@type</c>).
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatPreambleEntry(ref int data0, int eaten, int count)
+    private int EatPreambleEntry(ref PrimitiveCharT data0, int eaten, int count)
     {
-      int value;
+      PrimitiveCharT value;
       bool isBrace;
       /* Skip optional space, and expect '{' or '('. */
       eaten = EatSpace(ref data0, eaten, count);
@@ -384,15 +388,16 @@ namespace Neat.BibTeX.Utils
     /// Eats a general entry.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatGeneralEntry(ref int data0, int eaten, int count)
+    private int EatGeneralEntry(ref PrimitiveCharT data0, int eaten, int count)
     {
-      int valueOrLength;
+      PrimitiveCharT value;
+      int length;
       bool isBrace;
       /* Skip optional space, and expect '{' or '('. */
       eaten = EatSpace(ref data0, eaten, count);
       if (eaten == count
-        || (!(isBrace = ((valueOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
-          && valueOrLength != BibBstChars.LeftParenthesis))
+        || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
+          && value != BibBstChars.LeftParenthesis))
       {
         goto ErrorOpen;
       }
@@ -403,23 +408,23 @@ namespace Neat.BibTeX.Utils
       {
         goto ErrorDatabaseKey;
       }
-      valueOrLength = (isBrace
+      length = (isBrace
         ? EatBraceDatabaseKey(ref Unsafe.Add(ref data0, eaten), count - eaten)
         : EatParenthesisDatabaseKey(ref Unsafe.Add(ref data0, eaten), count - eaten));
-      Overrides.SaveDatabaseKey(ref this, ref Unsafe.Add(ref data0, eaten), valueOrLength);
+      Overrides.SaveDatabaseKey(ref this, ref Unsafe.Add(ref data0, eaten), length);
       /* Skip the database key, optional space, and expect ',' or '}' or ')'. */
-      eaten = EatSpace(ref data0, eaten + valueOrLength, count);
+      eaten = EatSpace(ref data0, eaten + length, count);
       if (eaten == count)
       {
         goto ErrorFirstCommaOrClose;
       }
       int entryClose = (isBrace ? BibBstChars.RightBrace : BibBstChars.RightParenthesis);
-      if ((valueOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
+      if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
       {
         ++eaten;
         goto ExpectSpaceThenFieldNameOrClose;
       }
-      if (valueOrLength == entryClose)
+      if (value == entryClose)
       {
         goto Save;
       }
@@ -431,14 +436,14 @@ namespace Neat.BibTeX.Utils
       {
         goto Save;
       }
-      valueOrLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
-      if (valueOrLength == 0)
+      length = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
+      if (length == 0)
       {
         goto ErrorFieldNameOrClose;
       }
-      Overrides.SaveFieldName(ref this, ref Unsafe.Add(ref data0, eaten), valueOrLength);
+      Overrides.SaveFieldName(ref this, ref Unsafe.Add(ref data0, eaten), length);
       /* Skip the field name, optional space, and expect '='. */
-      eaten = EatSpace(ref data0, eaten + valueOrLength, count);
+      eaten = EatSpace(ref data0, eaten + length, count);
       if (Unsafe.Add(ref data0, eaten) != BibBstChars.Assignment)
       {
         goto ErrorAssignment;
@@ -453,18 +458,18 @@ namespace Neat.BibTeX.Utils
       {
         goto ErrorEndOfInput;
       }
-      if ((valueOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
+      if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma)
       {
         Overrides.SaveField(ref this);
         ++eaten;
         goto ExpectSpaceThenFieldNameOrClose;
       }
-      if (valueOrLength != entryClose)
+      if (value != entryClose)
       {
         goto ErrorCommaOrClose;
       }
-      Overrides.SaveField(ref this);
       /* Fall through to save. */
+      Overrides.SaveField(ref this);
     Save:
       Overrides.SaveGeneralEntry(ref this);
       /* Skip '}' or ')'. */
@@ -505,59 +510,61 @@ namespace Neat.BibTeX.Utils
     /// This method returns <see langword="true"/> if an exception method was called.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private bool EatString(ref int data0, ref int oldNewEaten, int count)
+    private bool EatString(ref PrimitiveCharT data0, ref int oldNewEaten, int count)
     {
-      int eaten = oldNewEaten, valueOrNewEatenOrLength;
+      int eaten = oldNewEaten;
+      PrimitiveCharT value;
+      int newEatenOrLength;
     ExpectComponent:
       if (eaten == count)
       {
         goto ErrorComponent;
       }
-      if ((valueOrNewEatenOrLength = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
+      if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
       {
         /* Skip '{'. */
-        valueOrNewEatenOrLength = ++eaten;
-        if (EatBraceLiteral(ref data0, ref valueOrNewEatenOrLength, count))
+        newEatenOrLength = ++eaten;
+        if (EatBraceLiteral(ref data0, ref newEatenOrLength, count))
         {
           goto ErrorHandled;
         }
-        Overrides.SaveBraceLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength - eaten);
+        Overrides.SaveBraceLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), newEatenOrLength - eaten);
         /* Skip the brace-delimited literal and '}'. */
-        eaten = valueOrNewEatenOrLength + 1;
+        eaten = newEatenOrLength + 1;
         /* Fall through to skip optional space and check for '#'. */
       }
-      else if (valueOrNewEatenOrLength == BibBstChars.DoubleQuote)
+      else if (value == BibBstChars.DoubleQuote)
       {
         /* Skip '"'. */
-        valueOrNewEatenOrLength = ++eaten;
-        if (EatQuoteLiteral(ref data0, ref valueOrNewEatenOrLength, count))
+        newEatenOrLength = ++eaten;
+        if (EatQuoteLiteral(ref data0, ref newEatenOrLength, count))
         {
           goto ErrorHandled;
         }
-        Overrides.SaveQuoteLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength - eaten);
+        Overrides.SaveQuoteLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), newEatenOrLength - eaten);
         /* Skip the quote-delimited literal and '"'. */
-        eaten = valueOrNewEatenOrLength + 1;
+        eaten = newEatenOrLength + 1;
         /* Fall through to skip optional space and check for '#'. */
       }
-      else if (BibBstChars.IsNumericImpl(valueOrNewEatenOrLength))
+      else if (BibBstChars.IsNumericImpl(value))
       {
-        valueOrNewEatenOrLength = EatNumericLiteral(ref Unsafe.Add(ref data0, eaten), count - eaten);
-        Overrides.SaveNumericLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength);
+        newEatenOrLength = EatNumericLiteral(ref Unsafe.Add(ref data0, eaten), count - eaten);
+        Overrides.SaveNumericLiteralComponent(ref this, ref Unsafe.Add(ref data0, eaten), newEatenOrLength);
         /* Skip the numeric literal. */
-        eaten += valueOrNewEatenOrLength;
+        eaten += newEatenOrLength;
         /* Fall through to skip optional space and check for '#'. */
       }
       else
       {
         /* Expect an identifier (name of the referenced string). */
-        valueOrNewEatenOrLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
-        if (valueOrNewEatenOrLength == 0)
+        newEatenOrLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
+        if (newEatenOrLength == 0)
         {
           goto ErrorComponent;
         }
-        Overrides.SaveNameComponent(ref this, ref Unsafe.Add(ref data0, eaten), valueOrNewEatenOrLength);
+        Overrides.SaveNameComponent(ref this, ref Unsafe.Add(ref data0, eaten), newEatenOrLength);
         /* Skip the name of the referenced string. */
-        eaten += valueOrNewEatenOrLength;
+        eaten += newEatenOrLength;
         /* Fall through to skip optional space and check for '#'. */
       }
       /* Skip optional space and check if the next character is '#'. */
@@ -578,7 +585,7 @@ namespace Neat.BibTeX.Utils
       return true;
     ErrorHandled:
       /* We jump here from an error handled by EatBraceLiteral or EatQuoteLiteral. */
-      oldNewEaten = valueOrNewEatenOrLength;
+      oldNewEaten = newEatenOrLength;
       return true;
     }
 
@@ -586,13 +593,13 @@ namespace Neat.BibTeX.Utils
     /// Eats a brace-delimited literal (<c>data[oldEaten]</c> is right after the opening delimiter <c>{</c>).
     /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[newEaten]</c> is right at the closing delimiter <c>}</c>.
     /// This method returns <see langword="true"/> if an exception method was called.
-    /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveBraceLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref int, int)"/>.
+    /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveBraceLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref PrimitiveCharT, int)"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private bool EatBraceLiteral(ref int data0, ref int oldNewEaten, int count)
+    private bool EatBraceLiteral(ref PrimitiveCharT data0, ref int oldNewEaten, int count)
     {
       int eaten = oldNewEaten, depth = 0;
-      for (int value; eaten != count; ++eaten)
+      for (PrimitiveCharT value; eaten != count; ++eaten)
       {
         if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
         {
@@ -621,13 +628,13 @@ namespace Neat.BibTeX.Utils
     /// Eats a quote-delimited literal (<c>data[oldEaten]</c> is right after the opening delimiter <c>"</c>).
     /// Upon returning from this method (this does not apply if an exception is thrown), <c>data[newEaten]</c> is right at the closing delimiter <c>"</c>.
     /// This method returns <see langword="true"/> if an exception method was called.
-    /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveQuoteLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref int, int)"/>.
+    /// This method does not call <see cref="IBib32ParserUnsafeOverrides{TOverrides}.SaveQuoteLiteralComponent(ref Bib32ParserUnsafe{TOverrides}, ref PrimitiveCharT, int)"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private bool EatQuoteLiteral(ref int data0, ref int oldNewEaten, int count)
+    private bool EatQuoteLiteral(ref PrimitiveCharT data0, ref int oldNewEaten, int count)
     {
       int eaten = oldNewEaten, depth = 0;
-      for (int value; eaten != count; ++eaten)
+      for (PrimitiveCharT value; eaten != count; ++eaten)
       {
         if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace)
         {
@@ -665,7 +672,7 @@ namespace Neat.BibTeX.Utils
     /// <paramref name="count"/> is assumed to be positive without checking.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatNumericLiteral(ref int data0, int count)
+    private int EatNumericLiteral(ref PrimitiveCharT data0, int count)
     {
       int eaten = 1;
       while (eaten != count && BibBstChars.IsNumericImpl(Unsafe.Add(ref data0, eaten)))
@@ -679,9 +686,10 @@ namespace Neat.BibTeX.Utils
     /// Reads a database key (of a brace-delimited entry) starting at <paramref name="data0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatBraceDatabaseKey(ref int data0, int count)
+    private int EatBraceDatabaseKey(ref PrimitiveCharT data0, int count)
     {
-      int eaten, value;
+      int eaten;
+      PrimitiveCharT value;
       for (eaten = 0; eaten != count; ++eaten)
       {
         if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma
@@ -698,9 +706,10 @@ namespace Neat.BibTeX.Utils
     /// Reads a database key (of a parenthesis-delimited entry) starting at <paramref name="data0"/>.
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
-    private int EatParenthesisDatabaseKey(ref int data0, int count)
+    private int EatParenthesisDatabaseKey(ref PrimitiveCharT data0, int count)
     {
-      int eaten, value;
+      int eaten;
+      PrimitiveCharT value;
       for (eaten = 0; eaten != count; ++eaten)
       {
         if ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.Comma

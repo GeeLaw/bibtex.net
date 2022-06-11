@@ -4,7 +4,13 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
-using Neat.Unicode;
+
+/* @< StringT */
+using StringT = Neat.Unicode.String32;
+/* @> */
+/* @< Utf */
+using Utf = Neat.Unicode.Utf;
+/* @> */
 
 namespace Neat.BibTeX.BibModel
 {
@@ -16,13 +22,13 @@ namespace Neat.BibTeX.BibModel
     /// <summary>
     /// The entry type of a <c>@string</c> entry.
     /// </summary>
-    public static readonly String32 EntryType = Utf.String16ToString32Strict("string");
+    public static readonly StringT EntryType = Utf.String16ToString32Strict("string");
 
     /// <summary>
     /// The name of this referenceable string.
     /// This string should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
     /// </summary>
-    public String32 Name;
+    public StringT Name;
 
     /// <summary>
     /// The value of this referenceable string.
@@ -36,9 +42,9 @@ namespace Neat.BibTeX.BibModel
       /* @string{ name = value } */
       return Value.ToString(new StringBuilder()
         .Append('@')
-        .Append(Type.ToString())
+        .Append(Type.GenericToString())
         .Append(isBrace ? "{ " : "( ")
-        .Append(Name.ToString())
+        .Append(Name.GenericToString())
         .Append(" = ")
       ).Append(isBrace ? " }" : " )").ToString();
     }
@@ -46,7 +52,7 @@ namespace Neat.BibTeX.BibModel
     /// <param name="type">Must be <c>string</c> (in any casing).</param>
     /// <param name="name">Must be a valid identifier.</param>
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32StringEntry(String32 type, bool isBrace, String32 name, Bib32String value)
+    public Bib32StringEntry(StringT type, bool isBrace, StringT name, Bib32String value)
       : base(type, isBrace)
     {
       Name = name;

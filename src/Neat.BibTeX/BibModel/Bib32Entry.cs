@@ -1,6 +1,9 @@
 using System.Runtime.CompilerServices;
 using Neat.BibTeX.Utils;
-using Neat.Unicode;
+
+/* @< StringT */
+using StringT = Neat.Unicode.String32;
+/* @> */
 
 namespace Neat.BibTeX.BibModel
 {
@@ -19,7 +22,7 @@ namespace Neat.BibTeX.BibModel
     /// The special types are <c>string</c>, <c>preamble</c>, and <c>comment</c>.
     /// However, since comment entries are not modeled, this string should never be <c>comment</c>.
     /// </summary>
-    public String32 Type;
+    public StringT Type;
 
     /// <summary>
     /// Indicates whethe this entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
@@ -32,7 +35,7 @@ namespace Neat.BibTeX.BibModel
     public abstract override string ToString();
 
     [MethodImpl(Helper.OptimizeInline)]
-    private protected Bib32Entry(String32 type, bool isBrace)
+    private protected Bib32Entry(StringT type, bool isBrace)
     {
       Type = type;
       IsBrace = isBrace;

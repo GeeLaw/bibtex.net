@@ -4,7 +4,10 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
-using Neat.Unicode;
+
+/* @< StringT */
+using StringT = Neat.Unicode.String32;
+/* @> */
 
 namespace Neat.BibTeX.BibModel
 {
@@ -28,7 +31,7 @@ namespace Neat.BibTeX.BibModel
     /// If this is the numeric literal, it should not be <see langword="default"/> or empty and should contain only numeric characters.
     /// If this is the delimited literal, it should not be <see langword="default"/> and should be brace-balanced.
     /// </summary>
-    public readonly String32 NameOrLiteral;
+    public readonly StringT NameOrLiteral;
 
     /// <summary>
     /// The string representation obtained by this method is informational and not necessarily valid BibTeX.
@@ -38,10 +41,10 @@ namespace Neat.BibTeX.BibModel
     {
       byte type = Type.Value;
       return type == BibStringComponentType.BraceLiteralValue
-        ? "{" + NameOrLiteral.ToString() + "}"
+        ? "{" + NameOrLiteral.GenericToString() + "}"
         : type == BibStringComponentType.QuoteLiteralValue
-        ? "\"" + NameOrLiteral.ToString() + "\""
-        : NameOrLiteral.ToString();
+        ? "\"" + NameOrLiteral.GenericToString() + "\""
+        : NameOrLiteral.GenericToString();
     }
 
     [MethodImpl(Helper.JustOptimize)]
@@ -49,14 +52,14 @@ namespace Neat.BibTeX.BibModel
     {
       byte type = Type.Value;
       return type == BibStringComponentType.BraceLiteralValue
-        ? sb.Append('{').Append(NameOrLiteral.ToString()).Append('}')
+        ? sb.Append('{').Append(NameOrLiteral.GenericToString()).Append('}')
         : type == BibStringComponentType.QuoteLiteralValue
-        ? sb.Append('"').Append(NameOrLiteral.ToString()).Append('"')
-        : sb.Append(NameOrLiteral.ToString());
+        ? sb.Append('"').Append(NameOrLiteral.GenericToString()).Append('"')
+        : sb.Append(NameOrLiteral.GenericToString());
     }
 
     [MethodImpl(Helper.OptimizeInline)]
-    public Bib32StringComponent(BibStringComponentType type, String32 nameOrLiteral)
+    public Bib32StringComponent(BibStringComponentType type, StringT nameOrLiteral)
     {
       Type = type;
       NameOrLiteral = nameOrLiteral;
@@ -67,7 +70,7 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.OptimizeNoInline)]
     internal void CtorCheckImpl(string name)
     {
-      String32 nameOrLiteral = NameOrLiteral;
+      StringT nameOrLiteral = NameOrLiteral;
       switch (Type.Value)
       {
       case BibStringComponentType.NameValue:
@@ -106,7 +109,7 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public bool IsValid()
     {
-      String32 nameOrLiteral = NameOrLiteral;
+      StringT nameOrLiteral = NameOrLiteral;
       switch (Type.Value)
       {
       case BibStringComponentType.NameValue:
