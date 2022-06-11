@@ -11,6 +11,9 @@ namespace Neat.BibTeX.Utils
   /// </summary>
   public static class BibBstChars
   {
+    public const int CR = '\r';
+    public const int LF = '\n';
+
     /* BibTeX parser */
     public const int At = '@';
     public const int LeftBrace = '{';
