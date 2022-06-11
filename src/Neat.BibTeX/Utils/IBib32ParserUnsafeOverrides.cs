@@ -1,6 +1,4 @@
-/* @< PrimitiveCharT */
 using PrimitiveCharT = System.Int32;
-/* @> */
 
 namespace Neat.BibTeX.Utils
 {

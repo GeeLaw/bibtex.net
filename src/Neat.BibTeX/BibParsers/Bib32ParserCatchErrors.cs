@@ -1,6 +1,4 @@
-/* @< BIB_PARSER_CATCH_ERRORS */
 #define BIB_PARSER_CATCH_ERRORS
-/* @> */
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,12 +7,8 @@ using Neat.BibTeX.BibModel;
 using Neat.BibTeX.Utils;
 using Neat.Collections;
 
-/* @< PrimitiveCharT */
 using PrimitiveCharT = System.Int32;
-/* @> */
-/* @< StringT */
 using StringT = Neat.Unicode.String32;
-/* @> */
 
 namespace Neat.BibTeX.BibParsers
 {

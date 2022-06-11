@@ -2,9 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
-/* @< PrimitiveCharT */
 using PrimitiveCharT = System.Int32;
-/* @> */
 
 namespace Neat.BibTeX.Utils
 {

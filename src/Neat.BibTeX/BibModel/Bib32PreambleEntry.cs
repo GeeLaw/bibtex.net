@@ -5,12 +5,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
 
-/* @< StringT */
 using StringT = Neat.Unicode.String32;
-/* @> */
-/* @< Utf */
 using Utf = Neat.Unicode.Utf;
-/* @> */
 
 namespace Neat.BibTeX.BibModel
 {

@@ -1,9 +1,7 @@
 using System.Runtime.CompilerServices;
 using Neat.BibTeX.Utils;
 
-/* @< StringT */
 using StringT = Neat.Unicode.String32;
-/* @> */
 
 namespace Neat.BibTeX.BibModel
 {
