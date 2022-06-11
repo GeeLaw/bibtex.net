@@ -128,8 +128,7 @@ namespace Neat.BibTeX.Utils
       myCount = count;
       myLine = 1;
       myLastLineEndsAfter = -1;
-      bool isBrace;
-      for (int eaten = EatJunk(ref data0, 0, count), value; eaten != count; EatJunk(ref data0, 0, count))
+      for (int eaten = EatJunk(ref data0, 0, count); eaten != count; EatJunk(ref data0, 0, count))
       {
 #if BIB_PARSER_CHECKS
         /* The data were rudely modified (either by Overrides or from another thread) during parsing. */
@@ -138,7 +137,7 @@ namespace Neat.BibTeX.Utils
           throw new InvalidOperationException("An '@' disappeared.");
         }
 #endif
-        /* Skip '@', optional space, and expect an identifier (the entry type). */
+        /* Skip '@', optional space, and expect an identifier (entry type). */
         eaten = EatSpace(ref data0, eaten + 1, count);
         int entryTypeLength = EatIdentifier(ref Unsafe.Add(ref data0, eaten), count - eaten);
         if (entryTypeLength == 0)
@@ -148,32 +147,29 @@ namespace Neat.BibTeX.Utils
           continue;
         }
         int entryType = Overrides.SaveEntryType(ref this, ref Unsafe.Add(ref data0, eaten), entryTypeLength);
-        /* Skip the entry type, optional space, and expect '{' or '('. */
-        eaten = EatSpace(ref data0, eaten + entryTypeLength, count);
-        if (eaten == count
-          || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
-            && value != BibBstChars.LeftParenthesis))
-        {
-          myEaten = eaten;
-          Overrides.EntryExpectingOpen(ref this);
-          continue;
-        }
-        myEntryIsBrace = isBrace;
-        /* Skip '{' or '(', optional space, and continue parsing according to the entry type. */
-        eaten = EatSpace(ref data0, eaten + 1, count);
+        /* Skip the entry type and continue parsing according to the entry type. */
+        eaten += entryTypeLength;
+        /* In case the switch statement is not compiled into a jump table,
+        /* we make the assumption that the order of cases are preserved.
+        /* The numbering is determined by the frequency of entry types
+        /* so that more frequented types are tested first. */
         switch (entryType)
         {
         case 0:
-          eaten = EatStringEntry(ref data0, eaten, count, isBrace);
+          eaten = EatGeneralEntry(ref data0, eaten, count);
           continue;
         case 1:
-          eaten = EatPreambleEntry(ref data0, eaten, count, isBrace);
+          eaten = EatStringEntry(ref data0, eaten, count);
           continue;
         case 2:
-          eaten = EatGeneralEntry(ref data0, eaten, count, isBrace);
+          eaten = EatPreambleEntry(ref data0, eaten, count);
           continue;
         default:
-          /* The original implementation of BibTeX does not consider nested braces/parentheses for comment entries. */
+#if BIB_PARSER_CHECKS
+          throw new InvalidOperationException("SaveEntryType return value is out of range.");
+        case 3:
+#endif
+          /* The original implementation of BibTeX does not even look at delimiters for @comment. */
           continue;
         }
       }
@@ -257,24 +253,69 @@ namespace Neat.BibTeX.Utils
     /// <summary>
     /// Eats a string entry.
     /// </summary>
-    private int EatStringEntry(ref int data0, int eaten, int count, bool isBrace)
+    private int EatStringEntry(ref int data0, int eaten, int count)
     {
+      int value;
+      bool isBrace;
+      /* Skip optional space, and expect '{' or '('. */
+      eaten = EatSpace(ref data0, eaten, count);
+      if (eaten == count
+        || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
+          && value != BibBstChars.LeftParenthesis))
+      {
+        myEaten = eaten;
+        Overrides.StringEntryExpectingOpen(ref this);
+        return eaten;
+      }
+      myEntryIsBrace = isBrace;
+      /* Skip '{' or '(', optional space, and expect an identifier (string name). */
+      eaten = EatSpace(ref data0, eaten + 1, count);
       throw new NotImplementedException();
     }
 
     /// <summary>
     /// Eats a preamble entry.
     /// </summary>
-    private int EatPreambleEntry(ref int data0, int eaten, int count, bool isBrace)
+    private int EatPreambleEntry(ref int data0, int eaten, int count)
     {
+      int value;
+      bool isBrace;
+      /* Skip optional space, and expect '{' or '('. */
+      eaten = EatSpace(ref data0, eaten, count);
+      if (eaten == count
+        || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
+          && value != BibBstChars.LeftParenthesis))
+      {
+        myEaten = eaten;
+        Overrides.PreambleEntryExpectingOpen(ref this);
+        return eaten;
+      }
+      myEntryIsBrace = isBrace;
+      /* Skip '{' or '(', optional space, and expect a series of concatenated strings (preamble text). */
+      eaten = EatSpace(ref data0, eaten + 1, count);
       throw new NotImplementedException();
     }
 
     /// <summary>
     /// Eats a general entry.
     /// </summary>
-    private int EatGeneralEntry(ref int data0, int eaten, int count, bool isBrace)
+    private int EatGeneralEntry(ref int data0, int eaten, int count)
     {
+      int value;
+      bool isBrace;
+      /* Skip optional space, and expect '{' or '('. */
+      eaten = EatSpace(ref data0, eaten, count);
+      if (eaten == count
+        || (!(isBrace = ((value = Unsafe.Add(ref data0, eaten)) == BibBstChars.LeftBrace))
+          && value != BibBstChars.LeftParenthesis))
+      {
+        myEaten = eaten;
+        Overrides.GeneralEntryExpectingOpen(ref this);
+        return eaten;
+      }
+      myEntryIsBrace = isBrace;
+      /* Skip '{' or '(', optional space, and parse a database key. */
+      eaten = EatSpace(ref data0, eaten + 1, count);
       throw new NotImplementedException();
     }
   }

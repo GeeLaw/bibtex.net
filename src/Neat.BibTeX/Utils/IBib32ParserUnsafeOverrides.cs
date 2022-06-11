@@ -15,7 +15,7 @@ namespace Neat.BibTeX.Utils
     /// Indicates that the parser has seen <c>@type</c>.
     /// The range passed into this method is precisely the range of <c>type</c>.
     /// </summary>
-    /// <returns><c>0</c>, <c>1</c>, <c>2</c>, anything else
+    /// <returns><c>0</c>, <c>1</c>, <c>2</c>, <c>3</c>
     /// for general, string, preamble, comment entry, respectively.</returns>
     int SaveEntryType(ref Bib32ParserUnsafe<TOverrides> that, ref int start, int length);
 
@@ -99,11 +99,11 @@ namespace Neat.BibTeX.Utils
     void EntryExpectingType(ref Bib32ParserUnsafe<TOverrides> that);
 
     /// <summary>
-    /// The parser has read <c>@type</c>, but
+    /// The parser has read <c>@string</c>, but
     /// the end of input is reached, or
     /// the next non-space character is neither <c>{</c> nor <c>(</c>.
     /// </summary>
-    void EntryExpectingOpen(ref Bib32ParserUnsafe<TOverrides> that);
+    void StringEntryExpectingOpen(ref Bib32ParserUnsafe<TOverrides> that);
 
     /// <summary>
     /// The parser has read <c>@string{</c>, but
@@ -138,6 +138,13 @@ namespace Neat.BibTeX.Utils
     void StringEntryExpectingClose(ref Bib32ParserUnsafe<TOverrides> that);
 
     /// <summary>
+    /// The parser has read <c>@preamble</c>, but
+    /// the end of input is reached, or
+    /// the next non-space character is neither <c>{</c> nor <c>(</c>.
+    /// </summary>
+    void PreambleEntryExpectingOpen(ref Bib32ParserUnsafe<TOverrides> that);
+
+    /// <summary>
     /// The parser has read <c>@preamble{ {literal} # "literal" # 123 # name</c>, but
     /// the end of input is reached.
     /// When this method is called, <see cref="Bib32ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the preamble entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
@@ -152,6 +159,13 @@ namespace Neat.BibTeX.Utils
     /// The original implementation of BibTeX saves the current entry.
     /// </summary>
     void PreambleEntryExpectingClose(ref Bib32ParserUnsafe<TOverrides> that);
+
+    /// <summary>
+    /// The parser has read <c>@type</c>, but
+    /// the end of input is reached, or
+    /// the next non-space character is neither <c>{</c> nor <c>(</c>.
+    /// </summary>
+    void GeneralEntryExpectingOpen(ref Bib32ParserUnsafe<TOverrides> that);
 
     /// <summary>
     /// The parser has read <c>@type{</c>, but
