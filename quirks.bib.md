@@ -76,6 +76,8 @@ key
 
 is valid and creates an entry with key `key`.
 
+Moreover, it is not possible to skip the key with `=` (only with `,`), so `@misc{title=1}` creates an entry with key `title=1` and no fields.
+
 ## How `@comment` works
 
 In fact, `@comment` does not even look for the opening delimiter `{` or `(`. [Tame the BeaST](deps/tamethebeast/src/ttb_en.sec3.tex#L77) claims that `@comment` is used to “comment a large part of the bibliography easily”, which does not hold. The following BibTeX database file creates article entries with key `a`, `b`, `c`.
