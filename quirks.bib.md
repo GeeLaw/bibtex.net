@@ -89,7 +89,7 @@ In fact, `@comment` does not even look for the opening delimiter `{` or `(`. [Ta
 @misc{c,title=1}
 ```
 
-However, since `@` is an identifier character, `@comment@misc{d,title=1}` will not create an entry.
+However, since `@` is an identifier character, `@comment@misc{d,title=1}` will create an entry of type `comment@misc`.
 
 Comapre [`bibtex.web` L5491 “Process a `@comment` command”](deps/bibtex/src/bibtex.web#L5491) with the first few lines of [`bibtex.web` L5516 “Process a `@preamble` command”](deps/bibtex/src/bibtex.web#L5516), we see that the parser state is reset immediately after seeing `@comment` followed by non-identifier character.
 
