@@ -4,7 +4,7 @@ using Neat.BibTeX.BibModel;
 namespace Neat.BibTeX.Utils
 {
   /// <summary>
-  /// Provides extension methods for <see cref="IBib32EntryVisitor"/>.
+  /// Provides extension methods for <see cref="IBib32EntryVisitor"/>, <see cref="IBib16EntryVisitor"/>, and <see cref="IBib8EntryVisitor"/>.
   /// </summary>
   public static class BibBstVisitorsExtensions
   {
@@ -26,6 +26,57 @@ namespace Neat.BibTeX.Utils
     /// </summary>
     [MethodImpl(Helper.JustOptimize)]
     public static void AcceptVisitor(this Bib32Entry[] that, IBib32EntryVisitor visitor)
+    {
+      for (int i = 0; i < that.Length; ++i)
+      {
+        that[i].AcceptVisitor(visitor);
+      }
+    }
+
+    /// <summary>
+    /// Dispatches the correct method on each entry for the value-type visitor.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static void AcceptVisitor<TVisitor>(this Bib16Entry[] that, ref TVisitor visitor)
+      where TVisitor : struct, IBib16EntryVisitor
+    {
+      for (int i = 0; i < that.Length; ++i)
+      {
+        that[i].AcceptVisitor(ref visitor);
+      }
+    }
+
+    /// <summary>
+    /// Dispatches the correct method on each entry for the reference-type visitor.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static void AcceptVisitor(this Bib16Entry[] that, IBib16EntryVisitor visitor)
+    {
+      for (int i = 0; i < that.Length; ++i)
+      {
+        that[i].AcceptVisitor(visitor);
+      }
+    }
+
+
+    /// <summary>
+    /// Dispatches the correct method on each entry for the value-type visitor.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static void AcceptVisitor<TVisitor>(this Bib8Entry[] that, ref TVisitor visitor)
+      where TVisitor : struct, IBib8EntryVisitor
+    {
+      for (int i = 0; i < that.Length; ++i)
+      {
+        that[i].AcceptVisitor(ref visitor);
+      }
+    }
+
+    /// <summary>
+    /// Dispatches the correct method on each entry for the reference-type visitor.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static void AcceptVisitor(this Bib8Entry[] that, IBib8EntryVisitor visitor)
     {
       for (int i = 0; i < that.Length; ++i)
       {
