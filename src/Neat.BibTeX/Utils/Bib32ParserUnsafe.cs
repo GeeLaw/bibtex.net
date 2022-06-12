@@ -1,4 +1,6 @@
+#if BIB_PARSER_CHECKS
 using System;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
