@@ -78,6 +78,25 @@ is valid and creates an entry with key `key`.
 
 Moreover, it is not possible to skip the key with `=` (only with `,`), so `@misc{title=1}` creates an entry with key `title=1` and no fields.
 
+## Sometimes an entry is not created, although everthing reads prefectly correct
+
+Consider the following database file:
+
+```bib
+@misc{a,title=1}   @misc{b,author=2}
+```
+
+BibTeX 0.99d of MiKTeX 21.10 will silently drop `misc` entry `b`. However, if you write
+
+```bib
+@misc{a,title=1}   @misc{b,author=2}
+@misc{c,year=2000}
+```
+
+BibTeX 0.99d of MiKTeX 21.10 will then think there exist three entries, `a`, `b`, `c`.
+
+I have no idea whether this is a bug of MiKTeX 21.10 or the original implementation of BibTeX 0.99d. In either case, BibTeX.NET will not replicate this behavior.
+
 ## How `@comment` works
 
 In fact, `@comment` does not even look for the opening delimiter `{` or `(`. [Tame the BeaST](deps/tamethebeast/src/ttb_en.sec3.tex#L77) claims that `@comment` is used to “comment a large part of the bibliography easily”, which does not hold. The following BibTeX database file creates article entries with key `a`, `b`, `c`.
@@ -92,6 +111,8 @@ In fact, `@comment` does not even look for the opening delimiter `{` or `(`. [Ta
 However, since `@` is an identifier character, `@comment@misc{d,title=1}` will create an entry of type `comment@misc`.
 
 Comapre [`bibtex.web` L5491 “Process a `@comment` command”](deps/bibtex/src/bibtex.web#L5491) with the first few lines of [`bibtex.web` L5516 “Process a `@preamble` command”](deps/bibtex/src/bibtex.web#L5516), we see that the parser state is reset immediately after seeing `@comment` followed by non-identifier character.
+
+Note that the bug in the previous section implies if the content of a database file is just `@comment{@misc{a,title=1}}` and nothing else, then `misc` entry `a` will be dropped.
 
 ## Under what conditions are `@string` and `@preamble` commands processed?
 
