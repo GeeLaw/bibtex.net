@@ -10,7 +10,6 @@ namespace Neat.BibTeX.Utils
 {
   /// <summary>
   /// Implements case-insensitive comparison as far as BibTeX is concerned.
-  /// The strings are assumed to be ASCII-printable.
   /// </summary>
   public struct BibBstComparer
     : IEqualityComparer2<String32>, IComparer<String32>,
@@ -50,15 +49,19 @@ namespace Neat.BibTeX.Utils
       int xlength = x.Length, ylength = y.Length;
       ref int x0 = ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(x));
       ref int y0 = ref Unsafe.As<Char32, int>(ref MemoryMarshal.GetArrayDataReference(y));
-      for (int i = 0, length = (xlength < ylength ? xlength : ylength), xi, yi, z; i != length; ++i)
+      for (int i = 0, length = (xlength < ylength ? xlength : ylength), xi, yi; i != length; ++i)
       {
         xi = Unsafe.Add(ref x0, i);
         yi = Unsafe.Add(ref y0, i);
-        /* It is fine to do a simple subtraction because both strings are assumed to be ASCII-printable. */
-        z = ((uint)(xi - 'A') <= (uint)('Z' - 'A') ? xi + ('a' - 'A') : xi) - ((uint)(yi - 'A') <= (uint)('Z' - 'A') ? yi + ('a' - 'A') : yi);
-        if (z != 0)
+        xi = ((uint)(xi - 'A') <= (uint)('Z' - 'A') ? xi + ('a' - 'A') : xi);
+        yi = ((uint)(yi - 'A') <= (uint)('Z' - 'A') ? yi + ('a' - 'A') : yi);
+        if (xi < yi)
         {
-          return z;
+          return -1;
+        }
+        if (xi > yi)
+        {
+          return 1;
         }
       }
       return xlength - ylength;
@@ -108,6 +111,12 @@ namespace Neat.BibTeX.Utils
       {
         value = x[i].Value;
         value = ((uint)(value - 'A') <= (uint)('Z' - 'A') ? value + ('a' - 'A') : value);
+        hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
+        value = (int)((uint)value >> 8);
+        hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
+        value = (int)((uint)value >> 8);
+        hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
+        value = (int)((uint)value >> 8);
         hash = (hash ^ value) * Helper.FnvPrime;
       }
       return hash ^ x.Length;
@@ -259,6 +268,8 @@ namespace Neat.BibTeX.Utils
       {
         value = obj[i];
         value = ((uint)(value - 'A') <= (uint)('Z' - 'A') ? value + ('a' - 'A') : value);
+        hash = (hash ^ (value & 0xFF)) * Helper.FnvPrime;
+        value >>= 8;
         hash = (hash ^ value) * Helper.FnvPrime;
       }
       return hash ^ obj.Length;
@@ -291,7 +302,6 @@ namespace Neat.BibTeX.Utils
       {
         xi = Unsafe.Add(ref x0, i);
         yi = Unsafe.Add(ref y0, i);
-        /* It is fine to do a simple subtraction because both strings are assumed to be ASCII-printable. */
         z = ((uint)(xi - 'A') <= (uint)('Z' - 'A') ? xi + ('a' - 'A') : xi) - ((uint)(yi - 'A') <= (uint)('Z' - 'A') ? yi + ('a' - 'A') : yi);
         if (z != 0)
         {
