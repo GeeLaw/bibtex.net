@@ -28,7 +28,7 @@ For high-performance processing and coding simplicity, BibTeX.NET allows all pos
 
 ## What are valid entry types and field names?
 
-[`bibtex.web` L883](deps/bibtex/src/bibtex.web#L883) defines `[0-9A-Za-z]` and anything from ``!$&*+-./:;<>?@[\]^_`|~`` as valid identifier characters. A valid identifier consists of one or more valid identifier characters and does not being with a numeric character (i.e., `[0-9]`). BibTeX.NET follows this definition and will not allow non-ASCII characters in identifiers.
+[`bibtex.web` L883](deps/bibtex/src/bibtex.web#L883) defines `[0-9A-Za-z]` and anything from ``!$&*+-./:;<>?@[\]^_`|~`` as valid identifier characters. A valid identifier consists of one or more valid identifier characters and does not begin with a numeric character (i.e., `[0-9]`). BibTeX.NET follows this definition and will not allow non-ASCII characters in identifiers.
 
 It should be remarked that `@` is an identifier character, so `@@misc{ key, title = "Hello" }` creates an entry of type `@misc`, and `@ @ { key, @ = 2 }` creates an entry of type `@` with a field of name `@`.
 
@@ -64,7 +64,7 @@ In particular, a database key does not have to be an identifier, and can contain
 
 Note that even if the syntax is invalid, an entry might be created. The pattern is that the entry is created as long as there is non-space character following `{` or `(`.
 
-After `{` or `(`, BibTeX will skip space and lines that solely consists of space characters, so
+After `{` or `(`, BibTeX will skip space and lines that solely consist of space characters, so
 
 ```bib
 @misc{
