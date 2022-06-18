@@ -8,6 +8,12 @@
     <Platforms>AnyCPU</Platforms>
   </PropertyGroup>
 
+  <!--
+    BIB_PARSER_CHECKS should enable checking for validity of data in IBib32ParserUnsafeOverrides upon saving,
+    if the public interface of the object utilizing that override supports parsing mutable data
+    (the data could be modified by another thread).
+  -->
+  
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <DefineConstants>$(DefineConstants);BIB_PARSER_CHECKS</DefineConstants>
   </PropertyGroup>
