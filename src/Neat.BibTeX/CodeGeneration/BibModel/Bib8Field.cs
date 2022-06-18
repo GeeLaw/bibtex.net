@@ -1,6 +1,3 @@
-#if BIB_MODEL_CHECKS
-using System;
-#endif
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -44,19 +41,6 @@ namespace Neat.BibTeX.BibModel
     {
       Name = name;
       Value = value;
-#if BIB_MODEL_CHECKS
-      CtorCheckImpl(null);
-    }
-
-    [MethodImpl(Helper.OptimizeNoInline)]
-    internal void CtorCheckImpl(string name)
-    {
-      if (!BibBstChars.IsIdentifier(Name))
-      {
-        throw new ArgumentException("Bib8Field: Name is not a valid identifier.", name is null ? "name" : name);
-      }
-      Value.CtorCheckImpl(name is null ? "value" : name);
-#endif
     }
 
     /// <summary>

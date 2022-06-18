@@ -1,6 +1,3 @@
-#if BIB_MODEL_CHECKS
-using System;
-#endif
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -42,19 +39,6 @@ namespace Neat.BibTeX.BibModel
       : base(type, isBrace)
     {
       Text = text;
-#if BIB_MODEL_CHECKS
-      CtorCheckImpl(null);
-    }
-
-    [MethodImpl(Helper.OptimizeNoInline)]
-    internal void CtorCheckImpl(string name)
-    {
-      if (!BibBstComparer.Equals(Type, EntryType))
-      {
-        throw new ArgumentException("Bib16PreambleEntry: Type is not \"preamble\".", name is null ? "type" : name);
-      }
-      Text.CtorCheckImpl(name is null ? "text" : name);
-#endif
     }
 
     #region Bib16Entry overrides

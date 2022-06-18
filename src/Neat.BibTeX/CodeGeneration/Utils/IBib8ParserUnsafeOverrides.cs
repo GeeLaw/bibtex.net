@@ -40,7 +40,7 @@ namespace Neat.BibTeX.Utils
     void SaveGeneralEntry(ref Bib8ParserUnsafe<TOverrides> that);
 
     /// <summary>
-    /// Indicates that the parser has seen <c>@string { name</c>.
+    /// Indicates that the parser has seen <c>@string{ name</c>.
     /// When this method is called, <see cref="Bib8ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the string entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
     void SaveStringName(ref Bib8ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
@@ -72,7 +72,7 @@ namespace Neat.BibTeX.Utils
     void SaveBraceLiteralComponent(ref Bib8ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 
     /// <summary>
-    /// Indicates that the parser has seen <c>@type { key</c>.
+    /// Indicates that the parser has seen <c>@type{ key</c>.
     /// When this method is called, <see cref="Bib8ParserUnsafe{TOverrides}.EntryIsBrace"/> indicates whether the general entry uses <c>{}</c> as its delimiters, with the alternate option being <c>()</c>.
     /// </summary>
     void SaveDatabaseKey(ref Bib8ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);

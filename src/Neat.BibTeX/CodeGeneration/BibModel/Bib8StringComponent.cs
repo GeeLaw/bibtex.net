@@ -1,6 +1,3 @@
-#if BIB_MODEL_CHECKS
-using System;
-#endif
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -61,44 +58,6 @@ namespace Neat.BibTeX.BibModel
     {
       Type = type;
       NameOrLiteral = nameOrLiteral;
-#if BIB_MODEL_CHECKS
-      CtorCheckImpl(null);
-    }
-
-    [MethodImpl(Helper.OptimizeNoInline)]
-    internal void CtorCheckImpl(string name)
-    {
-      StringT nameOrLiteral = NameOrLiteral;
-      switch (Type.Value)
-      {
-      case BibStringComponentType.NameValue:
-        if (!BibBstChars.IsIdentifier(nameOrLiteral))
-        {
-          throw new ArgumentException("Bib8StringComponent: NameOrLiteral is not a valid identifier.", name is null ? "nameOrLiteral" : name);
-        }
-        break;
-      case BibStringComponentType.QuoteLiteralValue:
-        if (!BibBstChars.IsQuoteLiteral(nameOrLiteral))
-        {
-          throw new ArgumentException("Bib8StringComponent: NameOrLiteral is not a valid quote-delimited literal.", name is null ? "nameOrLiteral" : name);
-        }
-        break;
-      case BibStringComponentType.NumericLiteralValue:
-        if (!BibBstChars.IsNumericLiteral(nameOrLiteral))
-        {
-          throw new ArgumentException("Bib8StringComponent: NameOrLiteral is not a valid numeric literal.", name is null ? "nameOrLiteral" : name);
-        }
-        break;
-      case BibStringComponentType.BraceLiteralValue:
-        if (!BibBstChars.IsBraceBalanced(nameOrLiteral))
-        {
-          throw new ArgumentException("Bib8StringComponent: NameOrLiteral is not brace-balanced.", name is null ? "nameOrLiteral" : name);
-        }
-        break;
-      default:
-        throw new ArgumentException("Bib8StringComponent: Type is not valid.", name is null ? "type" : name);
-      }
-#endif
     }
 
     /// <summary>

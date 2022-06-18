@@ -1,6 +1,3 @@
-#if BIB_MODEL_CHECKS
-using System;
-#endif
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -69,9 +66,6 @@ namespace Neat.BibTeX.BibModel
     {
       OnlyComponent = onlyComponent;
       Components = null;
-#if BIB_MODEL_CHECKS
-      CtorCheckImpl("onlyComponent");
-#endif
     }
 
     /// <summary>
@@ -83,39 +77,7 @@ namespace Neat.BibTeX.BibModel
     {
       OnlyComponent = default(Bib16StringComponent);
       Components = components;
-#if BIB_MODEL_CHECKS
-      CtorCheckImpl("components");
-#endif
     }
-
-#if BIB_MODEL_CHECKS
-
-    [MethodImpl(Helper.OptimizeNoInline)]
-    internal void CtorCheckImpl(string name)
-    {
-      Bib16StringComponent[] components = Components;
-      if (components is null)
-      {
-        OnlyComponent.CtorCheckImpl(name is null ? "onlyComponent" : name);
-      }
-      else
-      {
-        name = (name is null ? "components" : name);
-        if (components.Length < 2)
-        {
-          throw new ArgumentException("Bib16String: Components contains less than 2 items.", name);
-        }
-        else
-        {
-          for (int i = 0; i < components.Length; ++i)
-          {
-            components[i].CtorCheckImpl(name);
-          }
-        }
-      }
-    }
-
-#endif
 
     /// <summary>
     /// Determines whether the string is currently valid.
