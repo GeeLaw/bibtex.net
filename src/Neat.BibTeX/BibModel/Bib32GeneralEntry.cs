@@ -1,7 +1,3 @@
-#if BIB_MODEL_CHECKS
-using System;
-using System.Diagnostics.CodeAnalysis;
-#endif
 using System.Runtime.CompilerServices;
 using Neat.BibTeX.Utils;
 
@@ -51,41 +47,6 @@ namespace Neat.BibTeX.BibModel
     {
       Key = key;
       Fields = fields;
-#if BIB_MODEL_CHECKS
-      CtorCheckImpl(null);
-    }
-
-    [SuppressMessage("Usage", "CA2208", Justification = "The usage is correct.")]
-    [MethodImpl(Helper.OptimizeNoInline)]
-    internal void CtorCheckImpl(string name)
-    {
-      if (!IsGeneralEntryType(Type))
-      {
-        throw new ArgumentException("Bib32GeneralEntry: Type is not a valid general entry type.", name is null ? "type" : name);
-      }
-      byte type = BibBstChars.GetDatabaseKeyType(Key).Value;
-      if (type == BibDatabaseKeyType.MustUseParenthesesValue)
-      {
-        if (IsBrace)
-        {
-          throw new ArgumentException("Bib32GeneralEntry: IsBrace is incompatible with Key (must use parentheses).", name is null ? "isBrace" : name);
-        }
-      }
-      else if (type != BibDatabaseKeyType.UseBracesOrParenthesesValue)
-      {
-        throw new ArgumentException("Bib32GeneralEntry: Key is not a valid database key.", name is null ? "key" : name);
-      }
-      name = (name is null ? "fields" : name);
-      Bib32Field[] fields = Fields;
-      if (fields is null)
-      {
-        throw new ArgumentNullException("Bib32GeneralEntry: Fields is null.", name);
-      }
-      for (int i = 0; i < fields.Length; ++i)
-      {
-        fields[i].CtorCheckImpl(name);
-      }
-#endif
     }
 
     [MethodImpl(Helper.OptimizeInline)]
