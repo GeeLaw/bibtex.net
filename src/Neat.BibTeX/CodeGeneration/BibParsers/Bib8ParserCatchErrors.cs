@@ -1,6 +1,5 @@
 #define BIB_PARSER_CATCH_ERRORS
 
-using System.Collections.Generic;
 #if BIB_PARSER_CATCH_ERRORS
 using System.Globalization;
 #endif
@@ -27,7 +26,7 @@ namespace Neat.BibTeX.BibParsers
       public List2<Bib8Entry> Entries;
       private List2<Bib8StringComponent> StringComponents;
       private List2<Bib8Field> Fields;
-      private Dictionary<StringT, StringT> InternedStrings;
+      private Bib8InternPoolUnsafe InternedStrings;
       private StringT EntryType;
 #if BIB_PARSER_CATCH_ERRORS
 #else
@@ -42,7 +41,7 @@ namespace Neat.BibTeX.BibParsers
         Entries = new List2<Bib8Entry>();
         StringComponents = new List2<Bib8StringComponent>();
         Fields = new List2<Bib8Field>();
-        InternedStrings = new Dictionary<StringT, StringT>();
+        InternedStrings.Initialize();
       }
 
       [MethodImpl(Helper.JustOptimize)]
@@ -53,19 +52,6 @@ namespace Neat.BibTeX.BibParsers
         EntryType = default(StringT);
         StringNameOrFieldName = default(StringT);
         DatabaseKey = default(StringT);
-      }
-
-      [MethodImpl(Helper.JustOptimize)]
-      private StringT GetInternedString(ref PrimitiveCharT start, uint length)
-      {
-        StringT str = Helper.GenericGetString(ref start, length);
-        StringT interned;
-        if (!InternedStrings.TryGetValue(str, out interned))
-        {
-          InternedStrings.Add(str, str);
-          interned = str;
-        }
-        return interned;
       }
 
       [MethodImpl(Helper.JustOptimize)]
@@ -89,7 +75,7 @@ namespace Neat.BibTeX.BibParsers
       [MethodImpl(Helper.JustOptimize)]
       public int SaveEntryType(ref Bib8ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
-        StringT entryType = GetInternedString(ref start, (uint)length);
+        StringT entryType = InternedStrings.Intern(ref start, length);
         EntryType = entryType;
         if (BibBstComparer.Equals(entryType, Bib8StringEntry.EntryType))
         {
@@ -144,7 +130,7 @@ namespace Neat.BibTeX.BibParsers
       [MethodImpl(Helper.OptimizeInline)]
       public void SaveStringName(ref Bib8ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
-        StringNameOrFieldName = GetInternedString(ref start, (uint)length);
+        StringNameOrFieldName = InternedStrings.Intern(ref start, length);
         StringComponents.Clear();
       }
 
@@ -153,7 +139,7 @@ namespace Neat.BibTeX.BibParsers
       {
         StringComponents.Add(new Bib8StringComponent(
           new BibStringComponentType(BibStringComponentType.NameValue),
-          GetInternedString(ref start, (uint)length)));
+          InternedStrings.Intern(ref start, length)));
       }
 
       [MethodImpl(Helper.OptimizeInline)]
@@ -190,7 +176,7 @@ namespace Neat.BibTeX.BibParsers
       [MethodImpl(Helper.OptimizeInline)]
       public void SaveFieldName(ref Bib8ParserUnsafe<Overrides> that, ref PrimitiveCharT start, int length)
       {
-        StringNameOrFieldName = GetInternedString(ref start, (uint)length);
+        StringNameOrFieldName = InternedStrings.Intern(ref start, length);
         StringComponents.Clear();
       }
 

@@ -30,7 +30,7 @@ RecursivelyGetGenericCSharpSources = (string directory) =>
 Func<string, string, string, bool> IsParserFile = (string file, string fileName, string content) =>
 {
   var fromFileName = string.Equals(fileName, "Bib32ParserCatchErrors.cs", StringComparison.OrdinalIgnoreCase);
-  var fromContent = content.StartsWith("#define BIB_PARSER_CATCH_ERRORS\n\nusing ");
+  var fromContent = content.StartsWith("#define BIB_PARSER_CATCH_ERRORS\n\n");
   if (fromFileName != fromContent)
   {
     var message = "Ambiguous detection of parser source code: " + file;
