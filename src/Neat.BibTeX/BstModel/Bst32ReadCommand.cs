@@ -1,4 +1,4 @@
-using System;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using Neat.BibTeX.Utils;
 
@@ -10,8 +10,18 @@ namespace Neat.BibTeX.BstModel
   /// <summary>
   /// Represents a <c>READ</c> command.
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Bst32ReadCommand))]
   public sealed class Bst32ReadCommand : Bst32Command
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     /// <summary>
     /// The command type of a <c>READ</c> command.
     /// </summary>
@@ -20,7 +30,7 @@ namespace Neat.BibTeX.BstModel
     [MethodImpl(Helper.OptimizeInline)]
     public sealed override string ToString()
     {
-      return Type.ToString();
+      return Type.GenericToString();
     }
 
     /// <param name="type">Must be <c>READ</c> (in any casing).</param>
@@ -32,9 +42,10 @@ namespace Neat.BibTeX.BstModel
 
     #region Bst32Command overrides
 
+    [MethodImpl(Helper.OptimizeInline)]
     public sealed override bool IsValid()
     {
-      throw new NotImplementedException();
+      return BibBstComparer.Equals(Type, CommandType);
     }
 
     [MethodImpl(Helper.OptimizeInline)]
