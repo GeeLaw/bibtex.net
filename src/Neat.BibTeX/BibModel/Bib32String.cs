@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -8,8 +9,18 @@ namespace Neat.BibTeX.BibModel
   /// Represents a string that is a concatenation of referenced strings and literals (e.g., <c>"literal" # {literal} # 123 # name</c>).
   /// This type avoids allocation for the most common case of single-component strings.
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Bib32String))]
   public readonly struct Bib32String
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     /// <summary>
     /// If <see cref="Components"/> is <see langword="null"/>, then this field is the only component.
     /// Otherwise, this field is <see langword="default"/> and not meaningful.

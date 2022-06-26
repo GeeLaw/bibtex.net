@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,9 +10,19 @@ namespace Neat.BibTeX.BibModel
   /// Represents the type of a database key.
   /// This type should be treated like an <see langword="enum"/> with the underlying type being <see langword="byte"/>.
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(BibDatabaseKeyType))]
   [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 1)]
   public readonly struct BibDatabaseKeyType : IEquatable<BibDatabaseKeyType>
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     public const byte InvalidValue = 0;
     public const byte UseBracesOrParenthesesValue = 1;
     public const byte MustUseParenthesesValue = 2;

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,9 +10,19 @@ namespace Neat.BibTeX.BibModel
   /// Represents the type of a string component.
   /// This type should be treated like an <see langword="enum"/> with the underlying type being <see langword="byte"/>.
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(BibStringComponentType))]
   [StructLayout(LayoutKind.Explicit, Pack = 1, Size = 1)]
   public readonly struct BibStringComponentType : IEquatable<BibStringComponentType>
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     public const byte NameValue = 0;
     public const byte QuoteLiteralValue = 1;
     public const byte NumericLiteralValue = 2;

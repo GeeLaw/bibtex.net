@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -9,8 +10,18 @@ namespace Neat.BibTeX.BibModel
   /// <summary>
   /// Represents a field in a <see cref="Bib32GeneralEntry"/> (e.g., <c>name1 = {literal} # "literal" # 123 # name</c>).
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Bib32Field))]
   public readonly struct Bib32Field
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     /// <summary>
     /// The name of this field.
     /// This string should be a valid identifier and should be compared by <see cref="BibBstComparer"/>.
@@ -33,6 +44,12 @@ namespace Neat.BibTeX.BibModel
         .Append(Name.GenericToString())
         .Append(" = ")
       ).ToString();
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    internal StringBuilder ToString(StringBuilder sb)
+    {
+      return Value.ToString(sb.Append(Name.GenericToString()).Append(" = "));
     }
 
     /// <param name="name">Must be a valid identifier.</param>

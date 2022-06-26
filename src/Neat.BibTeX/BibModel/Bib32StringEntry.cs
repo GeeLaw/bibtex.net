@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -10,8 +11,18 @@ namespace Neat.BibTeX.BibModel
   /// <summary>
   /// Represents a <c>@string{ name = "literal" # {literal} # 123 # anothername }</c> entry.
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Bib32StringEntry))]
   public sealed class Bib32StringEntry : Bib32Entry
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     /// <summary>
     /// The entry type of a <c>@string</c> entry.
     /// </summary>

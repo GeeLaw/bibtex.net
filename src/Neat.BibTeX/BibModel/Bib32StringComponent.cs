@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -12,8 +13,18 @@ namespace Neat.BibTeX.BibModel
   /// a string defined by <see cref="Bib32StringEntry"/> (<c>@string{ ... }</c>),
   /// or a literal (e.g., <c>{literal}</c>, <c>"literal"</c>, <c>123</c>).
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Bib32StringComponent))]
   public readonly struct Bib32StringComponent
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     /// <summary>
     /// The type of the literal.
     /// </summary>
