@@ -103,16 +103,16 @@ namespace Neat.BibTeX.BibModel
       {
       default:
         visitor.VisitName(this);
-        break;
+        return;
       case BibStringComponentType.QuoteLiteralValue:
         visitor.VisitQuoteLiteral(this);
-        break;
+        return;
       case BibStringComponentType.NumericLiteralValue:
         visitor.VisitNumericLiteral(this);
-        break;
+        return;
       case BibStringComponentType.BraceLiteralValue:
         visitor.VisitBraceLiteral(this);
-        break;
+        return;
       }
     }
 
@@ -126,16 +126,16 @@ namespace Neat.BibTeX.BibModel
       {
       default:
         visitor.VisitName(this);
-        break;
+        return;
       case BibStringComponentType.QuoteLiteralValue:
         visitor.VisitQuoteLiteral(this);
-        break;
+        return;
       case BibStringComponentType.NumericLiteralValue:
         visitor.VisitNumericLiteral(this);
-        break;
+        return;
       case BibStringComponentType.BraceLiteralValue:
         visitor.VisitBraceLiteral(this);
-        break;
+        return;
       }
     }
   }
