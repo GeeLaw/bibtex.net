@@ -127,6 +127,16 @@ namespace Neat.BibTeX.Utils
       return IsBraceBalancedImpl(Unsafe.As<String32, Char32[]>(ref str));
     }
 
+    /// <summary>
+    /// Determines whether the literal is valid in BibTeX style files.
+    /// Such a literal must not be <see langword="default"/> or contain <c>\r</c>, <c>\n</c>, or <c>"</c>.
+    /// </summary>
+    [MethodImpl(Helper.OptimizeInline)]
+    public static bool IsStringLiteral(String32 str)
+    {
+      return IsStringLiteralImpl(Unsafe.As<String32, Char32[]>(ref str));
+    }
+
     #endregion String32, Char32
 
     #region String16, Char16
@@ -1045,6 +1055,23 @@ namespace Neat.BibTeX.Utils
         }
       }
       return depth == 0;
+    }
+
+    [MethodImpl(Helper.JustOptimize)]
+    private static bool IsStringLiteralImpl(Char32[] data)
+    {
+      if (data is null)
+      {
+        return false;
+      }
+      for (int i = 0, value; i < data.Length; ++i)
+      {
+        if ((value = data[i].Value) == CR || value == LF || value == DoubleQuote)
+        {
+          return false;
+        }
+      }
+      return true;
     }
   }
 }
