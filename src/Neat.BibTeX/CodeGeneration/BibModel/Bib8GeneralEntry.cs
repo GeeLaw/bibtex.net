@@ -1,4 +1,6 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Neat.BibTeX.Utils;
 
 using StringT = Neat.Unicode.String8;
@@ -9,8 +11,20 @@ namespace Neat.BibTeX.BibModel
   /// <summary>
   /// Represents a general <c>@type{ key, name1 = {literal} # "literal" # 123 # name, ... }</c> entry.
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Bib8GeneralEntry))]
   public sealed class Bib8GeneralEntry : Bib8Entry
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        /* @type{ key, ... } */
+        return string.Format(IsBrace ? "@{0}{{ {1}, ... }}" : "@{0}( {1}, ... )",
+          Type.GenericToString(), Key.GenericToString());
+      }
+    }
+
     /// <summary>
     /// The entry type of a <c>@comment</c> entry.
     /// </summary>
@@ -32,9 +46,24 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public sealed override string ToString()
     {
-      /* @type{ key, ... } */
-      return string.Format(IsBrace ? "@{0}{{ {1}, ... }}" : "@{0}( {1}, ... )",
-        Type.GenericToString(), Key.GenericToString());
+      bool isBrace = IsBrace;
+      Bib8Field[] fields = Fields;
+      if (fields is null || fields.Length == 0)
+      {
+        /* @type{ key } or @type( key ) */
+        return string.Format(IsBrace ? "@{0}{{ {1} }}" : "@{0}( {1} )",
+          Type.GenericToString(), Key.GenericToString());
+      }
+      /* @type{ key, name = value, ... } */
+      StringBuilder sb = new StringBuilder();
+      sb.Append('@').Append(Type.GenericToString());
+      sb.Append(isBrace ? '{' : '(');
+      sb.Append(Key.GenericToString());
+      for (int i = 0; i < fields.Length; ++i)
+      {
+        fields[i].ToString(sb.Append(",\n  "));
+      }
+      return sb.Append(isBrace ? "\n}" : "\n)").ToString();
     }
 
     /// <param name="isBrace">Must be <see langword="false"/> if <paramref name="key"/> must use parentheses.</param>

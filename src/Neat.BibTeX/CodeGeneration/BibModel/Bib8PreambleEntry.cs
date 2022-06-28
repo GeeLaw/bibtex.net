@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Neat.BibTeX.Utils;
@@ -10,8 +11,18 @@ namespace Neat.BibTeX.BibModel
   /// <summary>
   /// Represents a <c>@preamble{ "literal" # {literal} # 123 # name }</c> entry.
   /// </summary>
+  [DebuggerDisplay("{" + nameof(DebuggerDisplay) + ",nq}", Type = nameof(Bib8PreambleEntry))]
   public sealed class Bib8PreambleEntry : Bib8Entry
   {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    private string DebuggerDisplay
+    {
+      get
+      {
+        return ToString();
+      }
+    }
+
     /// <summary>
     /// The entry type of a <c>@preamble</c> entry.
     /// </summary>

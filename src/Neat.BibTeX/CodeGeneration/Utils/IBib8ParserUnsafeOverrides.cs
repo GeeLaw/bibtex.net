@@ -17,7 +17,10 @@ namespace Neat.BibTeX.Utils
     /// Indicates that the parser has seen <c>@type</c>.
     /// The range passed into this method is precisely the range of <c>type</c>.
     /// </summary>
-    /// <returns><c>0</c>, <c>1</c>, <c>2</c>, <c>3</c>
+    /// <returns><see cref="BibParserUnsafe.SaveEntryTypeGeneral"/>,
+    /// <see cref="BibParserUnsafe.SaveEntryTypeString"/>,
+    /// <see cref="BibParserUnsafe.SaveEntryTypePreamble"/>,
+    /// <see cref="BibParserUnsafe.SaveEntryTypeComment"/>
     /// for general, string, preamble, comment entry, respectively.</returns>
     int SaveEntryType(ref Bib8ParserUnsafe<TOverrides> that, ref PrimitiveCharT start, int length);
 

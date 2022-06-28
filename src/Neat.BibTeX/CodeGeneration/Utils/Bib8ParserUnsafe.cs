@@ -166,19 +166,19 @@ namespace Neat.BibTeX.Utils
         /* so that more frequented types are tested first. */
         switch (entryType)
         {
-        case 0:
+        case BibParserUnsafe.SaveEntryTypeGeneral:
           eaten = EatGeneralEntry(ref data0, eaten, count);
           continue;
-        case 1:
+        case BibParserUnsafe.SaveEntryTypeString:
           eaten = EatStringEntry(ref data0, eaten, count);
           continue;
-        case 2:
+        case BibParserUnsafe.SaveEntryTypePreamble:
           eaten = EatPreambleEntry(ref data0, eaten, count);
           continue;
         default:
 #if BIB_PARSER_CHECKS
           throw new InvalidOperationException("SaveEntryType return value is out of range.");
-        case 3:
+        case BibParserUnsafe.SaveEntryTypeComment:
 #endif
           /* The original implementation of BibTeX does not even look at delimiters for @comment. */
           continue;
