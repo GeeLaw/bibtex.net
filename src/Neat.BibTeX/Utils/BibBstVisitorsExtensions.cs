@@ -108,5 +108,30 @@ namespace Neat.BibTeX.Utils
         that[i].AcceptVisitor(visitor);
       }
     }
+
+    /// <summary>
+    /// Dispatches the correct method on each operator for the value-type visitor.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static void AcceptVisitor<TVisitor>(this Bst32Command[] that, ref TVisitor visitor)
+      where TVisitor : struct, IBst32CommandVisitor
+    {
+      for (int i = 0; i < that.Length; ++i)
+      {
+        that[i].AcceptVisitor(ref visitor);
+      }
+    }
+
+    /// <summary>
+    /// Dispatches the correct method on each operator for the reference-type visitor.
+    /// </summary>
+    [MethodImpl(Helper.JustOptimize)]
+    public static void AcceptVisitor(this Bst32Command[] that, IBst32CommandVisitor visitor)
+    {
+      for (int i = 0; i < that.Length; ++i)
+      {
+        that[i].AcceptVisitor(visitor);
+      }
+    }
   }
 }
