@@ -26,6 +26,7 @@ namespace Neat.BibTeX.BibModel
     public const byte InvalidValue = 0;
     public const byte UseBracesOrParenthesesValue = 1;
     public const byte MustUseParenthesesValue = 2;
+    private const byte ExclusiveUpperBound = 3;
 
     /// <summary>
     /// Indicates that the database key is not valid.
@@ -68,7 +69,7 @@ namespace Neat.BibTeX.BibModel
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Value < 3u;
+        return Value < ExclusiveUpperBound;
       }
     }
 

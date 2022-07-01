@@ -28,6 +28,7 @@ namespace Neat.BibTeX.BibModel
     public const byte QuoteLiteralValue = 2;
     public const byte NumericLiteralValue = 3;
     public const byte BraceLiteralValue = 4;
+    private const byte ExclusiveUpperBound = 5;
 
     /// <summary>
     /// Indicates that the component is not valid.
@@ -80,7 +81,7 @@ namespace Neat.BibTeX.BibModel
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Value < 5u;
+        return Value < ExclusiveUpperBound;
       }
     }
 
@@ -90,7 +91,7 @@ namespace Neat.BibTeX.BibModel
       get
       {
         byte value = Value;
-        return value == 2u || value == 4u;
+        return value == QuoteLiteralValue || value == BraceLiteralValue;
       }
     }
 
@@ -100,7 +101,7 @@ namespace Neat.BibTeX.BibModel
       get
       {
         byte value = Value;
-        return value == 1u || value == 3u;
+        return value == NameValue || value == NumericLiteralValue;
       }
     }
 
