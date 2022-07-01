@@ -45,23 +45,37 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public override string ToString()
     {
-      byte type = Type.Value;
-      return type == BibStringComponentType.BraceLiteralValue
-        ? "{" + NameOrLiteral.GenericToString() + "}"
-        : type == BibStringComponentType.QuoteLiteralValue
-        ? "\"" + NameOrLiteral.GenericToString() + "\""
-        : NameOrLiteral.GenericToString();
+      switch (Type.Value)
+      {
+      default:
+      case BibStringComponentType.InvalidValue:
+        return "(invalid)";
+      case BibStringComponentType.NameValue:
+      case BibStringComponentType.NumericLiteralValue:
+        return NameOrLiteral.GenericToString();
+      case BibStringComponentType.BraceLiteralValue:
+        return "{" + NameOrLiteral.GenericToString() + "}";
+      case BibStringComponentType.QuoteLiteralValue:
+        return "\"" + NameOrLiteral.GenericToString() + "\"";
+      }
     }
 
     [MethodImpl(Helper.JustOptimize)]
     internal StringBuilder ToString(StringBuilder sb)
     {
-      byte type = Type.Value;
-      return type == BibStringComponentType.BraceLiteralValue
-        ? sb.Append('{').Append(NameOrLiteral.GenericToString()).Append('}')
-        : type == BibStringComponentType.QuoteLiteralValue
-        ? sb.Append('"').Append(NameOrLiteral.GenericToString()).Append('"')
-        : sb.Append(NameOrLiteral.GenericToString());
+      switch (Type.Value)
+      {
+      default:
+      case BibStringComponentType.InvalidValue:
+        return sb.Append("(invalid)");
+      case BibStringComponentType.NameValue:
+      case BibStringComponentType.NumericLiteralValue:
+        return sb.Append(NameOrLiteral.GenericToString());
+      case BibStringComponentType.BraceLiteralValue:
+        return sb.Append('{').Append(NameOrLiteral.GenericToString()).Append('}');
+      case BibStringComponentType.QuoteLiteralValue:
+        return sb.Append('"').Append(NameOrLiteral.GenericToString()).Append('"');
+      }
     }
 
     [MethodImpl(Helper.OptimizeInline)]
@@ -77,19 +91,19 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public bool IsValid()
     {
-      StringT nameOrLiteral = NameOrLiteral;
       switch (Type.Value)
       {
-      case BibStringComponentType.NameValue:
-        return BibBstChars.IsIdentifier(nameOrLiteral);
-      case BibStringComponentType.QuoteLiteralValue:
-        return BibBstChars.IsQuoteLiteral(nameOrLiteral);
-      case BibStringComponentType.NumericLiteralValue:
-        return BibBstChars.IsNumericLiteral(nameOrLiteral);
-      case BibStringComponentType.BraceLiteralValue:
-        return BibBstChars.IsBraceBalanced(nameOrLiteral);
       default:
+      case BibStringComponentType.InvalidValue:
         return false;
+      case BibStringComponentType.NameValue:
+        return BibBstChars.IsIdentifier(NameOrLiteral);
+      case BibStringComponentType.QuoteLiteralValue:
+        return BibBstChars.IsQuoteLiteral(NameOrLiteral);
+      case BibStringComponentType.NumericLiteralValue:
+        return BibBstChars.IsNumericLiteral(NameOrLiteral);
+      case BibStringComponentType.BraceLiteralValue:
+        return BibBstChars.IsBraceBalanced(NameOrLiteral);
       }
     }
 
@@ -102,16 +116,20 @@ namespace Neat.BibTeX.BibModel
       switch (Type.Value)
       {
       default:
-        visitor.VisitName(this);
+      case BibStringComponentType.InvalidValue:
+        visitor.VisitInvalid(this);
+        return;
+      case BibStringComponentType.NameValue:
+        visitor.VisitName(NameOrLiteral);
         return;
       case BibStringComponentType.QuoteLiteralValue:
-        visitor.VisitQuoteLiteral(this);
+        visitor.VisitQuoteLiteral(NameOrLiteral);
         return;
       case BibStringComponentType.NumericLiteralValue:
-        visitor.VisitNumericLiteral(this);
+        visitor.VisitNumericLiteral(NameOrLiteral);
         return;
       case BibStringComponentType.BraceLiteralValue:
-        visitor.VisitBraceLiteral(this);
+        visitor.VisitBraceLiteral(NameOrLiteral);
         return;
       }
     }
@@ -125,16 +143,20 @@ namespace Neat.BibTeX.BibModel
       switch (Type.Value)
       {
       default:
-        visitor.VisitName(this);
+      case BibStringComponentType.InvalidValue:
+        visitor.VisitInvalid(this);
+        return;
+      case BibStringComponentType.NameValue:
+        visitor.VisitName(NameOrLiteral);
         return;
       case BibStringComponentType.QuoteLiteralValue:
-        visitor.VisitQuoteLiteral(this);
+        visitor.VisitQuoteLiteral(NameOrLiteral);
         return;
       case BibStringComponentType.NumericLiteralValue:
-        visitor.VisitNumericLiteral(this);
+        visitor.VisitNumericLiteral(NameOrLiteral);
         return;
       case BibStringComponentType.BraceLiteralValue:
-        visitor.VisitBraceLiteral(this);
+        visitor.VisitBraceLiteral(NameOrLiteral);
         return;
       }
     }

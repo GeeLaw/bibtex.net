@@ -23,10 +23,16 @@ namespace Neat.BibTeX.BibModel
       }
     }
 
-    public const byte NameValue = 0;
-    public const byte QuoteLiteralValue = 1;
-    public const byte NumericLiteralValue = 2;
-    public const byte BraceLiteralValue = 3;
+    public const byte InvalidValue = 0;
+    public const byte NameValue = 1;
+    public const byte QuoteLiteralValue = 2;
+    public const byte NumericLiteralValue = 3;
+    public const byte BraceLiteralValue = 4;
+
+    /// <summary>
+    /// Indicates that the component is not valid.
+    /// </summary>
+    public static readonly BibStringComponentType Invalid = new BibStringComponentType(InvalidValue);
 
     /// <summary>
     /// Indicates that the component is the name of a referenced string.
@@ -74,7 +80,7 @@ namespace Neat.BibTeX.BibModel
       [MethodImpl(Helper.OptimizeInline)]
       get
       {
-        return Value < 4u;
+        return Value < 5u;
       }
     }
 
@@ -84,7 +90,7 @@ namespace Neat.BibTeX.BibModel
       get
       {
         byte value = Value;
-        return value == 1 || value == 3;
+        return value == 2u || value == 4u;
       }
     }
 
@@ -94,7 +100,7 @@ namespace Neat.BibTeX.BibModel
       get
       {
         byte value = Value;
-        return value == 0 || value == 2;
+        return value == 1u || value == 3u;
       }
     }
 
@@ -134,6 +140,8 @@ namespace Neat.BibTeX.BibModel
       byte value = Value;
       switch (value)
       {
+      case InvalidValue:
+        return nameof(Invalid);
       case NameValue:
         return nameof(Name);
       case QuoteLiteralValue:
@@ -151,7 +159,9 @@ namespace Neat.BibTeX.BibModel
     public static BibStringComponentType Parse(string str)
     {
       return new BibStringComponentType(
-        str == nameof(Name)
+        str == nameof(Invalid)
+        ? InvalidValue
+        : str == nameof(Name)
         ? NameValue
         : str == nameof(QuoteLiteral)
         ? QuoteLiteralValue
@@ -173,7 +183,9 @@ namespace Neat.BibTeX.BibModel
     private static BibStringComponentType ParseIgnoreCaseImpl(string str)
     {
       return new BibStringComponentType(
-        string.Equals(str, nameof(Name), StringComparison.OrdinalIgnoreCase)
+        string.Equals(str, nameof(Invalid), StringComparison.OrdinalIgnoreCase)
+        ? InvalidValue
+        : string.Equals(str, nameof(Name), StringComparison.OrdinalIgnoreCase)
         ? NameValue
         : string.Equals(str, nameof(QuoteLiteral), StringComparison.OrdinalIgnoreCase)
         ? QuoteLiteralValue
@@ -188,6 +200,11 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     public static bool TryParse(string str, out BibStringComponentType type)
     {
+      if (str == nameof(Invalid))
+      {
+        type = new BibStringComponentType(InvalidValue);
+        goto ReturnTrue;
+      }
       if (str == nameof(Name))
       {
         type = new BibStringComponentType(NameValue);
@@ -223,6 +240,11 @@ namespace Neat.BibTeX.BibModel
     [MethodImpl(Helper.JustOptimize)]
     private static bool TryParseIgnoreCaseImpl(string str, out BibStringComponentType type)
     {
+      if (string.Equals(str, nameof(Invalid), StringComparison.OrdinalIgnoreCase))
+      {
+        type = new BibStringComponentType(InvalidValue);
+        goto ReturnTrue;
+      }
       if (string.Equals(str, nameof(Name), StringComparison.OrdinalIgnoreCase))
       {
         type = new BibStringComponentType(NameValue);
