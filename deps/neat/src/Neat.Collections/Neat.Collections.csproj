@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <Platforms>AnyCPU</Platforms>
+  </PropertyGroup>
+
+  <!-- Define LIST2_SYNCROOT, MAP2_SYNCROOT to enable SyncRoot for List2<T>, Map2<TKey, TValue, TEqualityComparer>. -->
+  
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <DefineConstants>$(DefineConstants);LIST2_ENUMERATION_VERSION;LIST2_ENUMERATOR_DISPOSE;MAP2_ENUMERATION_VERSION;MAP2_ENUMERATOR_DISPOSE</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Neat\Neat.csproj" />
+  </ItemGroup>
+
+</Project>
